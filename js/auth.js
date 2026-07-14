@@ -153,6 +153,7 @@ class AuthSystem {
     this.currentUser.section = data.section || '';
     this.currentUser.course = data.course || this.currentUser.course;
     this.currentUser.year = data.year || this.currentUser.year;
+    if (data.avatar) this.currentUser.avatar = data.avatar;
     this.saveSession();
 
     // Also update in registeredStudents if they registered via the system
@@ -178,6 +179,24 @@ class AuthSystem {
   getUserInitials() {
     const name = this.getUserName();
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  getAvatar() {
+    return this.currentUser?.avatar || null;
+  }
+
+  setAvatarImage(element) {
+    const avatar = this.getAvatar();
+    if (!element) return;
+    if (avatar) {
+      element.style.backgroundImage = `url(${avatar})`;
+      element.style.backgroundSize = 'cover';
+      element.style.backgroundPosition = 'center';
+      element.textContent = '';
+    } else {
+      element.style.backgroundImage = '';
+      element.textContent = this.getUserInitials();
+    }
   }
 
   getCurrentStudentId() {
@@ -450,7 +469,7 @@ class AuthSystem {
       if (navUser) {
         navUser.style.display = 'flex';
         if (userName) userName.textContent = this.getUserName();
-        if (userInitials) userInitials.textContent = this.getUserInitials();
+        this.setAvatarImage(userInitials);
       }
     } else {
       if (loginBtn) loginBtn.style.display = '';

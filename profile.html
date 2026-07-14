@@ -50,7 +50,10 @@
         <!-- Profile Card -->
         <div class="glass-card reveal" id="profileCard">
           <div style="text-align:center;padding:1rem;">
-            <div style="width:90px;height:90px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.5rem;color:white;font-weight:800;" id="profileAvatar">U</div>
+            <div class="profile-avatar-wrap" id="profileAvatarWrap">
+              <div style="width:90px;height:90px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.5rem;color:white;font-weight:800;overflow:hidden;" id="profileAvatar">U</div>
+              <button class="avatar-upload-btn" id="avatarUploadBtn" title="Change photo"><i class="fas fa-camera"></i></button>
+            </div>
             <h2 id="profileName" style="font-size:1.3rem;font-weight:800;">Loading...</h2>
             <span class="role" id="profileCourse">Loading...</span>
             <div style="margin:0.8rem 0;display:flex;justify-content:center;gap:1.5rem;">
@@ -99,6 +102,17 @@
         <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.2rem;">Update your personal information</p>
       </div>
       <form id="editForm">
+        <!-- Avatar Upload -->
+        <div style="text-align:center;margin-bottom:1rem;">
+          <div class="edit-avatar-wrap">
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:1.8rem;color:white;font-weight:700;overflow:hidden;cursor:pointer;position:relative;" id="editAvatarPreview">
+              <span id="editAvatarInitials">U</span>
+              <div class="edit-avatar-overlay"><i class="fas fa-camera"></i> Change</div>
+            </div>
+            <input type="file" id="avatarInput" accept="image/*" style="display:none;" />
+            <p style="font-size:0.72rem;color:var(--text-light);margin-top:0.4rem;">Click to upload profile photo</p>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div class="form-group"><label>First Name</label><input type="text" id="editFirstName" required /></div>
           <div class="form-group"><label>Last Name</label><input type="text" id="editLastName" required /></div>
@@ -162,7 +176,8 @@
       const active = borrows.filter(r => r.status === 'Pending' || r.status === 'Approved').length;
       const returned = borrows.filter(r => r.status === 'Returned').length;
 
-      document.getElementById('profileAvatar').textContent = auth.getUserInitials();
+      // Avatar display
+      auth.setAvatarImage(document.getElementById('profileAvatar'));
       document.getElementById('profileName').textContent = user.name;
       document.getElementById('profileCourse').textContent = `${user.course || ''} ${user.year || ''}`.trim() || 'Student';
       document.getElementById('profileBorrowCount').textContent = borrows.length;
@@ -201,6 +216,7 @@
       }
 
       // ===== EDIT PROFILE =====
+      let pendingAvatar = null; // holds base64 string before save
       const nameParts = (user.name || '').split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -210,6 +226,36 @@
         if(el){el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},3000);}
       }
 
+      function avatarToPreview(url){
+        const preview = document.getElementById('editAvatarPreview');
+        const initials = document.getElementById('editAvatarInitials');
+        if(url){
+          preview.style.backgroundImage = `url(${url})`;
+          preview.style.backgroundSize = 'cover';
+          preview.style.backgroundPosition = 'center';
+          initials.style.display = 'none';
+        } else {
+          preview.style.backgroundImage = '';
+          initials.style.display = '';
+        }
+      }
+
+      // Avatar upload handler
+      const avatarInput = document.getElementById('avatarInput');
+      document.getElementById('editAvatarPreview').addEventListener('click', () => avatarInput.click());
+      document.getElementById('avatarUploadBtn').addEventListener('click', () => avatarInput.click());
+      avatarInput.addEventListener('change', function(){
+        const file = this.files[0];
+        if(!file) return;
+        if(file.size > 2 * 1024 * 1024){ showEditError('Image must be under 2MB.'); this.value=''; return; }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          pendingAvatar = e.target.result;
+          avatarToPreview(pendingAvatar);
+        };
+        reader.readAsDataURL(file);
+      });
+
       document.getElementById('editProfileBtn').addEventListener('click', () => {
         document.getElementById('editFirstName').value = firstName;
         document.getElementById('editLastName').value = lastName;
@@ -218,6 +264,9 @@
         document.getElementById('editSection').value = user.section || '';
         document.getElementById('editCourse').value = user.course || 'BSIT';
         document.getElementById('editYear').value = user.year || '1st Year';
+        pendingAvatar = null;
+        avatarInput.value = '';
+        avatarToPreview(user.avatar || null);
         document.getElementById('editModal').classList.add('active');
       });
 
@@ -242,22 +291,24 @@
         const year = document.getElementById('editYear').value;
         const section = document.getElementById('editSection').value.trim();
 
-        const result = auth.updateStudentProfile({ name: fullName, email, contact, section, course, year });
+        const updateData = { name: fullName, email, contact, section, course, year };
+        if(pendingAvatar) updateData.avatar = pendingAvatar;
+
+        const result = auth.updateStudentProfile(updateData);
 
         if(result.success){
           document.getElementById('editModal').classList.remove('active');
-          // Update UI without reload
+          // Update profile UI without reload
           document.getElementById('profileName').textContent = fullName;
-          document.getElementById('profileAvatar').textContent = auth.getUserInitials();
+          auth.setAvatarImage(document.getElementById('profileAvatar'));
           document.getElementById('profileEmail').textContent = email || 'N/A';
           document.getElementById('profileContact').textContent = contact || 'N/A';
           document.getElementById('profileSection').textContent = section || 'N/A';
           document.getElementById('profileCourse').textContent = `${course} ${year}`.trim();
-          // Also update navbar
+          // Update navbar
           const userNameEl = document.getElementById('userName');
           if(userNameEl) userNameEl.textContent = fullName;
-          const userInitEl = document.getElementById('userInitials');
-          if(userInitEl) userInitEl.textContent = auth.getUserInitials();
+          auth.setAvatarImage(document.getElementById('userInitials'));
           Notification.show('Profile Updated', 'Your changes have been saved successfully!');
         } else {
           showEditError(result.message);
