@@ -147,12 +147,19 @@
         <div class="admin-header"><h1>System <span>Settings</span></h1></div>
         <div class="admin-section"><h2><i class="fas fa-university"></i> Institution</h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            <div class="form-group"><label>School Name</label><input type="text" value="Technological University of the Philippines" /></div>
-            <div class="form-group"><label>Laboratory Name</label><input type="text" value="Computer Laboratory - Main" /></div>
-            <div class="form-group"><label>Lab Officer</label><input type="text" id="adminProfileName" /></div>
+            <div class="form-group"><label>School Name</label><input type="text" id="settingSchoolName" placeholder="e.g. Technological University of the Philippines" /></div>
+            <div class="form-group"><label>Laboratory Name</label><input type="text" id="settingLabName" placeholder="e.g. Computer Laboratory - Main" /></div>
+            <div class="form-group"><label>Lab Officer Name</label><input type="text" id="settingOfficer" placeholder="e.g. John Santos" /></div>
             <div class="form-group"><label>Admin ID</label><input type="text" id="adminProfileId" disabled style="opacity:0.6;" /></div>
           </div>
-          <button class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;margin-top:1rem;" onclick="Notification.show('Saved','Settings saved successfully.')">Save Changes</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+            <div class="form-group"><label>Items per page</label><select id="settingItemsPerPage" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="50">50</option></select></div>
+            <div class="form-group"><label>Dashboard refresh</label><select id="settingAutoRefresh" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;"><option value="0">Manual only</option><option value="30">Every 30s</option><option value="60" selected>Every 60s</option><option value="300">Every 5min</option></select></div>
+          </div>
+          <div style="display:flex;gap:0.8rem;margin-top:1.5rem;">
+            <button class="btn btn-primary" id="btnSaveSettings" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;"><i class="fas fa-save"></i> Save Settings</button>
+            <button class="btn" id="btnResetSettings" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;background:rgba(255,23,68,0.06);color:var(--danger);border:1px solid rgba(255,23,68,0.15);font-family:inherit;font-weight:600;cursor:pointer;transition:var(--transition);"><i class="fas fa-undo"></i> Reset to Default</button>
+          </div>
         </div>
       </div>
     </main>
@@ -211,6 +218,75 @@
       const low = inventory.equipments.filter(e=>e.status==='Low Stock'||e.status==='Out of Stock');
       if(low.length>0) alerts.innerHTML = low.map(e=>`<div class="warning-item"><div class="wi-icon" style="background:rgba(255,23,68,0.1);color:var(--danger);"><i class="fas fa-exclamation"></i></div><div style="flex:1;"><strong>${e.name}</strong> — ${e.stocks} left</div></div>`).join('');
       else alerts.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;">✓ All equipment adequately stocked.</p>';
+
+      // ===== SETTINGS PERSISTENCE =====
+      const SETTINGS_KEY = 'comlab_admin_settings';
+      const defaultSettings = {
+        schoolName: 'Technological University of the Philippines',
+        labName: 'Computer Laboratory - Main',
+        officerName: 'Laboratory Officer',
+        itemsPerPage: '10',
+        autoRefresh: '60'
+      };
+      function loadSettings(){
+        let s;
+        try{s=JSON.parse(localStorage.getItem(SETTINGS_KEY));}catch(e){}
+        if(!s||typeof s!=='object')s={};
+        const merged = {...defaultSettings,...s};
+        document.getElementById('settingSchoolName').value = merged.schoolName;
+        document.getElementById('settingLabName').value = merged.labName;
+        document.getElementById('settingOfficer').value = merged.officerName;
+        document.getElementById('settingItemsPerPage').value = merged.itemsPerPage;
+        document.getElementById('settingAutoRefresh').value = merged.autoRefresh;
+        return merged;
+      }
+      function saveSettings(){
+        const data = {
+          schoolName: document.getElementById('settingSchoolName').value.trim() || defaultSettings.schoolName,
+          labName: document.getElementById('settingLabName').value.trim() || defaultSettings.labName,
+          officerName: document.getElementById('settingOfficer').value.trim() || defaultSettings.officerName,
+          itemsPerPage: document.getElementById('settingItemsPerPage').value,
+          autoRefresh: document.getElementById('settingAutoRefresh').value
+        };
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
+        return data;
+      }
+      function applySettingsToUI(settings){
+        // Update admin header with saved school/lab names
+        const header = document.querySelector('.admin-header h1');
+        if(header){
+          const spans = header.querySelectorAll('span');
+          if(spans.length>0) spans[0].textContent = settings.labName || 'Overview';
+        }
+        // Update page title
+        document.title = `${settings.schoolName} — ${settings.labName}`;
+        // Apply auto-refresh interval
+        const autoSec = parseInt(settings.autoRefresh) || 0;
+        if(window._autoRefreshTimer) clearInterval(window._autoRefreshTimer);
+        if(autoSec>0){
+          window._autoRefreshTimer = setInterval(()=>{
+            location.reload();
+          }, autoSec * 1000);
+        }
+      }
+      const currentSettings = loadSettings();
+      applySettingsToUI(currentSettings);
+
+      document.getElementById('btnSaveSettings').addEventListener('click', function(){
+        const saved = saveSettings();
+        applySettingsToUI(saved);
+        Notification.show('Settings Saved', `Configuration for ${saved.labName} has been saved.`);
+      });
+
+      document.getElementById('btnResetSettings').addEventListener('click', function(){
+        localStorage.removeItem(SETTINGS_KEY);
+        loadSettings();
+        applySettingsToUI(defaultSettings);
+        Notification.show('Reset Complete', 'Settings restored to factory defaults.');
+      });
+
+      // Also set the officer name on the profile input
+      document.getElementById('adminProfileName').value = currentSettings.officerName || auth.getUserName();
 
       // TODAY WIDGET
       const today = new Date();
