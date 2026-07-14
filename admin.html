@@ -175,7 +175,6 @@
       const pending = history.filter(r => r.status === 'Pending');
       const revenue = history.reduce((s,r) => s + (r.fee||0), 0);
 
-      document.getElementById('adminProfileName').value = auth.getUserName();
       document.getElementById('adminProfileId').value = auth.currentUser?.id || '';
 
       // NAVIGATION
