@@ -370,6 +370,8 @@
         sidebarOverlay?.classList.remove('open');
         const icon = sidebarToggle?.querySelector('i');
         if (icon) icon.className = 'fas fa-bars';
+        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
       }
 
       function toggleSidebar() {
@@ -377,6 +379,8 @@
         sidebarOverlay?.classList.toggle('open', isOpen);
         const icon = sidebarToggle?.querySelector('i');
         if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+        document.body.style.overflow = isOpen ? 'hidden' : '';
       }
 
       sidebarToggle?.addEventListener('click', toggleSidebar);
