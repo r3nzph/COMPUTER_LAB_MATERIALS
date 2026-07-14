@@ -281,10 +281,10 @@
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">No borrowing records yet.</td></tr>';
       } else {
         tbody.innerHTML = borrows.map(r => `
-          <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${new Date(r.borrowDate).toLocaleDateString()}</td>
-          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${r.equipment}</td>
-          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-weight:700;">₱${r.fee}</td>
-          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);"><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td></tr>
+          <tr><td data-label="Date" style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${new Date(r.borrowDate).toLocaleDateString()}</td>
+          <td data-label="Equipment" style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${r.equipment}</td>
+          <td data-label="Fee" style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-weight:700;">₱${r.fee}</td>
+          <td data-label="Status" style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);"><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td></tr>
         `).join('');
       }
 

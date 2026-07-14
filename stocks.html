@@ -118,7 +118,7 @@
       });
       const tbody = document.getElementById('stockTableBody');
       function render(data=inventory.equipments){
-        tbody.innerHTML=data.map(e=>`<tr><td>${String(e.id).padStart(2,'0')}</td><td><strong>${e.name}</strong></td><td>${e.category}</td><td style="font-weight:700;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'}">${e.stocks}</td><td>₱${e.borrowFee}</td><td><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
+        tbody.innerHTML=data.map(e=>`<tr><td data-label="ID">${String(e.id).padStart(2,'0')}</td><td data-label="Equipment"><strong>${e.name}</strong></td><td data-label="Category">${e.category}</td><td data-label="Stocks" style="font-weight:700;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'}">${e.stocks}</td><td data-label="Fee">₱${e.borrowFee}</td><td data-label="Status"><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
       }
       render();
       document.getElementById('stockSearch').addEventListener('input', function(){

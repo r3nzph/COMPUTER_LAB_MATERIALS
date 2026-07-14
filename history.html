@@ -136,13 +136,13 @@
 
         tbody.innerHTML = data.map(r => `
           <tr>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><strong>${r.id}</strong></td>
-            <td>${r.equipment}</td>
-            <td>${r.officer}</td>
-            <td><strong>₱${r.fee}</strong></td>
-            <td>${new Date(r.borrowDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-            <td>${new Date(r.returnDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-            <td><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> ${r.status}</span></td>
+            <td data-label="ID" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;"><strong>${r.id}</strong></td>
+            <td data-label="Equipment">${r.equipment}</td>
+            <td data-label="Officer">${r.officer}</td>
+            <td data-label="Fee"><strong>₱${r.fee}</strong></td>
+            <td data-label="Borrow Date">${new Date(r.borrowDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+            <td data-label="Return Date">${new Date(r.returnDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+            <td data-label="Status"><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> ${r.status}</span></td>
           </tr>
         `).join('');
       }
