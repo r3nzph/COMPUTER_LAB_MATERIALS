@@ -153,7 +153,7 @@ class AuthSystem {
     this.currentUser.section = data.section || '';
     this.currentUser.course = data.course || this.currentUser.course;
     this.currentUser.year = data.year || this.currentUser.year;
-    if (data.avatar) this.currentUser.avatar = data.avatar;
+    if ('avatar' in data) this.currentUser.avatar = data.avatar;
     this.saveSession();
 
     // Also update in registeredStudents if they registered via the system
