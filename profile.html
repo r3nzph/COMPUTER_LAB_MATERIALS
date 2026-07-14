@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - COMLAB System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animation.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+</head>
+<body>
+  <div class="loading-screen"><div class="loading-logo">COMLAB<span>.</span></div><div class="loading-bar-container"><div class="loading-bar"></div></div><div class="loading-text">LOADING PROFILE...</div></div>
+  <div class="circuit-bg"><div class="circuit-lines"></div></div>
+  <div class="particles-container"></div>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
+    <ul class="nav-links" id="roleNav"></ul>
+    <div class="nav-right">
+      <div class="nav-clock">Loading...</div>
+      <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <div class="user-avatar" id="userInitials">U</div>
+        <span class="user-name" id="userName">User</span>
+        <span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- LOGIN MODAL -->
+  <div class="login-modal" id="loginModal"><div class="login-modal-content"><button class="login-close" id="loginClose">&times;</button>
+    <div style="text-align:center;margin-bottom:1.2rem;"><div style="font-size:1.5rem;font-weight:900;letter-spacing:2px;">COMLAB<span style="color:var(--primary-light);">.</span></div><p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Sign in to your account</p></div>
+    <div class="login-tabs"><button class="login-tab active" data-tab="student">Student</button><button class="login-tab" data-tab="admin">Administrator</button></div>
+    <form class="login-form active" id="studentLoginForm"><div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div><div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter your password" required /></div><div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div><button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button></form>
+    <form class="login-form" id="adminLoginForm"><div class="form-group"><label>Officer ID</label><input type="text" id="adminId" placeholder="e.g., ADMIN001" required /></div><div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter your password" required /></div><div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div><button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button></form>
+  </div></div>
+
+  <div class="page-header">
+    <div class="section-tag reveal"><i class="fas fa-user"></i> My Profile</div>
+    <h1 class="reveal">Student <span>Profile</span></h1>
+    <p class="section-desc reveal">Your personal information and borrowing activity.</p>
+  </div>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container" style="max-width:900px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <!-- Profile Card -->
+        <div class="glass-card reveal" id="profileCard">
+          <div style="text-align:center;padding:1rem;">
+            <div style="width:90px;height:90px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.5rem;color:white;font-weight:800;" id="profileAvatar">U</div>
+            <h2 id="profileName" style="font-size:1.3rem;font-weight:800;">Loading...</h2>
+            <span class="role" id="profileCourse">Loading...</span>
+            <div style="margin:0.8rem 0;display:flex;justify-content:center;gap:1.5rem;">
+              <div><div style="font-weight:800;font-size:1.2rem;" id="profileBorrowCount">0</div><div style="font-size:0.75rem;color:var(--text-light);">Borrows</div></div>
+              <div><div style="font-weight:800;font-size:1.2rem;" id="profileActiveCount">0</div><div style="font-size:0.75rem;color:var(--text-light);">Active</div></div>
+              <div><div style="font-weight:800;font-size:1.2rem;" id="profileReturnedCount">0</div><div style="font-size:0.75rem;color:var(--text-light);">Returned</div></div>
+            </div>
+          </div>
+          <div style="border-top:1px solid rgba(var(--primary-rgb),0.08);padding-top:1rem;">
+            <div class="form-group"><label>Student ID</label><div style="font-weight:700;" id="profileId">—</div></div>
+            <div class="form-group"><label>Email</label><div id="profileEmail">—</div></div>
+            <div class="form-group"><label>Contact</label><div id="profileContact">—</div></div>
+            <div class="form-group"><label>Section</label><div id="profileSection">—</div></div>
+            <div class="form-group"><label>Member Since</label><div id="profileMemberSince">—</div></div>
+            <button class="btn btn-primary" style="width:100%;padding:0.65rem;font-size:0.85rem;border-radius:10px;" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glass-card reveal">
+          <div class="card-header"><div class="icon"><i class="fas fa-clock"></i></div><h3>Recent Activity</h3></div>
+          <div id="profileActivity">
+            <div style="text-align:center;padding:2rem;color:var(--text-light);">No activity yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Borrow History Table -->
+      <div class="glass-card reveal" style="margin-top:1.5rem;">
+        <div class="card-header"><div class="icon"><i class="fas fa-history"></i></div><h3>My Borrow History</h3></div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;" id="profileTable">
+            <thead><tr><th style="text-align:left;padding:0.6rem 0.8rem;border-bottom:2px solid rgba(var(--primary-rgb),0.06);text-transform:uppercase;font-size:0.75rem;">Date</th><th style="text-align:left;padding:0.6rem 0.8rem;border-bottom:2px solid rgba(var(--primary-rgb),0.06);text-transform:uppercase;font-size:0.75rem;">Equipment</th><th style="text-align:left;padding:0.6rem 0.8rem;border-bottom:2px solid rgba(var(--primary-rgb),0.06);text-transform:uppercase;font-size:0.75rem;">Fee</th><th style="text-align:left;padding:0.6rem 0.8rem;border-bottom:2px solid rgba(var(--primary-rgb),0.06);text-transform:uppercase;font-size:0.75rem;">Status</th></tr></thead>
+            <tbody id="profileTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Edit Profile Modal -->
+  <div class="login-modal" id="editModal">
+    <div class="login-modal-content"><button class="login-close" id="editClose">&times;</button>
+      <h3 style="margin-bottom:1rem;">Edit Profile</h3>
+      <form id="editForm">
+        <div class="form-group"><label>Full Name</label><input type="text" id="editName" required /></div>
+        <div class="form-group"><label>Email</label><input type="email" id="editEmail" required /></div>
+        <div class="form-group"><label>Contact Number</label><input type="text" id="editContact" required /></div>
+        <div class="form-group"><label>Section</label><input type="text" id="editSection" /></div>
+        <button type="submit" class="btn-submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUP.</p><div class="footer-social"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a><a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a><a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a></div></div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
+      <div class="footer-col"><h4>Info</h4><ul><li><a href="members.html">Members</a></li><li><a href="profile.html">Profile</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Laboratory Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
+    </div>
+    <div class="footer-bottom"><p>COMLAB &bull; TUP &bull; 2026</p></div>
+  </footer>
+
+  <div class="modal-overlay" id="modalOverlay"><div class="modal-content"><div class="modal-icon">✓</div><h2 class="modal-title">Success!</h2><p class="modal-message"></p><button class="modal-btn">Okay</button></div></div>
+
+  <script src="js/effects.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/borrow.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await inventory.loadEquipments();
+      if (!auth.isLoggedIn() || !auth.isStudent()) return;
+
+      const user = auth.currentUser;
+      const studentId = user.id;
+      const borrows = inventory.getStudentBorrows(studentId);
+      const active = borrows.filter(r => r.status === 'Pending' || r.status === 'Approved').length;
+      const returned = borrows.filter(r => r.status === 'Returned').length;
+
+      document.getElementById('profileAvatar').textContent = auth.getUserInitials();
+      document.getElementById('profileName').textContent = user.name;
+      document.getElementById('profileCourse').textContent = `${user.course || ''} ${user.year || ''}`.trim() || 'Student';
+      document.getElementById('profileBorrowCount').textContent = borrows.length;
+      document.getElementById('profileActiveCount').textContent = active;
+      document.getElementById('profileReturnedCount').textContent = returned;
+      document.getElementById('profileId').textContent = user.id;
+      document.getElementById('profileEmail').textContent = user.email || 'N/A';
+      document.getElementById('profileContact').textContent = user.contact || 'N/A';
+      document.getElementById('profileSection').textContent = user.section || 'N/A';
+      document.getElementById('profileMemberSince').textContent = user.memberSince ? new Date(user.memberSince).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : 'N/A';
+
+      // Activity
+      const activity = document.getElementById('profileActivity');
+      if (borrows.length > 0) {
+        activity.innerHTML = borrows.slice(0, 5).map(r => `
+          <div style="display:flex;align-items:center;gap:10px;padding:0.6rem 0;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">
+            <div style="width:32px;height:32px;border-radius:50%;background:${r.status === 'Returned' ? 'rgba(0,200,83,0.1)' : r.status === 'Approved' ? 'rgba(33,150,243,0.1)' : 'rgba(255,193,7,0.15)'};display:flex;align-items:center;justify-content:center;color:${r.status === 'Returned' ? 'var(--success)' : r.status === 'Approved' ? '#1e88e5' : '#c79100'};font-size:0.75rem;">
+              <i class="fas ${r.status === 'Returned' ? 'fa-check' : r.status === 'Approved' ? 'fa-check-circle' : 'fa-clock'}"></i></div>
+            <div style="flex:1;"><div style="font-size:0.88rem;font-weight:600;">${r.equipment}</div><div style="font-size:0.75rem;color:var(--text-light);">${new Date(r.borrowDate).toLocaleDateString()}</div></div>
+            <span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span>
+          </div>
+        `).join('');
+      }
+
+      // Table
+      const tbody = document.getElementById('profileTableBody');
+      if (borrows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">No borrowing records yet.</td></tr>';
+      } else {
+        tbody.innerHTML = borrows.map(r => `
+          <tr><td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${new Date(r.borrowDate).toLocaleDateString()}</td>
+          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);">${r.equipment}</td>
+          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-weight:700;">₱${r.fee}</td>
+          <td style="padding:0.5rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);"><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td></tr>
+        `).join('');
+      }
+
+      // Edit Profile
+      document.getElementById('editProfileBtn').onclick = () => {
+        document.getElementById('editName').value = user.name;
+        document.getElementById('editEmail').value = user.email || '';
+        document.getElementById('editContact').value = user.contact || '';
+        document.getElementById('editSection').value = user.section || '';
+        document.getElementById('editModal').classList.add('active');
+      };
+      document.getElementById('editClose').onclick = () => document.getElementById('editModal').classList.remove('active');
+      document.getElementById('editForm').onsubmit = (e) => {
+        e.preventDefault();
+        user.name = document.getElementById('editName').value.trim();
+        user.email = document.getElementById('editEmail').value.trim();
+        user.contact = document.getElementById('editContact').value.trim();
+        user.section = document.getElementById('editSection').value.trim();
+        auth.saveSession();
+        document.getElementById('editModal').classList.remove('active');
+        location.reload();
+      };
+    });
+  </script>
+</body>
+</html>

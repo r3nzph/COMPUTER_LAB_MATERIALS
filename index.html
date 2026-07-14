@@ -11,32 +11,29 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
 </head>
 <body>
-
-  <!-- ===== LOADING SCREEN ===== -->
+  <!-- LOADING SCREEN -->
   <div class="loading-screen">
     <div class="loading-logo">COMLAB<span>.</span></div>
     <div class="loading-bar-container"><div class="loading-bar"></div></div>
     <div class="loading-text">INITIALIZING SYSTEM...</div>
   </div>
 
-  <!-- ===== BACKGROUND EFFECTS ===== -->
+  <!-- BACKGROUND -->
   <div class="circuit-bg"><div class="circuit-lines"></div></div>
   <div class="particles-container"></div>
 
   <!-- ===== NAVIGATION ===== -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
-    <ul class="nav-links">
-      <li><a href="index.html" class="active">Home</a></li>
-      <li><a href="equipments.html">Equipments</a></li>
-      <li><a href="borrow.html">Borrow</a></li>
-      <li><a href="members.html">Members</a></li>
-      <li><a href="stocks.html">Stocks</a></li>
-      <li><a href="history.html">History</a></li>
+    <ul class="nav-links" id="roleNav">
+      <!-- Rendered by auth.js based on role -->
+      <li><a href="index.html" class="active"><i class="fas fa-home" style="margin-right:4px;font-size:0.75rem;"></i> Home</a></li>
+      <li><a href="equipments.html"><i class="fas fa-tools" style="margin-right:4px;font-size:0.75rem;"></i> Equipments</a></li>
     </ul>
     <div class="nav-right">
       <div class="nav-clock">Loading...</div>
       <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
+      <button class="btn-login-nav" id="registerBtn" style="background:transparent;border:1.5px solid var(--primary);color:var(--primary);margin-left:0.3rem;">Register</button>
       <div class="nav-user" id="navUser" style="display:none;">
         <div class="user-avatar" id="userInitials">U</div>
         <span class="user-name" id="userName">User</span>
@@ -58,292 +55,150 @@
         <button class="login-tab active" data-tab="student">Student</button>
         <button class="login-tab" data-tab="admin">Administrator</button>
       </div>
-
-      <!-- Student Login -->
       <form class="login-form active" id="studentLoginForm">
-        <div class="form-group">
-          <label>TUP Student ID</label>
-          <input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="studentPassword" placeholder="Enter your password" required />
-        </div>
-        <div class="form-options">
-          <label><input type="checkbox" /> Remember Me</label>
-          <a href="#">Forgot Password?</a>
-        </div>
+        <div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter your password" required /></div>
+        <div class="form-options"><label><input type="checkbox" checked /> Remember Me</label><a href="#">Forgot Password?</a></div>
         <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
         <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
-        <p style="text-align:center;font-size:0.78rem;color:var(--text-light);margin-top:0.8rem;">
-          Demo: TUP-23-1001 / student123
-        </p>
+        <p style="text-align:center;font-size:0.78rem;color:var(--text-light);margin-top:0.8rem;">Demo: TUP-23-1001 / student123</p>
       </form>
-
-      <!-- Admin Login -->
       <form class="login-form" id="adminLoginForm">
-        <div class="form-group">
-          <label>Officer ID</label>
-          <input type="text" id="adminId" placeholder="e.g., ADMIN001" required />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="adminPassword" placeholder="Enter your password" required />
-        </div>
+        <div class="form-group"><label>Officer ID</label><input type="text" id="adminId" placeholder="e.g., ADMIN001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter your password" required /></div>
         <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
         <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
-        <p style="text-align:center;font-size:0.78rem;color:var(--text-light);margin-top:0.8rem;">
-          Demo: ADMIN001 / admin123
-        </p>
+        <p style="text-align:center;font-size:0.78rem;color:var(--text-light);margin-top:0.8rem;">Demo: ADMIN001 / admin123</p>
       </form>
     </div>
   </div>
 
-  <!-- ===== HERO SECTION ===== -->
+  <!-- ===== REGISTER MODAL ===== -->
+  <div class="login-modal" id="registerModal">
+    <div class="login-modal-content" style="max-width:520px;">
+      <button class="login-close" id="registerClose">&times;</button>
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:1.5rem;font-weight:900;letter-spacing:2px;">COMLAB<span style="color:var(--primary-light);">.</span></div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Create your student account</p>
+      </div>
+      <form id="registerForm">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div class="form-group"><label>First Name *</label><input type="text" name="firstName" placeholder="Juan" required /></div>
+          <div class="form-group"><label>Middle Name</label><input type="text" name="middleName" placeholder="(optional)" /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div class="form-group"><label>Last Name *</label><input type="text" name="lastName" placeholder="Dela Cruz" required /></div>
+          <div class="form-group"><label>TUP Student ID *</label><input type="text" name="regStudentId" placeholder="TUP-23-1001" required /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;">
+          <div class="form-group"><label>Course *</label><select name="course" required><option value="">Select</option><option>BSIT</option><option>BSCS</option><option>BSIS</option><option>BSCPE</option><option>BSECE</option></select></div>
+          <div class="form-group"><label>Year Level *</label><select name="year" required><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div>
+          <div class="form-group"><label>Section *</label><input type="text" name="section" placeholder="A" required /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div class="form-group"><label>Email *</label><input type="email" name="email" placeholder="juandelacruz@tup.edu.ph" required /></div>
+          <div class="form-group"><label>Contact Number *</label><input type="text" name="contact" placeholder="09123456789" required /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div class="form-group"><label>Password *</label><input type="password" name="regPassword" placeholder="Create password" required /></div>
+          <div class="form-group"><label>Confirm Password *</label><input type="password" name="regConfirmPassword" placeholder="Confirm password" required /></div>
+        </div>
+        <div class="login-error" id="registerError" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Create Account <i class="fas fa-user-plus"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- HERO (same as before) -->
   <section class="hero">
     <div class="hero-orb orb-1"></div>
     <div class="hero-orb orb-2"></div>
     <div class="hero-orb orb-3"></div>
-
     <div class="hero-content">
-      <div class="hero-badge reveal">
-        <span class="badge-dot"></span>
-        TUP Laboratory Management System
-      </div>
-      <h1 class="hero-title reveal">
-        Computer Laboratory<br />
-        <span class="highlight">Borrowing System</span>
-      </h1>
-      <p class="hero-subtitle reveal">
-        Professional laboratory equipment borrowing and inventory management platform
-        for <strong>Technological University of the Philippines</strong> students.
-      </p>
+      <div class="hero-badge reveal"><span class="badge-dot"></span>TUP Laboratory Management System</div>
+      <h1 class="hero-title reveal">Computer Laboratory<br /><span class="highlight">Borrowing System</span></h1>
+      <p class="hero-subtitle reveal">Professional laboratory equipment borrowing and inventory management platform for <strong>Technological University of the Philippines</strong> students.</p>
       <div class="hero-buttons reveal">
-        <a href="borrow.html" class="btn btn-primary btn-glow">
-          <i class="fas fa-clipboard-list"></i> Borrow Equipment
-        </a>
-        <a href="equipments.html" class="btn btn-secondary">
-          <i class="fas fa-search"></i> Browse Inventory
-        </a>
+        <a href="borrow.html" class="btn btn-primary btn-glow"><i class="fas fa-clipboard-list"></i> Borrow Equipment</a>
+        <a href="equipments.html" class="btn btn-secondary"><i class="fas fa-search"></i> Browse Inventory</a>
       </div>
     </div>
-
-    <!-- HERO ILLUSTRATION -->
     <div class="hero-illustration">
       <div class="ill-container">
-        <div class="ill-glow-ring r1"></div>
-        <div class="ill-glow-ring r2"></div>
-        <div class="ill-glow-ring r3"></div>
-        <div class="ill-glow-ring r4"></div>
-
+        <div class="ill-glow-ring r1"></div><div class="ill-glow-ring r2"></div><div class="ill-glow-ring r3"></div><div class="ill-glow-ring r4"></div>
         <div class="ill-icon i1"><i class="fas fa-desktop"></i></div>
         <div class="ill-icon i2"><i class="fas fa-server"></i></div>
         <div class="ill-icon i3"><i class="fas fa-microchip"></i></div>
         <div class="ill-icon i4"><i class="fas fa-wifi"></i></div>
-
-        <div class="ill-monitor">
-          <div class="ill-screen">
-            <div class="ill-screen-grid">
-              <span></span><span></span><span></span>
-              <span></span><span></span><span></span>
-            </div>
-            <div class="ill-screen-line" style="width:60%;"></div>
-            <div class="ill-screen-line" style="width:40%;"></div>
-          </div>
-        </div>
+        <div class="ill-monitor"><div class="ill-screen"><div class="ill-screen-grid"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="ill-screen-line" style="width:60%;"></div><div class="ill-screen-line" style="width:40%;"></div></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ===== STATISTICS SECTION ===== -->
+  <!-- STATS, FEATURES, EQUIP PREVIEW, TESTIMONIALS (same as before) -->
   <section class="stats-section">
     <div class="stats-grid stagger-children">
-      <div class="stat-item">
-        <div class="stat-number"><span class="counter" data-target="15">0</span></div>
-        <div class="stat-label">Available Equipments</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number"><span class="counter" data-target="0">0</span></div>
-        <div class="stat-label">Total Borrowed</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number"><span class="counter" data-target="6">0</span></div>
-        <div class="stat-label">Lab Officers</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number"><span class="counter" data-target="8">0</span></div>
-        <div class="stat-label">Registered Students</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number"><span class="counter" data-target="0">0</span></div>
-        <div class="stat-label">Active Requests</div>
-      </div>
+      <div class="stat-item"><div class="stat-number"><span class="counter" data-target="15">0</span></div><div class="stat-label">Available Equipments</div></div>
+      <div class="stat-item"><div class="stat-number"><span class="counter" data-target="0">0</span></div><div class="stat-label">Total Borrowed</div></div>
+      <div class="stat-item"><div class="stat-number"><span class="counter" data-target="6">0</span></div><div class="stat-label">Lab Officers</div></div>
+      <div class="stat-item"><div class="stat-number"><span class="counter" data-target="8">0</span></div><div class="stat-label">Registered Students</div></div>
+      <div class="stat-item"><div class="stat-number"><span class="counter" data-target="0">0</span></div><div class="stat-label">Active Requests</div></div>
     </div>
   </section>
 
-  <!-- ===== FEATURES SECTION ===== -->
   <section class="features-section">
-    <div class="section-header reveal">
-      <div class="section-tag"><i class="fas fa-star"></i> Platform Features</div>
-      <h2 class="section-title">Everything You <span>Need</span></h2>
-      <p class="section-desc">Streamlined tools for managing laboratory equipment borrowing and inventory.</p>
-    </div>
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-star"></i> Platform Features</div><h2 class="section-title">Everything You <span>Need</span></h2><p class="section-desc">Streamlined tools for managing laboratory equipment borrowing and inventory.</p></div>
     <div class="features-grid stagger-children">
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-bolt"></i></div>
-        <h3>Fast Borrowing</h3>
-        <p>Borrow equipment in minutes with our streamlined digital request system and instant approval workflow.</p>
-      </div>
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-boxes"></i></div>
-        <h3>Equipment Tracking</h3>
-        <p>Real-time tracking of all laboratory equipment, tools, and networking devices with stock monitoring.</p>
-      </div>
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-chart-line"></i></div>
-        <h3>Inventory Monitoring</h3>
-        <p>Comprehensive inventory dashboard with low stock alerts and detailed analytics.</p>
-      </div>
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-calendar-check"></i></div>
-        <h3>Schedule Management</h3>
-        <p>Schedule pick-up and return dates to ensure equipment availability and timely returns.</p>
-      </div>
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-user-tie"></i></div>
-        <h3>Lab Officers</h3>
-        <p>Dedicated laboratory officers oversee all borrowing transactions and equipment maintenance.</p>
-      </div>
-      <div class="feature-card">
-        <div class="fc-icon"><i class="fas fa-history"></i></div>
-        <h3>Borrow History</h3>
-        <p>Complete borrowing history with search, filter, and sort capabilities for easy reference.</p>
-      </div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-bolt"></i></div><h3>Fast Borrowing</h3><p>Borrow equipment in minutes with our streamlined digital request system and instant approval workflow.</p></div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-boxes"></i></div><h3>Equipment Tracking</h3><p>Real-time tracking of all laboratory equipment, tools, and networking devices with stock monitoring.</p></div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-chart-line"></i></div><h3>Inventory Monitoring</h3><p>Comprehensive inventory dashboard with low stock alerts and detailed analytics.</p></div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-calendar-check"></i></div><h3>Schedule Management</h3><p>Schedule pick-up and return dates to ensure equipment availability and timely returns.</p></div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-user-tie"></i></div><h3>Lab Officers</h3><p>Dedicated laboratory officers oversee all borrowing transactions and equipment maintenance.</p></div>
+      <div class="feature-card"><div class="fc-icon"><i class="fas fa-history"></i></div><h3>Borrow History</h3><p>Complete borrowing history with search, filter, and sort capabilities for easy reference.</p></div>
     </div>
   </section>
 
-  <!-- ===== EQUIPMENT PREVIEW ===== -->
   <section class="equip-preview">
-    <div class="section-header reveal">
-      <div class="section-tag"><i class="fas fa-tools"></i> Equipment Catalog</div>
-      <h2 class="section-title">Featured <span>Equipment</span></h2>
-      <p class="section-desc">Browse our most commonly borrowed laboratory equipment.</p>
-    </div>
-    <div class="equip-preview-grid stagger-children" id="featuredEquipGrid">
-      <!-- Rendered by JS -->
-    </div>
-    <div style="text-align:center;" class="reveal">
-      <a href="equipments.html" class="btn-view-more">
-        View All Equipment <i class="fas fa-arrow-right"></i>
-      </a>
-    </div>
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-tools"></i> Equipment Catalog</div><h2 class="section-title">Featured <span>Equipment</span></h2><p class="section-desc">Browse our most commonly borrowed laboratory equipment.</p></div>
+    <div class="equip-preview-grid stagger-children" id="featuredEquipGrid"></div>
+    <div style="text-align:center;" class="reveal"><a href="equipments.html" class="btn-view-more">View All Equipment <i class="fas fa-arrow-right"></i></a></div>
   </section>
 
-  <!-- ===== TESTIMONIALS ===== -->
   <section class="testimonials-section">
-    <div class="section-header reveal">
-      <div class="section-tag"><i class="fas fa-quote-left"></i> Testimonials</div>
-      <h2 class="section-title">What Students <span>Say</span></h2>
-    </div>
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-quote-left"></i> Testimonials</div><h2 class="section-title">What Students <span>Say</span></h2></div>
     <div class="testimonials-grid stagger-children">
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Very easy to borrow equipment for our laboratory activities. The process is fast and the officers are very helpful."</blockquote>
-        <div class="author">
-          <div class="avatar">JD</div>
-          <div class="info"><strong>Juan Dela Cruz</strong><span>BSIT - 2nd Year</span></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★★</div>
-        <blockquote>"I can now easily borrow tools for my capstone project. The scheduling feature ensures I get the equipment when I need it."</blockquote>
-        <div class="author">
-          <div class="avatar">MS</div>
-          <div class="info"><strong>Maria Santos</strong><span>BSCS - 3rd Year</span></div>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="stars">★★★★☆</div>
-        <blockquote>"Fast approval process and well-maintained equipment. The inventory system helps me check availability before going to the lab."</blockquote>
-        <div class="author">
-          <div class="avatar">CM</div>
-          <div class="info"><strong>Carlos Mendoza</strong><span>BSIT - 1st Year</span></div>
-        </div>
-      </div>
+      <div class="testimonial-card"><div class="stars">★★★★★</div><blockquote>"Very easy to borrow equipment for our laboratory activities. The process is fast and the officers are very helpful."</blockquote><div class="author"><div class="avatar">JD</div><div class="info"><strong>Juan Dela Cruz</strong><span>BSIT - 2nd Year</span></div></div></div>
+      <div class="testimonial-card"><div class="stars">★★★★★</div><blockquote>"I can now easily borrow tools for my capstone project. The scheduling feature ensures I get the equipment when I need it."</blockquote><div class="author"><div class="avatar">MS</div><div class="info"><strong>Maria Santos</strong><span>BSCS - 3rd Year</span></div></div></div>
+      <div class="testimonial-card"><div class="stars">★★★★☆</div><blockquote>"Fast approval process and well-maintained equipment. The inventory system helps me check availability before going to the lab."</blockquote><div class="author"><div class="avatar">CM</div><div class="info"><strong>Carlos Mendoza</strong><span>BSIT - 1st Year</span></div></div></div>
     </div>
   </section>
 
-  <!-- ===== MODAL ===== -->
+  <!-- MODAL -->
   <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-      <div class="modal-icon">✓</div>
-      <h2 class="modal-title">Success!</h2>
-      <p class="modal-message">Operation completed successfully.</p>
-      <button class="modal-btn">Okay</button>
-    </div>
+    <div class="modal-content"><div class="modal-icon">✓</div><h2 class="modal-title">Success!</h2><p class="modal-message">Operation completed successfully.</p><button class="modal-btn">Okay</button></div>
   </div>
 
-  <!-- ===== FOOTER ===== -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-content">
-      <div class="footer-col">
-        <h3>COMLAB<span>.</span></h3>
-        <p>Computer Laboratory Borrowing System — an equipment and inventory management platform for the Technological University of the Philippines.</p>
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
-          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="equipments.html">Equipments</a></li>
-          <li><a href="borrow.html">Borrow</a></li>
-          <li><a href="history.html">History</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Information</h4>
-        <ul>
-          <li><a href="members.html">Members</a></li>
-          <li><a href="stocks.html">Stocks</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact Us</h4>
-        <div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Laboratory Building, Manila</span></div>
-        <div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div>
-        <div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div>
-      </div>
+      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System — an equipment and inventory management platform for the Technological University of the Philippines.</p><div class="footer-social"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a><a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a><a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a></div></div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
+      <div class="footer-col"><h4>Information</h4><ul><li><a href="members.html">Members</a></li><li><a href="stocks.html">Stocks</a></li><li><a href="profile.html">Profile</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Contact Us</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Laboratory Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
     </div>
-    <div class="footer-bottom">
-      <p>Computer Laboratory Borrowing System &bull; Technological University of the Philippines &bull; 2026</p>
-    </div>
+    <div class="footer-bottom"><p>Computer Laboratory Borrowing System &bull; TUP &bull; 2026</p></div>
   </footer>
 
-  <!-- ===== SCRIPTS ===== -->
   <script src="js/effects.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/borrow.js"></script>
   <script src="js/app.js"></script>
-
   <script>
-    // Homepage-specific: Render featured equipment and update stats
     document.addEventListener('DOMContentLoaded', async function() {
       await inventory.loadEquipments();
-
-      // Featured equipment (first 6)
       const grid = document.getElementById('featuredEquipGrid');
-      const featured = inventory.equipments.slice(0, 6);
-      inventory.renderEquipments(grid, featured);
-
-      // Update stats counters
+      inventory.renderEquipments(grid, inventory.equipments.slice(0, 6));
       const stats = inventory.getStats();
       const pending = inventory.borrowHistory.filter(r => r.status === 'Pending').length;
 
@@ -358,15 +213,11 @@
         c.setAttribute('data-target', target);
       });
 
-      // Force animate counters
       document.querySelectorAll('.stats-section .counter').forEach(counter => {
         const target = parseInt(counter.getAttribute('data-target')) || 0;
-        let current = 0;
-        const duration = 2000;
-        const start = performance.now();
+        let current = 0, duration = 2000, start = performance.now();
         function update(now) {
-          const elapsed = now - start;
-          const progress = Math.min(elapsed / duration, 1);
+          const elapsed = now - start, progress = Math.min(elapsed / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 3);
           current = Math.floor(eased * target);
           counter.textContent = current.toLocaleString();

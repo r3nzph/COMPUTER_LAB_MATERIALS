@@ -1,6 +1,6 @@
 /* ============================================
    COMPUTER LABORATORY BORROWING SYSTEM
-   Inventory Management
+   Inventory Management - v3
    ============================================ */
 
 class InventoryManager {
@@ -16,19 +16,15 @@ class InventoryManager {
       const response = await fetch('json/equipments.json');
       if (!response.ok) throw new Error('Failed to load equipments');
       const data = await response.json();
-
-      // Merge with localStorage stock adjustments
       const savedStocks = JSON.parse(localStorage.getItem('equipmentStocks')) || {};
       this.equipments = data.map((item) => ({
         ...item,
         stocks: savedStocks[item.id] ?? item.stocks,
         status: this.computeStatus(savedStocks[item.id] ?? item.stocks)
       }));
-
       return this.equipments;
     } catch (error) {
       console.error('Error loading equipments:', error);
-      // Fallback data
       this.equipments = this.getFallbackData();
       return this.equipments;
     }
@@ -54,50 +50,34 @@ class InventoryManager {
     ];
   }
 
-  // ===== COMPUTE STATUS =====
   computeStatus(stocks) {
     if (stocks <= 0) return 'Out of Stock';
     if (stocks <= 3) return 'Low Stock';
     return 'Available';
   }
 
-  // ===== GET EQUIPMENT BY ID =====
-  getEquipment(id) {
-    return this.equipments.find((e) => e.id === id);
-  }
+  getEquipment(id) { return this.equipments.find((e) => e.id === id); }
+  getEquipmentByName(name) { return this.equipments.find((e) => e.name === name); }
 
-  // ===== GET EQUIPMENT BY NAME =====
-  getEquipmentByName(name) {
-    return this.equipments.find((e) => e.name === name);
-  }
-
-  // ===== UPDATE STOCKS =====
   updateStock(itemId, delta) {
     const item = this.equipments.find((e) => e.id === itemId);
     if (!item) return false;
-
     const newStock = item.stocks + delta;
     if (newStock < 0) return false;
-
     item.stocks = newStock;
     item.status = this.computeStatus(newStock);
-
-    // Save to localStorage
     const savedStocks = JSON.parse(localStorage.getItem('equipmentStocks')) || {};
     savedStocks[itemId] = newStock;
     localStorage.setItem('equipmentStocks', JSON.stringify(savedStocks));
-
     return true;
   }
 
-  // ===== BORROW ITEM =====
-  borrowItem(studentName, officer, equipmentId, fee, pickupDate, returnDate, purpose, remarks) {
+  // ===== BORROW ITEM (now tracks studentId) =====
+  borrowItem(studentName, studentId, officer, equipmentId, fee, pickupDate, returnDate, purpose, remarks) {
     const equipment = this.equipments.find((e) => e.id === equipmentId);
     if (!equipment || equipment.stocks <= 0) {
       return { success: false, message: 'Equipment is out of stock.' };
     }
-
-    // Update stock
     if (!this.updateStock(equipmentId, -1)) {
       return { success: false, message: 'Failed to update stock.' };
     }
@@ -105,6 +85,7 @@ class InventoryManager {
     const borrowRecord = {
       id: 'BRW-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase(),
       studentName,
+      studentId: studentId || 'GUEST',
       officer,
       equipment: equipment.name,
       equipmentId: equipment.id,
@@ -119,131 +100,98 @@ class InventoryManager {
 
     this.borrowHistory.unshift(borrowRecord);
     this.saveHistory();
-
     return { success: true, data: borrowRecord };
   }
 
-  // ===== RETURN ITEM =====
   returnItem(borrowId) {
     const record = this.borrowHistory.find((r) => r.id === borrowId);
     if (!record) return false;
-
     record.status = 'Returned';
     this.updateStock(record.equipmentId, 1);
     this.saveHistory();
     return true;
   }
 
-  // ===== SAVE BORROW HISTORY =====
+  approveItem(borrowId) {
+    const record = this.borrowHistory.find((r) => r.id === borrowId);
+    if (!record) return false;
+    record.status = 'Approved';
+    this.saveHistory();
+    return true;
+  }
+
+  rejectItem(borrowId) {
+    const record = this.borrowHistory.find((r) => r.id === borrowId);
+    if (!record) return false;
+    record.status = 'Rejected';
+    this.updateStock(record.equipmentId, 1); // return stock
+    this.saveHistory();
+    return true;
+  }
+
   saveHistory() {
     localStorage.setItem('borrowHistory', JSON.stringify(this.borrowHistory));
   }
 
-  // ===== GET STATS =====
   getStats() {
     const total = this.equipments.length;
     const available = this.equipments.filter((e) => e.status === 'Available').length;
     const lowStockCount = this.equipments.filter((e) => e.status === 'Low Stock').length;
     const outOfStock = this.equipments.filter((e) => e.status === 'Out of Stock').length;
     const borrowed = this.borrowHistory.filter((r) => r.status === 'Pending').length;
-
     return { total, available, lowStockCount, outOfStock, borrowed };
   }
 
-  // ===== GET CATEGORIES =====
-  getCategories() {
-    return [...new Set(this.equipments.map((e) => e.category))];
+  getCategories() { return [...new Set(this.equipments.map((e) => e.category))]; }
+
+  // ===== GET STUDENT-SPECIFIC BORROWS =====
+  getStudentBorrows(studentId) {
+    return this.borrowHistory.filter(r => r.studentId === studentId);
   }
 
   // ===== FILTER EQUIPMENTS =====
   filterEquipments(category, searchText) {
     let filtered = [...this.equipments];
-
-    if (category && category !== 'All') {
-      filtered = filtered.filter((e) => e.category === category);
-    }
-
+    if (category && category !== 'All') filtered = filtered.filter((e) => e.category === category);
     if (searchText) {
       const text = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (e) =>
-          e.name.toLowerCase().includes(text) ||
-          e.category.toLowerCase().includes(text)
-      );
+      filtered = filtered.filter((e) => e.name.toLowerCase().includes(text) || e.category.toLowerCase().includes(text));
     }
-
     return filtered;
   }
 
   // ===== RENDER EQUIPMENT CARDS =====
   renderEquipments(container, equipments) {
     if (!container) return;
-
     if (!equipments || equipments.length === 0) {
-      container.innerHTML = `
-        <div class="no-results" style="text-align:center;padding:3rem;color:var(--text-secondary);">
-          <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
-          <h3 style="margin-bottom:0.5rem;">No Equipment Found</h3>
-          <p>Try adjusting your search or filter.</p>
-        </div>
-      `;
+      container.innerHTML = `<div class="no-results" style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;">🔍</div><h3 style="margin-bottom:0.5rem;">No Equipment Found</h3><p>Try adjusting your search or filter.</p></div>`;
       return;
     }
-
-    container.innerHTML = equipments
-      .map(
-        (item) => `
-        <div class="equip-card reveal" data-id="${item.id}">
-          <div class="card-icon">
-            <i class="${this.getIcon(item.category)}"></i>
-          </div>
-          <h3>${item.name}</h3>
-          <span class="category-tag">${item.category}</span>
-          <div class="card-details">
-            <div class="fee">₱${item.borrowFee} <small>fee</small></div>
-            <div class="stocks">Stocks: <span>${item.stocks}</span></div>
-          </div>
-          <span class="status-badge ${this.getStatusClass(item.status)}">
-            <span class="status-dot"></span>
-            ${item.status}
-          </span>
-          <button class="btn-add add-to-borrow" data-id="${item.id}">
-            <span>+</span> Add to Borrow
-          </button>
+    container.innerHTML = equipments.map((item) => `
+      <div class="equip-card reveal" data-id="${item.id}">
+        <div class="card-icon"><i class="${this.getIcon(item.category)}"></i></div>
+        <h3>${item.name}</h3>
+        <span class="category-tag">${item.category}</span>
+        <div class="card-details">
+          <div class="fee">₱${item.borrowFee} <small>fee</small></div>
+          <div class="stocks">Stocks: <span>${item.stocks}</span></div>
         </div>
-      `
-      )
-      .join('');
-
-    // Re-initialize scroll reveal for new elements
+        <span class="status-badge ${this.getStatusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+        <button class="btn-add add-to-borrow" data-id="${item.id}"><span>+</span> Add to Borrow</button>
+      </div>
+    `).join('');
     if (window.revealObserver) {
-      document.querySelectorAll('.reveal').forEach((el) => {
-        window.revealObserver.observe(el);
-      });
+      document.querySelectorAll('.reveal').forEach((el) => { window.revealObserver.observe(el); });
     }
   }
 
-  // ===== GET ICON CLASS =====
   getIcon(category) {
-    const icons = {
-      'Hand Tool': 'fas fa-tools',
-      'Testing': 'fas fa-microchip',
-      'Networking': 'fas fa-network-wired',
-      'Safety': 'fas fa-hard-hat',
-      'Cleaning': 'fas fa-broom',
-      'Storage': 'fas fa-database'
-    };
+    const icons = { 'Hand Tool': 'fas fa-tools', 'Testing': 'fas fa-microchip', 'Networking': 'fas fa-network-wired', 'Safety': 'fas fa-hard-hat', 'Cleaning': 'fas fa-broom', 'Storage': 'fas fa-database' };
     return icons[category] || 'fas fa-cog';
   }
 
-  // ===== GET STATUS CLASS =====
   getStatusClass(status) {
-    const classes = {
-      'Available': 'available',
-      'Low Stock': 'low-stock',
-      'Out of Stock': 'low-stock',
-      'Borrowed': 'borrowed'
-    };
+    const classes = { 'Available': 'available', 'Low Stock': 'low-stock', 'Out of Stock': 'low-stock', 'Borrowed': 'borrowed' };
     return classes[status] || '';
   }
 }

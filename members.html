@@ -3,258 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Members - COMLAB Borrowing System</title>
+  <title>Members - COMLAB System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animation.css" />
   <link rel="stylesheet" href="css/responsive.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+  <style>
+    .team-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1.5rem; max-width:1100px; margin:0 auto; }
+    .team-card { background:var(--card-bg); border-radius:var(--radius); overflow:hidden; border:1px solid rgba(var(--primary-rgb),0.06); transition:var(--transition); }
+    .team-card:hover { transform:translateY(-6px); box-shadow:0 12px 40px rgba(var(--primary-rgb),0.08); }
+    .team-card .tc-header { padding:1.5rem; text-align:center; }
+    .team-card .tc-avatar { width:80px; height:80px; border-radius:50%; margin:0 auto 1rem; display:flex; align-items:center; justify-content:center; font-size:2rem; color:white; font-weight:800; position:relative; }
+    .team-card .tc-avatar .ring { position:absolute; inset:-4px; border-radius:50%; border:2px solid rgba(var(--primary-rgb),0.12); animation:spin 8s linear infinite; }
+    .team-card .tc-name { font-size:1.1rem; font-weight:700; }
+    .team-card .tc-role { font-size:0.82rem; color:var(--primary); font-weight:600; margin-bottom:0.5rem; }
+    .team-card .tc-body { padding:0 1.5rem 1rem; }
+    .team-card .tc-desc { font-size:0.85rem; color:var(--text-secondary); line-height:1.6; margin-bottom:0.8rem; }
+    .team-card .tc-spec { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:0.8rem; }
+    .team-card .tc-spec span { padding:0.15rem 0.5rem; background:rgba(var(--primary-rgb),0.06); border-radius:50px; font-size:0.72rem; color:var(--primary); font-weight:500; }
+    .team-card .tc-contact { display:flex; gap:0.5rem; justify-content:center; padding:0.8rem 1.5rem; border-top:1px solid rgba(var(--primary-rgb),0.06); }
+    .team-card .tc-contact a { width:34px; height:34px; border-radius:50%; border:1px solid rgba(var(--primary-rgb),0.1); display:flex; align-items:center; justify-content:center; color:var(--text-secondary); text-decoration:none; transition:var(--transition); font-size:0.85rem; }
+    .team-card .tc-contact a:hover { background:var(--gradient-1); color:white; border-color:transparent; transform:translateY(-2px); }
+  </style>
 </head>
 <body>
-
-  <!-- LOADING SCREEN -->
-  <div class="loading-screen">
-    <div class="loading-logo">COMLAB<span>.</span></div>
-    <div class="loading-bar-container">
-      <div class="loading-bar"></div>
-    </div>
-    <div class="loading-text">LOADING MEMBERS...</div>
-  </div>
-
-  <!-- BACKGROUND -->
-  <div class="circuit-bg">
-    <div class="circuit-lines"></div>
-  </div>
+  <div class="loading-screen"><div class="loading-logo">COMLAB<span>.</span></div><div class="loading-bar-container"><div class="loading-bar"></div></div><div class="loading-text">LOADING TEAM...</div></div>
+  <div class="circuit-bg"><div class="circuit-lines"></div></div>
   <div class="particles-container"></div>
 
-  <!-- NAVIGATION -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
-    <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="equipments.html">Equipments</a></li>
-      <li><a href="borrow.html">Borrow</a></li>
-      <li><a href="members.html" class="active">Members</a></li>
-      <li><a href="stocks.html">Stocks</a></li>
-      <li><a href="history.html">History</a></li>
-    </ul>
+    <ul class="nav-links" id="roleNav"></ul>
     <div class="nav-right">
       <div class="nav-clock">Loading...</div>
       <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
-      <div class="nav-user" id="navUser" style="display:none;">
-        <div class="user-avatar" id="userInitials">U</div>
-        <span class="user-name" id="userName">User</span>
-        <span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span>
-      </div>
-      <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+      <div class="nav-user" id="navUser" style="display:none;"><div class="user-avatar" id="userInitials">U</div><span class="user-name" id="userName">User</span><span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span></div>
+      <button class="nav-toggle"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
-  <!-- LOGIN MODAL -->
-  <div class="login-modal" id="loginModal">
-    <div class="login-modal-content">
-      <button class="login-close" id="loginClose">&times;</button>
-      <div style="text-align:center;margin-bottom:1.2rem;">
-        <div style="font-size:1.5rem;font-weight:900;letter-spacing:2px;">COMLAB<span style="color:var(--primary-light);">.</span></div>
-        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Sign in to your account</p>
-      </div>
-      <div class="login-tabs">
-        <button class="login-tab active" data-tab="student">Student</button>
-        <button class="login-tab" data-tab="admin">Administrator</button>
-      </div>
-      <form class="login-form active" id="studentLoginForm">
-        <div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div>
-        <div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter password" required /></div>
-        <div class="form-options"><label><input type="checkbox" /> Remember Me</label><a href="#">Forgot Password?</a></div>
-        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
-        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
-      </form>
-      <form class="login-form" id="adminLoginForm">
-        <div class="form-group"><label>Officer ID</label><input type="text" id="adminId" placeholder="e.g., ADMIN001" required /></div>
-        <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter password" required /></div>
-        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
-        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
-      </form>
-    </div>
+  <div class="page-header">
+    <div class="section-tag reveal"><i class="fas fa-users"></i> Our Team</div>
+    <h1 class="reveal">Laboratory <span>Members</span></h1>
+    <p class="section-desc reveal">Meet the dedicated team behind the Computer Laboratory operations.</p>
   </div>
 
-  <!-- PAGE HEADER -->
-  <!-- PAGE HEADER -->
-  <div class="page-header" style="background:linear-gradient(135deg, rgba(33,150,243,0.05), rgba(13,71,161,0.05));">
-    <div class="section-tag reveal" style="background:rgba(33,150,243,0.1);color:#1565C0;"><i class="fas fa-users"></i> Our Team</div>
-    <h1 class="reveal">Laboratory <span style="background:linear-gradient(135deg, #1565C0, #1E88E5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Members</span></h1>
-    <p class="section-desc reveal">Meet the team behind the Computer Laboratory operations.</p>
-  </div>
-
-  <!-- MEMBERS GRID -->
   <section class="section" style="padding-top:0;">
-    <div class="members-grid stagger-children" id="membersGrid">
-      <!-- Member 1 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #1565C0, #1E88E5);">
-          <span>JS</span>
-          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
-        </div>
-        <h3>John Santos</h3>
-        <div class="role">Laboratory Officer</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          john.santos@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 912 345 6789
-        </div>
+    <div class="team-grid stagger-children">
+      <!-- Lab Officer -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#990000,#d32f2f);"><span>JS</span><div class="ring"></div></div><div class="tc-name">John Santos</div><div class="tc-role">Laboratory Officer</div></div>
+        <div class="tc-body"><div class="tc-desc">Responsible for approving borrowing requests, monitoring laboratory equipment, and ensuring smooth laboratory operations.</div>
+        <div class="tc-spec"><span>Equipment Management</span><span>Borrow Approvals</span><span>Lab Operations</span><span>Inventory Audit</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-phone"></i></a></div>
       </div>
-
-      <!-- Member 2 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #1E88E5, #1565C0);">
-          <span>MC</span>
-          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
-        </div>
-        <h3>Maria Cruz</h3>
-        <div class="role">Assistant</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          maria.cruz@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 917 890 1234
-        </div>
+      <!-- Assistant -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#d32f2f,#990000);"><span>MC</span><div class="ring"></div></div><div class="tc-name">Maria Cruz</div><div class="tc-role">Student Assistant</div></div>
+        <div class="tc-body"><div class="tc-desc">Assists students during borrowing transactions, maintains laboratory records, and provides technical support to laboratory users.</div>
+        <div class="tc-spec"><span>Student Support</span><span>Record Keeping</span><span>Technical Support</span><span>Lab Orientation</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-phone"></i></a></div>
       </div>
-
-      <!-- Member 3 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #1976D2, #1565C0);">
-          <span>AR</span>
-          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
-        </div>
-        <h3>Alex Reyes</h3>
-        <div class="role">Developer</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          alex.reyes@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 905 678 9012
-        </div>
+      <!-- Developer -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#990000,#B71C1C);"><span>AR</span><div class="ring"></div></div><div class="tc-name">Alex Reyes</div><div class="tc-role">System Developer</div></div>
+        <div class="tc-body"><div class="tc-desc">Designed and developed the Computer Laboratory Borrowing System. Specializes in web development and database management.</div>
+        <div class="tc-spec"><span>Web Development</span><span>UI/UX Design</span><span>System Architecture</span><span>Database Design</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a></div>
       </div>
-
-      <!-- Member 4 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #1E88E5, #1976D2);">
-          <span>SL</span>
-          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
-        </div>
-        <h3>Sarah Lim</h3>
-        <div class="role">Secretary</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          sarah.lim@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 922 345 6789
-        </div>
+      <!-- Secretary -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#B71C1C,#990000);"><span>SL</span><div class="ring"></div></div><div class="tc-name">Sarah Lim</div><div class="tc-role">Secretary</div></div>
+        <div class="tc-body"><div class="tc-desc">Handles documentation, reports, and administrative tasks for the laboratory. Maintains organized records of all transactions.</div>
+        <div class="tc-spec"><span>Documentation</span><span>Report Generation</span><span>Data Entry</span><span>Administration</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-phone"></i></a></div>
       </div>
-
-      <!-- Member 5 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #1565C0, #1E88E5);">
-          <span>DT</span>
-          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
-        </div>
-        <h3>David Tan</h3>
-        <div class="role">Treasurer</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          david.tan@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 915 678 9012
-        </div>
+      <!-- Treasurer -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#990000,#d32f2f);"><span>DT</span><div class="ring"></div></div><div class="tc-name">David Tan</div><div class="tc-role">Treasurer</div></div>
+        <div class="tc-body"><div class="tc-desc">Monitors borrowing fees, manages financial records, and ensures proper accounting of all laboratory-related transactions.</div>
+        <div class="tc-spec"><span>Financial Management</span><span>Fee Monitoring</span><span>Accounting</span><span>Budget Planning</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-phone"></i></a></div>
       </div>
-
-      <!-- Member 6 -->
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:linear-gradient(135deg, #0D47A1, #1565C0);">
-          <span>AG</span>
-          <div class="avatar-ring" style="border-color:rgba(13,71,161,0.2);"></div>
-        </div>
-        <h3>Anna Garcia</h3>
-        <div class="role">Laboratory Officer</div>
-        <div class="contact">
-          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
-          anna.garcia@university.edu
-        </div>
-        <div class="contact" style="margin-top:0.3rem;">
-          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
-          +63 908 234 5678
-        </div>
+      <!-- Lab Officer 2 -->
+      <div class="team-card"><div class="tc-header"><div class="tc-avatar" style="background:linear-gradient(135deg,#d32f2f,#B71C1C);"><span>AG</span><div class="ring"></div></div><div class="tc-name">Anna Garcia</div><div class="tc-role">Laboratory Officer</div></div>
+        <div class="tc-body"><div class="tc-desc">Oversees laboratory safety protocols, equipment maintenance schedules, and coordinates with faculty for laboratory activities.</div>
+        <div class="tc-spec"><span>Safety Compliance</span><span>Equipment Maintenance</span><span>Lab Scheduling</span><span>Faculty Coordination</span></div></div>
+        <div class="tc-contact"><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-phone"></i></a></div>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-col">
-        <h3>COMLAB<span>.</span></h3>
-        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment.</p>
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
-          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="equipments.html">Equipments</a></li>
-          <li><a href="borrow.html">Borrow</a></li>
-          <li><a href="history.html">History</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Information</h4>
-        <ul>
-          <li><a href="members.html">Members</a></li>
-          <li><a href="stocks.html">Stocks</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact Us</h4>
-        <div class="footer-contact-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>University Laboratory Building, Manila</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-envelope"></i>
-          <span>comlab@university.edu</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-phone"></i>
-          <span>(02) 8123-4567</span>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
-    </div>
-  </footer>
+  <footer class="footer"><div class="footer-content">
+    <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUP.</p><div class="footer-social"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fas fa-envelope"></i></a><a href="#"><i class="fas fa-phone"></i></a><a href="#"><i class="fas fa-map-marker-alt"></i></a></div></div>
+    <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
+    <div class="footer-col"><h4>Info</h4><ul><li><a href="members.html">Members</a></li><li><a href="stocks.html">Stocks</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Lab Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
+  </div><div class="footer-bottom"><p>COMLAB &bull; TUP &bull; 2026</p></div></footer>
 
-  <!-- SCRIPTS -->
   <script src="js/effects.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/borrow.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

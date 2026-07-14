@@ -275,14 +275,7 @@ class Navbar {
       });
     });
 
-    // Active link
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-    this.links?.querySelectorAll('a').forEach((link) => {
-      const href = link.getAttribute('href');
-      if (href === currentPath) {
-        link.classList.add('active');
-      }
-    });
+    // Active link handled by auth.renderRoleNav()
   }
 }
 

@@ -1,133 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard - COMLAB System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/animation.css" />
-  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/style.css" /><link rel="stylesheet" href="css/animation.css" /><link rel="stylesheet" href="css/responsive.css" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
   <style>
-    :root { --admin-sidebar: #141414; --admin-bg: #f5f5f5; }
-    .admin-layout { display: flex; min-height: 100vh; }
-    .admin-sidebar {
-      width: 240px; background: var(--admin-sidebar);
-      padding: 1.5rem 1rem; position: fixed; top: 0; left: 0;
-      height: 100vh; z-index: 100; display: flex; flex-direction: column;
-      border-right: 1px solid rgba(255,255,255,0.05);
-    }
-    .admin-sidebar .admin-logo { font-size: 1.3rem; font-weight: 900; color: white; margin-bottom: 2rem; letter-spacing: 2px; }
-    .admin-sidebar .admin-logo span { color: var(--primary-light); }
-    .admin-sidebar .admin-nav { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
-    .admin-sidebar .admin-nav a {
-      display: flex; align-items: center; gap: 10px;
-      padding: 0.7rem 0.9rem; border-radius: 10px;
-      color: rgba(255,255,255,0.55); text-decoration: none;
-      font-size: 0.85rem; font-weight: 500; transition: var(--transition);
-    }
-    .admin-sidebar .admin-nav a:hover,
-    .admin-sidebar .admin-nav a.active { background: rgba(var(--primary-rgb), 0.15); color: white; }
-    .admin-sidebar .admin-nav a i { width: 20px; text-align: center; }
-    .admin-sidebar .admin-logout {
-      padding: 0.7rem 0.9rem; border-radius: 10px;
-      color: rgba(255,255,255,0.4); font-size: 0.85rem; font-weight: 500;
-      cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 10px;
-      border: none; background: none; font-family: 'Inter', sans-serif; margin-top: auto;
-    }
-    .admin-sidebar .admin-logout:hover { background: rgba(255,23,68,0.1); color: var(--danger); }
-    .admin-main { flex: 1; margin-left: 240px; padding: 2rem; min-height: 100vh; }
-
-    .admin-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
-    }
-    .admin-header h1 { font-size: 1.6rem; font-weight: 800; }
-    .admin-header h1 span { background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .admin-header .admin-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .admin-header .admin-actions input, .admin-header .admin-actions select {
-      padding: 0.5rem 0.8rem; border: 1.5px solid rgba(var(--primary-rgb), 0.1);
-      border-radius: 8px; font-size: 0.84rem; font-family: 'Inter', sans-serif; background: white;
-    }
-
-    .admin-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .admin-card {
-      background: white; border-radius: var(--radius); padding: 1.2rem;
-      border: 1px solid rgba(var(--primary-rgb), 0.06); transition: var(--transition);
-    }
-    .admin-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-    .admin-card .ac-label { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.3rem; }
-    .admin-card .ac-value { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
-    .admin-card .ac-value.green { color: var(--success); }
-    .admin-card .ac-value.red { color: var(--danger); }
-    .admin-card .ac-value.yellow { color: #c79100; }
-    .admin-card .ac-value.blue { color: #1e88e5; }
-
-    .admin-section { background: white; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(var(--primary-rgb), 0.06); }
-    .admin-section h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
-    .admin-section h2 i { color: var(--primary); }
-
-    .admin-table { width: 100%; overflow-x: auto; }
-    .admin-table table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .admin-table th { padding: 0.6rem 0.8rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid rgba(var(--primary-rgb), 0.06); }
-    .admin-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(var(--primary-rgb), 0.04); }
-
-    .btn-sm { padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); font-family: 'Inter', sans-serif; }
-    .btn-sm.green { background: rgba(0,200,83,0.1); color: #00a844; }
-    .btn-sm.green:hover { background: #00a844; color: white; }
-    .btn-sm.red { background: rgba(255,23,68,0.1); color: var(--danger); }
-    .btn-sm.red:hover { background: var(--danger); color: white; }
-    .btn-sm.blue { background: rgba(33,150,243,0.1); color: #1e88e5; }
-    .btn-sm.blue:hover { background: #1e88e5; color: white; }
-    .btn-sm.orange { background: rgba(255,193,7,0.15); color: #c79100; }
-    .btn-sm.orange:hover { background: #c79100; color: white; }
-
-    .admin-section-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .admin-section-tabs button {
-      padding: 0.4rem 0.9rem; border-radius: 8px; border: 1px solid rgba(var(--primary-rgb), 0.1);
-      background: transparent; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: var(--transition); font-family: 'Inter', sans-serif; color: var(--text-secondary);
-    }
-    .admin-section-tabs button.active,
-    .admin-section-tabs button:hover { background: var(--gradient-1); color: white; border-color: transparent; }
-
-    .admin-content-area { display: none; }
-    .admin-content-area.active { display: block; }
-
-    .timeline { position: relative; padding-left: 2rem; }
-    .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: rgba(var(--primary-rgb), 0.1); }
-    .timeline-item { position: relative; padding-bottom: 1.5rem; }
-    .timeline-item::before { content: ''; position: absolute; left: -1.6rem; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gradient-1); border: 2px solid white; }
-    .timeline-item .tl-title { font-weight: 600; font-size: 0.88rem; }
-    .timeline-item .tl-sub { font-size: 0.8rem; color: var(--text-secondary); }
-    .timeline-item .tl-time { font-size: 0.75rem; color: var(--text-light); margin-top: 0.2rem; }
-
-    .progress-bar { height: 6px; border-radius: 3px; background: rgba(var(--primary-rgb), 0.08); overflow: hidden; margin-top: 0.4rem; }
-    .progress-bar .progress-fill { height: 100%; border-radius: 3px; background: var(--gradient-1); transition: width 1s ease; }
-
-    /* Settings */
-    .settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .settings-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.3rem; }
-    .settings-group input, .settings-group select {
-      width: 100%; padding: 0.55rem 0.8rem; border: 1.5px solid rgba(var(--primary-rgb), 0.1);
-      border-radius: 8px; font-size: 0.85rem; font-family: 'Inter', sans-serif;
-    }
-
-    @media (max-width: 768px) {
-      .admin-sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; padding: 0.8rem; }
-      .admin-sidebar .admin-logo { width: 100%; text-align: center; margin-bottom: 0.5rem; }
-      .admin-sidebar .admin-nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-      .admin-sidebar .admin-nav a { padding: 0.35rem 0.6rem; font-size: 0.75rem; }
-      .admin-sidebar .admin-logout { margin-top: 0; }
-      .admin-main { margin-left: 0; padding: 1rem; }
-      .admin-cards { grid-template-columns: repeat(2, 1fr); }
-      .settings-row { grid-template-columns: 1fr; }
+    :root{--admin-sidebar:#141414;}
+    .admin-layout{display:flex;min-height:100vh;}
+    .admin-sidebar{width:240px;background:var(--admin-sidebar);padding:1.5rem 1rem;position:fixed;top:0;left:0;height:100vh;z-index:100;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,0.05);}
+    .admin-sidebar .admin-logo{font-size:1.3rem;font-weight:900;color:white;margin-bottom:2rem;letter-spacing:2px;}
+    .admin-sidebar .admin-logo span{color:var(--primary-light);}
+    .admin-sidebar .admin-nav{display:flex;flex-direction:column;gap:0.2rem;flex:1;}
+    .admin-sidebar .admin-nav a{display:flex;align-items:center;gap:10px;padding:0.7rem 0.9rem;border-radius:10px;color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.85rem;font-weight:500;transition:var(--transition);}
+    .admin-sidebar .admin-nav a:hover,.admin-sidebar .admin-nav a.active{background:rgba(var(--primary-rgb),0.15);color:white;}
+    .admin-sidebar .admin-nav a i{width:20px;text-align:center;}
+    .admin-sidebar .admin-logout{padding:0.7rem 0.9rem;border-radius:10px;color:rgba(255,255,255,0.4);font-size:0.85rem;font-weight:500;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:10px;border:none;background:none;font-family:'Inter',sans-serif;margin-top:auto;}
+    .admin-sidebar .admin-logout:hover{background:rgba(255,23,68,0.1);color:var(--danger);}
+    .admin-main{flex:1;margin-left:240px;padding:2rem;min-height:100vh;}
+    .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+    .admin-header h1{font-size:1.6rem;font-weight:800;}
+    .admin-header h1 span{background:var(--gradient-1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .admin-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;}
+    .admin-card{background:white;border-radius:var(--radius);padding:1.2rem;border:1px solid rgba(var(--primary-rgb),0.06);transition:var(--transition);}
+    .admin-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+    .admin-card .ac-label{font-size:0.78rem;color:var(--text-secondary);font-weight:500;margin-bottom:0.3rem;}
+    .admin-card .ac-value{font-size:1.8rem;font-weight:800;}
+    .admin-card .ac-value.green{color:var(--success);}
+    .admin-card .ac-value.red{color:var(--danger);}
+    .admin-card .ac-value.yellow{color:#c79100;}
+    .admin-card .ac-value.blue{color:#1e88e5;}
+    .admin-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+    .admin-section{background:white;border-radius:var(--radius);padding:1.5rem;border:1px solid rgba(var(--primary-rgb),0.06);margin-bottom:1.5rem;}
+    .admin-section h2{font-size:1.05rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+    .admin-section h2 i{color:var(--primary);}
+    .admin-table{width:100%;overflow-x:auto;}
+    .admin-table table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+    .admin-table th{padding:0.6rem 0.8rem;text-align:left;font-size:0.75rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid rgba(var(--primary-rgb),0.06);}
+    .admin-table td{padding:0.55rem 0.8rem;border-bottom:1px solid rgba(var(--primary-rgb),0.04);}
+    .btn-sm{padding:0.3rem 0.7rem;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;border:none;transition:var(--transition);font-family:'Inter',sans-serif;}
+    .btn-sm.green{background:rgba(0,200,83,0.1);color:#00a844;}
+    .btn-sm.green:hover{background:#00a844;color:white;}
+    .btn-sm.red{background:rgba(255,23,68,0.1);color:var(--danger);}
+    .btn-sm.red:hover{background:var(--danger);color:white;}
+    .btn-sm.blue{background:rgba(33,150,243,0.1);color:#1e88e5;}
+    .btn-sm.blue:hover{background:#1e88e5;color:white;}
+    .timeline{position:relative;padding-left:2rem;}
+    .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:rgba(var(--primary-rgb),0.1);}
+    .timeline-item{position:relative;padding-bottom:1.2rem;}
+    .timeline-item::before{content:'';position:absolute;left:-1.6rem;top:4px;width:12px;height:12px;border-radius:50%;background:var(--gradient-1);border:2px solid white;}
+    .timeline-item .tl-title{font-weight:600;font-size:0.85rem;}
+    .timeline-item .tl-sub{font-size:0.78rem;color:var(--text-secondary);}
+    .timeline-item .tl-time{font-size:0.72rem;color:var(--text-light);margin-top:0.15rem;}
+    .progress-bar{height:6px;border-radius:3px;background:rgba(var(--primary-rgb),0.08);overflow:hidden;margin-top:0.3rem;}
+    .progress-bar .progress-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+    .warning-item{display:flex;align-items:center;gap:8px;padding:0.5rem 0;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-size:0.85rem;}
+    .warning-item .wi-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
+    @media(max-width:768px){
+      .admin-sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:0.8rem;}
+      .admin-sidebar .admin-logo{width:100%;text-align:center;margin-bottom:0.5rem;}
+      .admin-sidebar .admin-nav{flex-direction:row;flex-wrap:wrap;justify-content:center;}
+      .admin-sidebar .admin-nav a{padding:0.35rem 0.6rem;font-size:0.75rem;}
+      .admin-sidebar .admin-logout{margin-top:0;}
+      .admin-main{margin-left:0;padding:1rem;}
+      .admin-cards{grid-template-columns:repeat(2,1fr);}
+      .admin-grid{grid-template-columns:1fr;}
     }
   </style>
 </head>
 <body>
   <div class="admin-layout">
-    <!-- SIDEBAR -->
     <aside class="admin-sidebar">
       <div class="admin-logo">COMLAB<span>.</span></div>
       <nav class="admin-nav">
@@ -136,328 +79,175 @@
         <a href="#" data-section="equipments"><i class="fas fa-tools"></i> Equipments</a>
         <a href="#" data-section="stocks"><i class="fas fa-boxes"></i> Stocks</a>
         <a href="#" data-section="members"><i class="fas fa-users"></i> Members</a>
-        <a href="#" data-section="history"><i class="fas fa-history"></i> History</a>
         <a href="#" data-section="settings"><i class="fas fa-cog"></i> Settings</a>
       </nav>
-      <button class="admin-logout" onclick="auth.logout(); window.location.href='index.html';">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
+      <button class="admin-logout" onclick="auth.logout();"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </aside>
-
-    <!-- MAIN CONTENT -->
     <main class="admin-main">
-      <!-- ===== DASHBOARD ===== -->
+      <!-- DASHBOARD -->
       <div class="admin-content-area active" id="section-dashboard">
-        <div class="admin-header">
-          <h1>Dashboard <span>Overview</span></h1>
-          <div class="live-clock" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--text-secondary);"></div>
-        </div>
-        <div class="admin-cards" id="adminStatCards">
-          <div class="admin-card"><div class="ac-label">Available Equipments</div><div class="ac-value green counter" id="adminAvailable" data-target="0">0</div></div>
-          <div class="admin-card"><div class="ac-label">Borrowed Today</div><div class="ac-value blue counter" id="adminBorrowed" data-target="0">0</div></div>
-          <div class="admin-card"><div class="ac-label">Pending Requests</div><div class="ac-value yellow counter" id="adminPending" data-target="0">0</div></div>
-          <div class="admin-card"><div class="ac-label">Low Stocks</div><div class="ac-value red counter" id="adminLowStocks" data-target="0">0</div></div>
-          <div class="admin-card"><div class="ac-label">Total Revenue</div><div class="ac-value blue counter" id="adminRevenue" data-target="0">₱0</div></div>
-        </div>
-        <div class="admin-section">
-          <h2><i class="fas fa-clock"></i> Recent Activity</h2>
-          <div class="timeline" id="adminTimeline">
-            <div class="timeline-item"><div class="tl-title">No recent activity</div><div class="tl-sub">Start borrowing to see activity here.</div></div>
+        <div class="admin-header"><h1>Dashboard <span>Overview</span></h1><div class="live-clock" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--text-secondary);"></div></div>
+        <div class="admin-cards" id="adminStatCards"></div>
+        <div class="admin-grid">
+          <div>
+            <div class="admin-section">
+              <h2><i class="fas fa-clock"></i> Recent Activity</h2>
+              <div class="timeline" id="adminTimeline"><div class="timeline-item"><div class="tl-title">No recent activity</div><div class="tl-sub">Start borrowing to see activity here.</div></div></div>
+            </div>
+            <div class="admin-section">
+              <h2><i class="fas fa-inbox"></i> Pending Requests</h2>
+              <div class="admin-table"><table><thead><tr><th>Student</th><th>Equipment</th><th>Date</th><th>Action</th></tr></thead><tbody id="adminPendingRequests"></tbody></table></div>
+            </div>
+          </div>
+          <div>
+            <div class="admin-section">
+              <h2><i class="fas fa-exclamation-triangle"></i> Low Stock Alerts</h2>
+              <div id="lowStockAlerts"><p style="color:var(--text-light);font-size:0.85rem;">No low stock items.</p></div>
+            </div>
+            <div class="admin-section">
+              <h2><i class="fas fa-bullhorn"></i> Announcements</h2>
+              <p style="font-size:0.85rem;color:var(--text-secondary);">System is running normally. All equipment available for borrowing.</p>
+            </div>
+            <div class="admin-section">
+              <h2><i class="fas fa-calendar"></i> Today</h2>
+              <div id="todayWidget" style="font-size:0.9rem;font-weight:600;"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ===== BORROW REQUESTS ===== -->
+      <!-- REQUESTS -->
       <div class="admin-content-area" id="section-requests">
         <div class="admin-header"><h1>Borrow <span>Requests</span></h1></div>
         <div class="admin-section">
-          <div class="admin-section-tabs">
-            <button class="active" data-filter="all">All</button>
-            <button data-filter="pending">Pending</button>
-            <button data-filter="approved">Approved</button>
-            <button data-filter="returned">Returned</button>
-          </div>
-          <div class="admin-table" id="adminRequestsTable">
-            <table><thead><tr><th>ID</th><th>Student</th><th>Equipment</th><th>Date</th><th>Return</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody id="adminRequestsBody"></tbody></table>
-          </div>
+          <div class="admin-table"><table><thead><tr><th>ID</th><th>Student</th><th>Equipment</th><th>Date</th><th>Return</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminRequestsBody"></tbody></table></div>
         </div>
       </div>
 
-      <!-- ===== EQUIPMENTS MANAGEMENT ===== -->
+      <!-- EQUIPMENTS -->
       <div class="admin-content-area" id="section-equipments">
-        <div class="admin-header">
-          <h1>Equipment <span>Management</span></h1>
-          <div class="admin-actions">
-            <input type="text" id="adminEquipSearch" placeholder="Search..." />
-            <select id="adminEquipCategory"><option value="All">All</option><option value="Hand Tool">Hand Tools</option><option value="Testing">Testing</option><option value="Networking">Networking</option><option value="Safety">Safety</option><option value="Cleaning">Cleaning</option><option value="Storage">Storage</option></select>
-          </div>
-        </div>
-        <div class="admin-section">
-          <div class="admin-table"><table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th></tr></thead>
-            <tbody id="adminEquipBody"></tbody></table>
-          </div>
-        </div>
+        <div class="admin-header"><h1>Equipment <span>Management</span></h1><div class="admin-actions"><input type="text" id="adminEquipSearch" placeholder="Search..." /><select id="adminEquipCategory"><option value="All">All</option><option value="Hand Tool">Hand Tools</option><option value="Testing">Testing</option><option value="Networking">Networking</option><option value="Safety">Safety</option><option value="Cleaning">Cleaning</option><option value="Storage">Storage</option></select></div></div>
+        <div class="admin-section"><div class="admin-table"><table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th></tr></thead><tbody id="adminEquipBody"></tbody></table></div></div>
       </div>
 
-      <!-- ===== STOCKS ===== -->
+      <!-- STOCKS -->
       <div class="admin-content-area" id="section-stocks">
         <div class="admin-header"><h1>Stock <span>Management</span></h1></div>
         <div class="admin-cards" id="adminStockCards"></div>
-        <div class="admin-section">
-          <h2><i class="fas fa-chart-bar"></i> Stock Levels</h2>
-          <div id="adminStockLevels"></div>
-        </div>
       </div>
 
-      <!-- ===== MEMBERS ===== -->
+      <!-- MEMBERS -->
       <div class="admin-content-area" id="section-members">
         <div class="admin-header"><h1>Laboratory <span>Members</span></h1></div>
         <div class="members-grid" id="adminMembersGrid" style="max-width:100%;"></div>
       </div>
 
-      <!-- ===== HISTORY ===== -->
-      <div class="admin-content-area" id="section-history">
-        <div class="admin-header">
-          <h1>Borrow <span>History</span></h1>
-          <div class="admin-actions">
-            <input type="text" id="adminHistorySearch" placeholder="Search..." />
-            <button class="btn btn-primary" style="padding:0.5rem 1rem;font-size:0.8rem;border-radius:8px;" onclick="Notification.show('Export', 'Export feature coming soon.')"><i class="fas fa-download"></i> Export</button>
-          </div>
-        </div>
-        <div class="admin-section">
-          <div class="admin-table"><table><thead><tr><th>ID</th><th>Student</th><th>Officer</th><th>Equipment</th><th>Fee</th><th>Date</th><th>Status</th></tr></thead>
-            <tbody id="adminHistoryBody"></tbody></table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== SETTINGS ===== -->
+      <!-- SETTINGS -->
       <div class="admin-content-area" id="section-settings">
         <div class="admin-header"><h1>System <span>Settings</span></h1></div>
-        <div class="admin-section">
-          <h2><i class="fas fa-university"></i> Institution</h2>
-          <div class="settings-row">
-            <div class="settings-group"><label>School Name</label><input type="text" value="Technological University of the Philippines" /></div>
-            <div class="settings-group"><label>Laboratory Name</label><input type="text" value="Computer Laboratory - Main" /></div>
+        <div class="admin-section"><h2><i class="fas fa-university"></i> Institution</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group"><label>School Name</label><input type="text" value="Technological University of the Philippines" /></div>
+            <div class="form-group"><label>Laboratory Name</label><input type="text" value="Computer Laboratory - Main" /></div>
+            <div class="form-group"><label>Lab Officer</label><input type="text" id="adminProfileName" /></div>
+            <div class="form-group"><label>Admin ID</label><input type="text" id="adminProfileId" disabled style="opacity:0.6;" /></div>
           </div>
-          <div class="settings-row">
-            <div class="settings-group"><label>Lab Officer</label><input type="text" value="John Santos" /></div>
-            <div class="settings-group"><label>Contact Email</label><input type="email" value="comlab@tup.edu.ph" /></div>
-          </div>
-        </div>
-        <div class="admin-section">
-          <h2><i class="fas fa-user-cog"></i> Profile</h2>
-          <div class="settings-row">
-            <div class="settings-group"><label>Full Name</label><input type="text" id="adminProfileName" /></div>
-            <div class="settings-group"><label>Admin ID</label><input type="text" id="adminProfileId" disabled style="opacity:0.6;" /></div>
-          </div>
-          <div class="settings-row">
-            <div class="settings-group"><label>New Password</label><input type="password" placeholder="Leave blank to keep current" /></div>
-            <div class="settings-group"><label>Confirm Password</label><input type="password" placeholder="Confirm new password" /></div>
-          </div>
-          <button class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;margin-top:0.5rem;" onclick="Notification.show('Saved', 'Settings saved successfully.')">Save Changes</button>
+          <button class="btn btn-primary" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;margin-top:1rem;" onclick="Notification.show('Saved','Settings saved successfully.')">Save Changes</button>
         </div>
       </div>
     </main>
   </div>
 
-  <script src="js/effects.js"></script>
-  <script src="js/inventory.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="js/effects.js"></script><script src="js/inventory.js"></script><script src="js/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
-      // Check authentication
-      if (!auth.isLoggedIn() || !auth.isAdmin()) {
-        window.location.href = 'index.html';
-        return;
-      }
-
+      if (!auth.isLoggedIn() || !auth.isAdmin()) { window.location.href = 'index.html'; return; }
       await inventory.loadEquipments();
       const stats = inventory.getStats();
       const history = inventory.borrowHistory;
+      const pending = history.filter(r => r.status === 'Pending');
+      const revenue = history.reduce((s,r) => s + (r.fee||0), 0);
 
-      // Set profile
       document.getElementById('adminProfileName').value = auth.getUserName();
       document.getElementById('adminProfileId').value = auth.currentUser?.id || '';
 
-      // ===== NAVIGATION =====
-      document.querySelectorAll('.admin-nav a').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          document.querySelectorAll('.admin-nav a').forEach(l => l.classList.remove('active'));
-          this.classList.add('active');
-          document.querySelectorAll('.admin-content-area').forEach(a => a.classList.remove('active'));
-          document.getElementById('section-' + this.dataset.section).classList.add('active');
-        });
-      });
+      // NAVIGATION
+      document.querySelectorAll('.admin-nav a').forEach(l => l.addEventListener('click', function(e){
+        e.preventDefault();
+        document.querySelectorAll('.admin-nav a').forEach(x=>x.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.admin-content-area').forEach(x=>x.classList.remove('active'));
+        document.getElementById('section-'+this.dataset.section).classList.add('active');
+      }));
 
-      // ===== STATS =====
-      const pending = history.filter(r => r.status === 'Pending').length;
-      const revenue = history.reduce((sum, r) => sum + (r.fee || 0), 0);
-      document.getElementById('adminAvailable').setAttribute('data-target', stats.available);
-      document.getElementById('adminBorrowed').setAttribute('data-target', pending);
-      document.getElementById('adminPending').setAttribute('data-target', pending);
-      document.getElementById('adminLowStocks').setAttribute('data-target', stats.lowStockCount);
-      document.getElementById('adminRevenue').innerHTML = '₱' + revenue;
+      // STATS CARDS
+      document.getElementById('adminStatCards').innerHTML = `
+        <div class="admin-card"><div class="ac-label">Available</div><div class="ac-value green counter" data-target="${stats.available}">0</div></div>
+        <div class="admin-card"><div class="ac-label">Pending</div><div class="ac-value yellow counter" data-target="${pending.length}">0</div></div>
+        <div class="admin-card"><div class="ac-label">Low Stocks</div><div class="ac-value red counter" data-target="${stats.lowStockCount}">0</div></div>
+        <div class="admin-card"><div class="ac-label">Revenue</div><div class="ac-value blue counter" data-target="${revenue}">₱0</div></div>
+        <div class="admin-card"><div class="ac-label">Total Items</div><div class="ac-value counter" data-target="${stats.total}">0</div></div>`;
 
-      // Force counters
       document.querySelectorAll('#adminStatCards .counter').forEach(c => {
-        const t = parseInt(c.dataset.target) || 0;
-        let cur = 0, dur = 1500, s = performance.now();
-        function u(now) {
-          const p = Math.min((now - s) / dur, 1);
-          cur = Math.floor((1 - Math.pow(1 - p, 3)) * t);
-          if (c.id === 'adminRevenue') c.innerHTML = '₱' + cur;
-          else c.textContent = cur;
-          if (p < 1) requestAnimationFrame(u);
-          else { if (c.id === 'adminRevenue') c.innerHTML = '₱' + t; else c.textContent = t; }
-        }
+        const t = parseInt(c.dataset.target)||0; let cur=0, dur=1500, s=performance.now();
+        function u(now){const p=Math.min((now-s)/dur,1);cur=Math.floor((1-Math.pow(1-p,3))*t);if(c.closest('.admin-card')?.querySelector('.ac-value')===c&&c.closest('.admin-card')?.querySelector('.ac-label')?.textContent==='Revenue')c.innerHTML='₱'+cur;else c.textContent=cur;if(p<1)requestAnimationFrame(u);else{if(c.closest('.admin-card')?.querySelector('.ac-label')?.textContent==='Revenue')c.innerHTML='₱'+t;else c.textContent=t;}}
         requestAnimationFrame(u);
       });
 
-      // ===== TIMELINE =====
-      const timeline = document.getElementById('adminTimeline');
-      if (history.length > 0) {
-        timeline.innerHTML = history.slice(0, 5).map(r => `
-          <div class="timeline-item">
-            <div class="tl-title">${r.studentName} borrowed ${r.equipment}</div>
-            <div class="tl-sub">Officer: ${r.officer} — ${r.purpose || 'N/A'}</div>
-            <div class="tl-time">${new Date(r.borrowDate).toLocaleDateString()} • ${r.status}</div>
-          </div>
-        `).join('');
-      }
+      // TIMELINE
+      const tl = document.getElementById('adminTimeline');
+      if(history.length>0) tl.innerHTML = history.slice(0,4).map(r=>`<div class="timeline-item"><div class="tl-title">${r.studentName} borrowed ${r.equipment}</div><div class="tl-sub">Officer: ${r.officer} • ${r.purpose||'N/A'}</div><div class="tl-time">${new Date(r.borrowDate).toLocaleDateString()} • ${r.status}</div></div>`).join('');
 
-      // ===== REQUESTS TABLE =====
-      function renderRequests(filter = 'all') {
+      // PENDING REQUESTS (dashboard)
+      const pendingBody = document.getElementById('adminPendingRequests');
+      if(pending.length===0) pendingBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-light);">No pending requests.</td></tr>';
+      else pendingBody.innerHTML = pending.slice(0,5).map(r => `<tr><td>${r.studentName}</td><td>${r.equipment}</td><td>${new Date(r.borrowDate).toLocaleDateString()}</td><td><button class="btn-sm green" onclick="window.approveReq('${r.id}')"><i class="fas fa-check"></i></button> <button class="btn-sm red" onclick="window.rejectReq('${r.id}')"><i class="fas fa-times"></i></button></td></tr>`).join('');
+
+      window.approveReq = (id)=>{const r=history.find(x=>x.id===id);if(r){r.status='Approved';inventory.saveHistory();Notification.show('Approved','Request approved.');location.reload();}};
+      window.rejectReq = (id)=>{const r=history.find(x=>x.id===id);if(r){inventory.rejectItem(id);Notification.show('Rejected','Request rejected, stock returned.');location.reload();}};
+
+      // LOW STOCK ALERTS
+      const alerts = document.getElementById('lowStockAlerts');
+      const low = inventory.equipments.filter(e=>e.status==='Low Stock'||e.status==='Out of Stock');
+      if(low.length>0) alerts.innerHTML = low.map(e=>`<div class="warning-item"><div class="wi-icon" style="background:rgba(255,23,68,0.1);color:var(--danger);"><i class="fas fa-exclamation"></i></div><div style="flex:1;"><strong>${e.name}</strong> — ${e.stocks} left</div></div>`).join('');
+      else alerts.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;">✓ All equipment adequately stocked.</p>';
+
+      // TODAY WIDGET
+      const today = new Date();
+      document.getElementById('todayWidget').textContent = today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+      // REQUESTS TABLE
+      function renderRequests(data=history){
         const body = document.getElementById('adminRequestsBody');
-        let data = history;
-        if (filter !== 'all') data = data.filter(r => r.status.toLowerCase() === filter);
-        if (data.length === 0) {
-          body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">No requests found.</td></tr>';
-          return;
-        }
-        body.innerHTML = data.map(r => `
-          <tr>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${r.id}</td>
-            <td>${r.studentName}</td>
-            <td>${r.equipment}</td>
-            <td>${new Date(r.borrowDate).toLocaleDateString()}</td>
-            <td>${new Date(r.returnDate).toLocaleDateString()}</td>
-            <td><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td>
-            <td style="display:flex;gap:4px;">
-              ${r.status === 'Pending' ? `
-                <button class="btn-sm green" onclick="approveRequest('${r.id}')"><i class="fas fa-check"></i></button>
-                <button class="btn-sm red" onclick="rejectRequest('${r.id}')"><i class="fas fa-times"></i></button>
-              ` : r.status === 'Approved' ? `
-                <button class="btn-sm blue" onclick="returnRequest('${r.id}')"><i class="fas fa-undo"></i></button>
-              ` : '<span style="color:var(--text-light);font-size:0.75rem;">Done</span>'}
-            </td>
-          </tr>
-        `).join('');
+        if(data.length===0){body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">No requests found.</td></tr>';return;}
+        body.innerHTML = data.map(r=>`<tr><td style="font-size:0.75rem;font-family:monospace;">${r.id}</td><td>${r.studentName}</td><td>${r.equipment}</td><td>${new Date(r.borrowDate).toLocaleDateString()}</td><td>${new Date(r.returnDate).toLocaleDateString()}</td><td><span class="status-pill ${r.status==='Pending'?'pending':r.status==='Returned'?'returned':'approved'}">${r.status}</span></td><td style="display:flex;gap:4px;">${r.status==='Pending'?`<button class="btn-sm green" onclick="window.approveReq('${r.id}')"><i class="fas fa-check"></i></button><button class="btn-sm red" onclick="window.rejectReq('${r.id}')"><i class="fas fa-times"></i></button>`:r.status==='Approved'?`<button class="btn-sm blue" onclick="window.returnReq('${r.id}')"><i class="fas fa-undo"></i></button>`:'<span style="color:var(--text-light);font-size:0.75rem;">Done</span>'}</td></tr>`).join('');
       }
       renderRequests();
+      window.returnReq = (id)=>{inventory.returnItem(id);Notification.show('Returned','Equipment returned & stock updated.');renderRequests();};
 
-      document.querySelectorAll('#section-requests .admin-section-tabs button').forEach(btn => {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('#section-requests .admin-section-tabs button').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          renderRequests(this.dataset.filter);
-        });
-      });
-
-      window.approveRequest = (id) => {
-        const r = inventory.borrowHistory.find(x => x.id === id);
-        if (r) { r.status = 'Approved'; inventory.saveHistory(); renderRequests(); Notification.show('Approved', 'Request approved.'); }
-      };
-      window.rejectRequest = (id) => {
-        const r = inventory.borrowHistory.find(x => x.id === id);
-        if (r) { r.status = 'Returned'; inventory.updateStock(r.equipmentId, 1); inventory.saveHistory(); renderRequests(); Notification.show('Rejected', 'Request rejected, stock returned.'); }
-      };
-      window.returnRequest = (id) => {
-        inventory.returnItem(id); renderRequests(); Notification.show('Returned', 'Equipment returned.');
-      };
-
-      // ===== EQUIPMENTS TABLE =====
-      function renderAdminEquips(data = inventory.equipments) {
-        document.getElementById('adminEquipBody').innerHTML = data.map(e => `
-          <tr><td>${String(e.id).padStart(2,'0')}</td><td><strong>${e.name}</strong></td><td>${e.category}</td>
-          <td style="color:${e.stocks <= 3 ? 'var(--danger)' : e.stocks <= 5 ? '#c79100' : 'var(--success)'};font-weight:700;">${e.stocks}</td>
-          <td>₱${e.borrowFee}</td>
-          <td><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>
-        `).join('');
+      // EQUIPMENTS TABLE
+      function renderEquips(data=inventory.equipments){
+        document.getElementById('adminEquipBody').innerHTML = data.map(e=>`<tr><td>${String(e.id).padStart(2,'0')}</td><td><strong>${e.name}</strong></td><td>${e.category}</td><td style="color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};font-weight:700;">${e.stocks}</td><td>₱${e.borrowFee}</td><td><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
       }
-      renderAdminEquips();
-
-      document.getElementById('adminEquipSearch').addEventListener('input', function() {
-        const text = this.value.toLowerCase();
-        const cat = document.getElementById('adminEquipCategory').value;
-        let filtered = inventory.equipments;
-        if (cat !== 'All') filtered = filtered.filter(e => e.category === cat);
-        if (text) filtered = filtered.filter(e => e.name.toLowerCase().includes(text));
-        renderAdminEquips(filtered);
+      renderEquips();
+      document.getElementById('adminEquipSearch').addEventListener('input', function(){
+        const t=this.value.toLowerCase(),cat=document.getElementById('adminEquipCategory').value;
+        let f=inventory.equipments; if(cat!=='All')f=f.filter(e=>e.category===cat); if(t)f=f.filter(e=>e.name.toLowerCase().includes(t)); renderEquips(f);
       });
-      document.getElementById('adminEquipCategory').addEventListener('change', function() {
-        document.getElementById('adminEquipSearch').dispatchEvent(new Event('input'));
-      });
+      document.getElementById('adminEquipCategory').addEventListener('change', function(){document.getElementById('adminEquipSearch').dispatchEvent(new Event('input'));});
 
-      // ===== STOCKS =====
-      const stockCards = document.getElementById('adminStockCards');
-      stockCards.innerHTML = inventory.equipments.map(e => `
-        <div class="admin-card">
-          <div class="ac-label">${e.name}</div>
-          <div class="ac-value" style="font-size:1.2rem;color:${e.stocks <= 3 ? 'var(--danger)' : e.stocks <= 5 ? '#c79100' : 'var(--success)'};">${e.stocks} units</div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, (e.stocks/25)*100)}%;background:${e.stocks <= 3 ? 'var(--danger)' : e.stocks <= 5 ? '#c79100' : 'var(--success)'};"></div></div>
-          <div style="font-size:0.72rem;color:var(--text-light);margin-top:0.3rem;">Fee: ₱${e.borrowFee}</div>
-        </div>
-      `).join('');
+      // STOCK CARDS
+      document.getElementById('adminStockCards').innerHTML = inventory.equipments.map(e=>`
+        <div class="admin-card"><div class="ac-label">${e.name}</div><div class="ac-value" style="font-size:1.2rem;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};">${e.stocks} units</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(e.stocks/25)*100)}%;background:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};"></div></div><div style="font-size:0.72rem;color:var(--text-light);margin-top:0.3rem;">₱${e.borrowFee}/item</div></div>`).join('');
 
-      // ===== MEMBERS =====
-      const members = [
-        { initials: 'JS', name: 'John Santos', role: 'Laboratory Officer', email: 'john.santos@tup.edu.ph' },
-        { initials: 'MC', name: 'Maria Cruz', role: 'Assistant', email: 'maria.cruz@tup.edu.ph' },
-        { initials: 'AR', name: 'Alex Reyes', role: 'Developer', email: 'alex.reyes@tup.edu.ph' },
-        { initials: 'SL', name: 'Sarah Lim', role: 'Secretary', email: 'sarah.lim@tup.edu.ph' },
-        { initials: 'DT', name: 'David Tan', role: 'Treasurer', email: 'david.tan@tup.edu.ph' }
-      ];
-      document.getElementById('adminMembersGrid').innerHTML = members.map(m => `
-        <div class="member-card">
-          <div class="member-avatar" style="background:var(--gradient-1);"><span>${m.initials}</span><div class="avatar-ring"></div></div>
-          <h3>${m.name}</h3><div class="role">${m.role}</div>
-          <div class="contact"><i class="fas fa-envelope" style="font-size:0.75rem;"></i> ${m.email}</div>
-        </div>
-      `).join('');
-
-      // ===== HISTORY =====
-      function renderAdminHistory(data = inventory.borrowHistory) {
-        const body = document.getElementById('adminHistoryBody');
-        if (data.length === 0) {
-          body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">No history.</td></tr>';
-          return;
-        }
-        body.innerHTML = data.map(r => `
-          <tr>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${r.id}</td>
-            <td>${r.studentName}</td>
-            <td>${r.officer}</td>
-            <td>${r.equipment}</td>
-            <td>₱${r.fee}</td>
-            <td>${new Date(r.borrowDate).toLocaleDateString()}</td>
-            <td><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td>
-          </tr>
-        `).join('');
-      }
-      renderAdminHistory();
-
-      document.getElementById('adminHistorySearch').addEventListener('input', function() {
-        const text = this.value.toLowerCase();
-        const filtered = inventory.borrowHistory.filter(r =>
-          r.studentName.toLowerCase().includes(text) ||
-          r.equipment.toLowerCase().includes(text) ||
-          r.id.toLowerCase().includes(text)
-        );
-        renderAdminHistory(filtered);
-      });
+      // MEMBERS
+      document.getElementById('adminMembersGrid').innerHTML = [
+        {i:'JS',n:'John Santos',r:'Laboratory Officer'},
+        {i:'MC',n:'Maria Cruz',r:'Student Assistant'},
+        {i:'AR',n:'Alex Reyes',r:'Developer'},
+        {i:'SL',n:'Sarah Lim',r:'Secretary'},
+        {i:'DT',n:'David Tan',r:'Treasurer'}
+      ].map(m=>`<div class="member-card"><div class="member-avatar" style="background:var(--gradient-1);"><span>${m.i}</span><div class="avatar-ring"></div></div><h3>${m.n}</h3><div class="role">${m.r}</div></div>`).join('');
     });
   </script>
 </body>

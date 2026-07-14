@@ -114,9 +114,10 @@ class BorrowManager {
 
       const fee = equipment.borrowFee;
 
-      // Confirm borrowing
+      // Confirm borrowing - include studentId if logged in
+      const studentId = auth.isLoggedIn() && auth.isStudent() ? auth.getCurrentStudentId() : null;
       const result = inventory.borrowItem(
-        studentName, officer, equipmentId, fee,
+        studentName, studentId, officer, equipmentId, fee,
         pickupDate, returnDate, purpose, remarks
       );
 
