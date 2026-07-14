@@ -94,7 +94,10 @@
     @keyframes skeletonSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .skeleton-fade{animation:skeletonFadeIn 0.3s ease both;}
     @keyframes skeletonFadeIn{from{opacity:0;}to{opacity:1;}}
-    @media(max-width:768px){
+    /* Admin sidebar toast/notification on mobile */
+    .admin-dismiss-btn{padding:0.25rem 0.6rem;font-size:0.7rem;}
+
+    @media(max-width:1024px){
       .admin-sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:0.8rem;}
       .admin-sidebar .admin-logo{width:100%;text-align:center;margin-bottom:0.5rem;}
       .admin-sidebar .admin-nav{flex-direction:row;flex-wrap:wrap;justify-content:center;}
@@ -104,11 +107,107 @@
       .admin-cards{grid-template-columns:repeat(2,1fr);}
       .admin-grid{grid-template-columns:1fr;}
     }
+
+    /* ===== COLLAPSIBLE SIDEBAR (phones) ===== */
+    .admin-sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 200;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--gradient-1);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+    }
+    .admin-sidebar-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+    }
+
+    .admin-sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .admin-sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media(max-width:767px){
+      .admin-sidebar-toggle { display: flex; }
+
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 260px;
+        height: 100vh;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        padding: 1.5rem 1rem;
+        z-index: 99;
+        background: #141414;
+        transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-right: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+      }
+      .admin-sidebar.open {
+        left: 0;
+      }
+      .admin-sidebar .admin-logo {
+        width: auto;
+        text-align: left;
+        margin-bottom: 2rem;
+      }
+      .admin-sidebar .admin-nav {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 0.2rem;
+        flex: 1;
+      }
+      .admin-sidebar .admin-nav a {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.85rem;
+        width: 100%;
+      }
+      .admin-sidebar .admin-logout {
+        margin-top: auto;
+      }
+
+      .admin-sidebar-overlay.open {
+        display: block;
+      }
+
+      .admin-main {
+        margin-left: 0;
+        padding: 1rem 0.8rem;
+      }
+    }
   </style>
 </head>
 <body>
+  <button class="admin-sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar"><i class="fas fa-bars"></i></button>
+  <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
+
   <div class="admin-layout">
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
       <div class="admin-logo">COMLAB<span>.</span></div>
       <nav class="admin-nav">
         <a href="#" class="active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
@@ -261,6 +360,28 @@
 
       document.getElementById('adminProfileId').value = auth.currentUser?.id || '';
 
+      // SIDEBAR TOGGLE (mobile)
+      const sidebar = document.getElementById('adminSidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      function closeSidebar() {
+        sidebar?.classList.remove('open');
+        sidebarOverlay?.classList.remove('open');
+        const icon = sidebarToggle?.querySelector('i');
+        if (icon) icon.className = 'fas fa-bars';
+      }
+
+      function toggleSidebar() {
+        const isOpen = sidebar?.classList.toggle('open');
+        sidebarOverlay?.classList.toggle('open', isOpen);
+        const icon = sidebarToggle?.querySelector('i');
+        if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+      }
+
+      sidebarToggle?.addEventListener('click', toggleSidebar);
+      sidebarOverlay?.addEventListener('click', closeSidebar);
+
       // NAVIGATION
       document.querySelectorAll('.admin-nav a').forEach(l => l.addEventListener('click', function(e){
         e.preventDefault();
@@ -268,6 +389,7 @@
         this.classList.add('active');
         document.querySelectorAll('.admin-content-area').forEach(x=>x.classList.remove('active'));
         document.getElementById('section-'+this.dataset.section).classList.add('active');
+        closeSidebar(); // close sidebar on mobile after clicking a link
       }));
 
       // STATS CARDS
