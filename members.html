@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members - COMLAB Borrowing System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animation.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div class="loading-screen">
+    <div class="loading-logo">COMLAB<span>.</span></div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="loading-text">LOADING MEMBERS...</div>
+  </div>
+
+  <!-- BACKGROUND -->
+  <div class="circuit-bg">
+    <div class="circuit-lines"></div>
+  </div>
+  <div class="particles-container"></div>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      COMLAB<span>.</span>
+      <span class="logo-dot"></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="equipments.html">Equipments</a></li>
+      <li><a href="borrow.html">Borrow</a></li>
+      <li><a href="members.html" class="active">Members</a></li>
+      <li><a href="stocks.html">Stocks</a></li>
+      <li><a href="history.html">History</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="nav-clock">Loading...</div>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <!-- PAGE HEADER -->
+  <div class="page-header" style="background:linear-gradient(135deg, rgba(33,150,243,0.05), rgba(13,71,161,0.05));">
+    <div class="section-tag reveal" style="background:rgba(33,150,243,0.1);color:#1565C0;"><i class="fas fa-users"></i> Our Team</div>
+    <h1 class="reveal">Laboratory <span style="background:linear-gradient(135deg, #1565C0, #1E88E5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Members</span></h1>
+    <p class="section-desc reveal">Meet the team behind the Computer Laboratory operations.</p>
+  </div>
+
+  <!-- MEMBERS GRID -->
+  <section class="section" style="padding-top:0;">
+    <div class="members-grid stagger-children" id="membersGrid">
+      <!-- Member 1 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #1565C0, #1E88E5);">
+          <span>JS</span>
+          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
+        </div>
+        <h3>John Santos</h3>
+        <div class="role">Laboratory Officer</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          john.santos@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 912 345 6789
+        </div>
+      </div>
+
+      <!-- Member 2 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #1E88E5, #1565C0);">
+          <span>MC</span>
+          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
+        </div>
+        <h3>Maria Cruz</h3>
+        <div class="role">Assistant</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          maria.cruz@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 917 890 1234
+        </div>
+      </div>
+
+      <!-- Member 3 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #1976D2, #1565C0);">
+          <span>AR</span>
+          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
+        </div>
+        <h3>Alex Reyes</h3>
+        <div class="role">Developer</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          alex.reyes@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 905 678 9012
+        </div>
+      </div>
+
+      <!-- Member 4 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #1E88E5, #1976D2);">
+          <span>SL</span>
+          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
+        </div>
+        <h3>Sarah Lim</h3>
+        <div class="role">Secretary</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          sarah.lim@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 922 345 6789
+        </div>
+      </div>
+
+      <!-- Member 5 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #1565C0, #1E88E5);">
+          <span>DT</span>
+          <div class="avatar-ring" style="border-color:rgba(21,101,192,0.2);"></div>
+        </div>
+        <h3>David Tan</h3>
+        <div class="role">Treasurer</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          david.tan@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 915 678 9012
+        </div>
+      </div>
+
+      <!-- Member 6 -->
+      <div class="member-card reveal">
+        <div class="member-avatar" style="background:linear-gradient(135deg, #0D47A1, #1565C0);">
+          <span>AG</span>
+          <div class="avatar-ring" style="border-color:rgba(13,71,161,0.2);"></div>
+        </div>
+        <h3>Anna Garcia</h3>
+        <div class="role">Laboratory Officer</div>
+        <div class="contact">
+          <i class="fas fa-envelope" style="font-size:0.75rem;"></i>
+          anna.garcia@university.edu
+        </div>
+        <div class="contact" style="margin-top:0.3rem;">
+          <i class="fas fa-phone" style="font-size:0.75rem;"></i>
+          +63 908 234 5678
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h3>COMLAB<span>.</span></h3>
+        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
+          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="equipments.html">Equipments</a></li>
+          <li><a href="borrow.html">Borrow</a></li>
+          <li><a href="history.html">History</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Information</h4>
+        <ul>
+          <li><a href="members.html">Members</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>University Laboratory Building, Manila</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>comlab@university.edu</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-phone"></i>
+          <span>(02) 8123-4567</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/effects.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/borrow.js"></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History - COMLAB Borrowing System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animation.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div class="loading-screen">
+    <div class="loading-logo">COMLAB<span>.</span></div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="loading-text">LOADING HISTORY...</div>
+  </div>
+
+  <!-- BACKGROUND -->
+  <div class="circuit-bg">
+    <div class="circuit-lines"></div>
+  </div>
+  <div class="particles-container"></div>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      COMLAB<span>.</span>
+      <span class="logo-dot"></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="equipments.html">Equipments</a></li>
+      <li><a href="borrow.html">Borrow</a></li>
+      <li><a href="members.html">Members</a></li>
+      <li><a href="stocks.html">Stocks</a></li>
+      <li><a href="history.html" class="active">History</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="nav-clock">Loading...</div>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="section-tag reveal"><i class="fas fa-history"></i> Transaction Records</div>
+    <h1 class="reveal">Borrow <span>History</span></h1>
+    <p class="section-desc reveal">Complete record of all equipment borrowing transactions.</p>
+  </div>
+
+  <!-- HISTORY TABLE -->
+  <section class="section" style="padding-top:0;">
+    <div class="table-container reveal">
+      <div class="table-toolbar">
+        <div class="table-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="historySearch" placeholder="Search transactions..." />
+        </div>
+        <div class="table-controls">
+          <select id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="returned">Returned</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="sortable" id="historyTable">
+          <thead>
+            <tr>
+              <th>Borrow ID</th>
+              <th>Student</th>
+              <th>Officer</th>
+              <th>Equipment</th>
+              <th>Fee</th>
+              <th>Borrow Date</th>
+              <th>Return Date</th>
+              <th>Status</th>
+              <th class="no-sort">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(139,0,0,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <span style="font-size:0.85rem;color:var(--text-secondary);">
+          <span id="historyCount">0</span> total transactions
+        </span>
+        <div style="display:flex;gap:0.5rem;">
+          <span class="status-pill pending" style="font-size:0.75rem;">Pending</span>
+          <span class="status-pill approved" style="font-size:0.75rem;">Approved</span>
+          <span class="status-pill returned" style="font-size:0.75rem;">Returned</span>
+          <span class="status-pill overdue" style="font-size:0.75rem;">Overdue</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h3>COMLAB<span>.</span></h3>
+        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
+          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="equipments.html">Equipments</a></li>
+          <li><a href="borrow.html">Borrow</a></li>
+          <li><a href="history.html">History</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Information</h4>
+        <ul>
+          <li><a href="members.html">Members</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>University Laboratory Building, Manila</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>comlab@university.edu</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-phone"></i>
+          <span>(02) 8123-4567</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/effects.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/borrow.js"></script>
+
+  <!-- HISTORY PAGE SPECIFIC SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await inventory.loadEquipments();
+
+      const tbody = document.querySelector('#historyTable tbody');
+      const historyCount = document.getElementById('historyCount');
+      const historySearch = document.getElementById('historySearch');
+      const statusFilter = document.getElementById('statusFilter');
+
+      let currentData = [];
+
+      function getStatusClass(status) {
+        const classes = { 'Pending': 'pending', 'Approved': 'approved', 'Returned': 'returned', 'Overdue': 'overdue' };
+        return classes[status] || 'pending';
+      }
+
+      function renderTable(data) {
+        currentData = data;
+        historyCount.textContent = data.length;
+
+        if (data.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                <div style="font-size:2.5rem;margin-bottom:0.8rem;">📋</div>
+                <h3 style="margin-bottom:0.3rem;">No Transactions Found</h3>
+                <p>Start borrowing equipment to see history here.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = data.map(record => `
+          <tr>
+            <td><strong style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;">${record.id}</strong></td>
+            <td>${record.studentName}</td>
+            <td>${record.officer}</td>
+            <td>${record.equipment}</td>
+            <td><strong>₱${record.fee}</strong></td>
+            <td>${new Date(record.borrowDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+            <td>${new Date(record.returnDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+            <td>
+              <span class="status-pill ${getStatusClass(record.status)}">
+                <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+                ${record.status}
+              </span>
+            </td>
+            <td>
+              ${record.status === 'Pending'
+                ? `<button class="btn-return" data-id="${record.id}" style="padding:0.3rem 0.8rem;background:var(--gradient-1);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;transition:all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Mark Returned</button>`
+                : '<span style="color:var(--text-light);font-size:0.8rem;display:flex;align-items:center;gap:4px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> Completed</span>'
+              }
+            </td>
+          </tr>
+        `).join('');
+
+        // Bind return buttons
+        tbody.querySelectorAll('.btn-return').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            inventory.returnItem(id);
+            // Update UI
+            const row = this.closest('tr');
+            const statusCell = row.querySelector('.status-pill');
+            statusCell.className = 'status-pill returned';
+            statusCell.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> Returned';
+            this.outerHTML = '<span style="color:var(--text-light);font-size:0.8rem;display:flex;align-items:center;gap:4px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> Completed</span>';
+            Notification.show('Item Returned', 'Equipment stock has been updated.', 'success');
+            // Refresh if filtered
+            filterData();
+          });
+        });
+      }
+
+      function filterData() {
+        const searchText = historySearch.value.toLowerCase();
+        const statusVal = statusFilter.value;
+
+        let filtered = inventory.borrowHistory;
+
+        if (searchText) {
+          filtered = filtered.filter(r =>
+            r.studentName.toLowerCase().includes(searchText) ||
+            r.officer.toLowerCase().includes(searchText) ||
+            r.equipment.toLowerCase().includes(searchText) ||
+            r.id.toLowerCase().includes(searchText)
+          );
+        }
+
+        if (statusVal !== 'all') {
+          filtered = filtered.filter(r =>
+            r.status.toLowerCase() === statusVal
+          );
+        }
+
+        renderTable(filtered);
+      }
+
+      // Initial render
+      renderTable(inventory.borrowHistory);
+
+      // Bind search and filter
+      historySearch.addEventListener('input', filterData);
+      statusFilter.addEventListener('change', filterData);
+    });
+  </script>
+
+</body>
+</html>

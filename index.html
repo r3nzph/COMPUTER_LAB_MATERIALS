@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMLAB - Computer Laboratory Borrowing System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animation.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div class="loading-screen">
+    <div class="loading-logo">COMLAB<span>.</span></div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="loading-text">INITIALIZING SYSTEM...</div>
+  </div>
+
+  <!-- BACKGROUND -->
+  <div class="circuit-bg">
+    <div class="circuit-lines"></div>
+  </div>
+  <div class="particles-container"></div>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      COMLAB<span>.</span>
+      <span class="logo-dot"></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="equipments.html">Equipments</a></li>
+      <li><a href="borrow.html">Borrow</a></li>
+      <li><a href="members.html">Members</a></li>
+      <li><a href="stocks.html">Stocks</a></li>
+      <li><a href="history.html">History</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="nav-clock">Loading...</div>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge reveal">
+        <span class="badge-dot"></span>
+        Laboratory Management System
+      </div>
+      <h1 class="hero-title reveal">
+        Computer Laboratory<br />
+        <span class="highlight">Borrowing System</span>
+      </h1>
+      <p class="hero-subtitle reveal">
+        Borrow laboratory equipment, tools and networking devices quickly and securely.
+        Streamlined inventory management for academic laboratories.
+      </p>
+      <div class="hero-buttons reveal">
+        <a href="equipments.html" class="btn btn-primary btn-glow">
+          <i class="fas fa-eye"></i> View Equipments
+        </a>
+        <a href="borrow.html" class="btn btn-secondary">
+          <i class="fas fa-clipboard-list"></i> Borrow Now
+        </a>
+      </div>
+    </div>
+
+    <!-- BORROWING FORM SIDEBAR -->
+    <div class="hero-form">
+      <div class="glass-card glass-error reveal-right">
+        <div class="card-header">
+          <div class="icon"><i class="fas fa-file-invoice"></i></div>
+          <h3>Quick Borrow Form</h3>
+        </div>
+        <form id="borrowForm">
+          <div class="form-group">
+            <label for="studentName">Student Name</label>
+            <input type="text" id="studentName" name="studentName" placeholder="Enter your full name" required />
+          </div>
+          <div class="form-group">
+            <label for="officer">Laboratory Officer</label>
+            <select id="officer" name="officer" required>
+              <option value="">Select Officer</option>
+              <option value="John Santos">John Santos</option>
+              <option value="Maria Cruz">Maria Cruz</option>
+              <option value="Alex Reyes">Alex Reyes</option>
+              <option value="Sarah Lim">Sarah Lim</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="equipment">Equipment</label>
+            <select id="equipment" name="equipment" required>
+              <option value="">Select Equipment</option>
+            </select>
+            <input type="hidden" id="equipmentName" name="equipmentName" />
+          </div>
+          <div class="form-group">
+            <label>Borrowing Fee</label>
+            <div class="input-fee" id="borrowFee">₱0</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pickupDate">Schedule Pick-up</label>
+              <input type="date" id="pickupDate" name="pickupDate" required />
+            </div>
+            <div class="form-group">
+              <label for="returnDate">Schedule Return</label>
+              <input type="date" id="returnDate" name="returnDate" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="purpose">Purpose</label>
+            <select id="purpose" name="purpose" required>
+              <option value="">Select Purpose</option>
+              <option value="Laboratory Activity">Laboratory Activity</option>
+              <option value="Research Project">Research Project</option>
+              <option value="Capstone Project">Capstone Project</option>
+              <option value="Thesis">Thesis</option>
+              <option value="Class Demonstration">Class Demonstration</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="remarks">Remarks</label>
+            <textarea id="remarks" name="remarks" placeholder="Optional notes..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit btn-glow">
+            <i class="fas fa-check-circle"></i> Confirm Borrowing
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <div class="modal-icon">✓</div>
+      <h2 class="modal-title">Borrow Successful!</h2>
+      <p class="modal-message">Your equipment has been borrowed successfully.</p>
+      <button class="modal-btn">Okay</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h3>COMLAB<span>.</span></h3>
+        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment, tools, and networking devices.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
+          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="equipments.html">Equipments</a></li>
+          <li><a href="borrow.html">Borrow</a></li>
+          <li><a href="history.html">History</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Information</h4>
+        <ul>
+          <li><a href="members.html">Members</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>University Laboratory Building, Manila</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>comlab@university.edu</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-phone"></i>
+          <span>(02) 8123-4567</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/effects.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/borrow.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
