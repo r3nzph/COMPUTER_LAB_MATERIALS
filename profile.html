@@ -51,8 +51,13 @@
         <div class="glass-card reveal" id="profileCard">
           <div style="text-align:center;padding:1rem;">
             <div class="profile-avatar-wrap" id="profileAvatarWrap">
-              <div style="width:90px;height:90px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:2.5rem;color:white;font-weight:800;overflow:hidden;" id="profileAvatar">U</div>
-              <button class="avatar-upload-btn" id="avatarUploadBtn" title="Change photo"><i class="fas fa-camera"></i></button>
+              <div class="avatar-action-container">
+                <div style="width:90px;height:90px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:2.5rem;color:white;font-weight:800;overflow:hidden;" id="profileAvatar">U</div>
+                <div class="avatar-action-buttons" id="avatarActionButtons" style="display:none;">
+                  <button class="avatar-upload-btn" id="avatarUploadBtn" title="Change photo"><i class="fas fa-camera"></i></button>
+                  <button class="avatar-remove-btn" id="avatarRemoveBtn" title="Remove photo"><i class="fas fa-trash-alt"></i></button>
+                </div>
+              </div>
             </div>
             <h2 id="profileName" style="font-size:1.3rem;font-weight:800;">Loading...</h2>
             <span class="role" id="profileCourse">Loading...</span>
@@ -110,7 +115,10 @@
               <div class="edit-avatar-overlay"><i class="fas fa-camera"></i> Change</div>
             </div>
             <input type="file" id="avatarInput" accept="image/*" style="display:none;" />
-            <p style="font-size:0.72rem;color:var(--text-light);margin-top:0.4rem;">Click to upload profile photo</p>
+            <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.4rem;">
+              <span style="font-size:0.72rem;color:var(--text-light);cursor:pointer;" id="editAvatarUploadLabel"><i class="fas fa-upload"></i> Upload</span>
+              <span style="font-size:0.72rem;color:var(--danger);cursor:pointer;display:none;" id="editAvatarRemoveLabel"><i class="fas fa-trash-alt"></i> Remove</span>
+            </div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
@@ -240,9 +248,19 @@
         }
       }
 
-      // Avatar upload handler
+      // ===== AVATAR UPLOAD & REMOVE =====
+      function updateAvatarRemoveBtn(){
+        const hasAvatar = !!auth.getAvatar();
+        document.getElementById('avatarActionButtons').style.display = hasAvatar ? 'flex' : 'none';
+      }
+      function updateEditRemoveLabel(){
+        const label = document.getElementById('editAvatarRemoveLabel');
+        if(label) label.style.display = (pendingAvatar || auth.getAvatar()) ? 'inline' : 'none';
+      }
+
       const avatarInput = document.getElementById('avatarInput');
       document.getElementById('editAvatarPreview').addEventListener('click', () => avatarInput.click());
+      document.getElementById('editAvatarUploadLabel').addEventListener('click', () => avatarInput.click());
       document.getElementById('avatarUploadBtn').addEventListener('click', () => avatarInput.click());
       avatarInput.addEventListener('change', function(){
         const file = this.files[0];
@@ -252,8 +270,30 @@
         reader.onload = (e) => {
           pendingAvatar = e.target.result;
           avatarToPreview(pendingAvatar);
+          updateEditRemoveLabel();
         };
         reader.readAsDataURL(file);
+      });
+
+      // Remove photo from profile card
+      document.getElementById('avatarRemoveBtn').addEventListener('click', function(){
+        if(!user.avatar) return;
+        const result = auth.updateStudentProfile({ avatar: null });
+        if(result.success){
+          user.avatar = null;
+          auth.setAvatarImage(document.getElementById('profileAvatar'));
+          auth.setAvatarImage(document.getElementById('userInitials'));
+          updateAvatarRemoveBtn();
+          Notification.show('Photo Removed', 'Your profile photo has been removed.');
+        }
+      });
+
+      // Remove photo from edit modal
+      document.getElementById('editAvatarRemoveLabel').addEventListener('click', function(){
+        pendingAvatar = null;
+        avatarInput.value = '';
+        avatarToPreview(null);
+        updateEditRemoveLabel();
       });
 
       document.getElementById('editProfileBtn').addEventListener('click', () => {
@@ -267,8 +307,12 @@
         pendingAvatar = null;
         avatarInput.value = '';
         avatarToPreview(user.avatar || null);
+        updateEditRemoveLabel();
         document.getElementById('editModal').classList.add('active');
       });
+
+      // Initial state for profile remove button
+      updateAvatarRemoveBtn();
 
       document.getElementById('editClose').addEventListener('click', () =>
         document.getElementById('editModal').classList.remove('active'));
@@ -293,6 +337,7 @@
 
         const updateData = { name: fullName, email, contact, section, course, year };
         if(pendingAvatar) updateData.avatar = pendingAvatar;
+        else if(pendingAvatar === null && user.avatar) updateData.avatar = null;
 
         const result = auth.updateStudentProfile(updateData);
 
