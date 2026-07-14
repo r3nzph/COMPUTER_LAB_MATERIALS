@@ -124,6 +124,42 @@
   to { transform: scale(4); opacity: 0; }
 }
 
+/* ===== CSS-ONLY RIPPLE ON CLICK ===== */
+@keyframes btnRipple {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ripple-btn:active::after {
+  animation: btnRipple 0.45s ease-out;
+}
+
+.ripple-btn-dark::after {
+  background: radial-gradient(circle, rgba(153,0,0,0.08) 0%, transparent 70%);
+}
+
+.ripple-btn-glow::after {
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+}
+
 @keyframes skeleton-pulse {
   0% { opacity: 0.6; }
   50% { opacity: 1; }

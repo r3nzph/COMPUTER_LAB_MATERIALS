@@ -672,6 +672,9 @@ body {
   background: var(--gradient-1);
   color: white;
   box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3);
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-primary:hover {
   transform: translateY(-3px);
@@ -686,11 +689,17 @@ body {
   transition: 0.5s;
 }
 .btn-primary:hover::before { left: 100%; }
+.btn-primary:active {
+  transform: scale(0.97);
+}
 
 .btn-secondary {
   background: transparent;
   color: var(--primary);
   border: 2px solid var(--primary);
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-secondary:hover {
   background: var(--primary);
@@ -698,6 +707,7 @@ body {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.2);
 }
+.btn-secondary:active { transform: scale(0.97); }
 
 .btn-glow { position: relative; }
 .btn-glow::after {
@@ -1649,6 +1659,35 @@ tbody td {
   transform: scale(0);
   animation: rippleAnim 0.6s ease-out;
   pointer-events: none;
+}
+
+/* CSS-only ripple on all major buttons */
+.btn, .btn-primary, .btn-secondary, .btn-submit,
+.filter-btn, .btn-add, .btn-view-more, .btn-sm,
+.btn-login-outline, .btn-register-solid, .modal-btn,
+.btn-login-nav, .btn-glow, .avatar-upload-btn,
+.avatar-remove-btn, .dropdown-trigger,
+.btn-register-solid, .btn-login-nav {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ripple pseudo-element for ripple-btn class */
+.ripple-btn::after { display: none; }
+/* Universal button ripple on :active */
+.btn:active, .btn-primary:active, .btn-secondary:active,
+.btn-submit:active, .filter-btn:active, .btn-add:active,
+.btn-sm:active, .btn-login-outline:active, .btn-register-solid:active,
+.modal-btn:active, .btn-login-nav:active {
+  transition: transform 0.1s ease;
+}
+.btn-primary:active, .btn-submit:active, .btn-register-solid:active,
+.modal-btn:active, .btn-login-nav:active {
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2) !important;
+  transform: scale(0.96);
+}
+.btn-secondary:active, .btn-login-outline:active,
+.filter-btn:active, .btn-add:active, .btn-sm:active {
+  transform: scale(0.96);
 }
 
 /* ===== VIEW MORE BTN ===== */
