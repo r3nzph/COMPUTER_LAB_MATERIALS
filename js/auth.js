@@ -54,6 +54,57 @@ class AuthSystem {
     localStorage.setItem('registeredStudents', JSON.stringify(this.registered));
   }
 
+  // ===== PASSWORD OVERRIDES FOR SEED USERS =====
+  getPasswordOverrides() {
+    return JSON.parse(localStorage.getItem('comlab_passwords')) || {};
+  }
+
+  savePasswordOverrides(overrides) {
+    localStorage.setItem('comlab_passwords', JSON.stringify(overrides));
+  }
+
+  getEffectivePassword(studentId, originalPassword) {
+    const overrides = this.getPasswordOverrides();
+    return overrides[studentId] || originalPassword;
+  }
+
+  // ===== CHANGE PASSWORD =====
+  changePassword(currentPassword, newPassword) {
+    if (!this.isLoggedIn() || !this.isStudent()) {
+      return { success: false, message: 'Please log in first.' };
+    }
+
+    const studentId = this.currentUser.id;
+
+    // Verify current password: check overrides first, then original data
+    const allStudents = this.getAllStudents();
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) return { success: false, message: 'Student record not found.' };
+
+    const effectiveCurrent = this.getEffectivePassword(studentId, student.password);
+    if (currentPassword !== effectiveCurrent) {
+      return { success: false, message: 'Current password is incorrect.' };
+    }
+
+    if (newPassword.length < 4) {
+      return { success: false, message: 'Password must be at least 4 characters.' };
+    }
+
+    // For registered students, update directly
+    const regIdx = this.registered.findIndex(r => r.id === studentId);
+    if (regIdx !== -1) {
+      this.registered[regIdx].password = newPassword;
+      this.saveRegisteredStudents();
+      return { success: true, message: 'Password changed successfully!' };
+    }
+
+    // For seed students, store in password overrides
+    const overrides = this.getPasswordOverrides();
+    overrides[studentId] = newPassword;
+    this.savePasswordOverrides(overrides);
+    return { success: true, message: 'Password changed successfully!' };
+  }
+
   // ===== REGISTER =====
   register(data) {
     // Validate unique ID
@@ -87,8 +138,10 @@ class AuthSystem {
   // ===== LOGIN STUDENT =====
   loginStudent(studentId, password) {
     const allStudents = this.getAllStudents();
-    const student = allStudents.find(s => s.id === studentId && s.password === password);
+    const student = allStudents.find(s => s.id === studentId);
     if (!student) return { success: false, message: 'Invalid Student ID or password.' };
+    const effectivePassword = this.getEffectivePassword(studentId, student.password);
+    if (password !== effectivePassword) return { success: false, message: 'Invalid Student ID or password.' };
 
     // Sync borrow count with actual records
     const actualBorrows = inventory.borrowHistory.filter(r => r.studentId === studentId).length;
