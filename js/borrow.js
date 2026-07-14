@@ -14,7 +14,7 @@ class BorrowManager {
     this.setupFormSubmission();
     this.setupAutoFee();
     this.setupAddToBorrowButtons();
-    this.setupSearchAndFilter();
+    this.setupEquipDetails();
   }
 
   // ===== SETUP EQUIPMENT SELECT =====
@@ -138,40 +138,44 @@ class BorrowManager {
     });
   }
 
-  // ===== SETUP SEARCH & FILTER ON EQUIPMENTS PAGE =====
-  setupSearchAndFilter() {
-    const searchInput = document.getElementById('equipSearch');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const grid = document.getElementById('equipGrid');
+  // ===== EQUIPMENT DETAILS PANEL =====
+  setupEquipDetails() {
+    const select = document.getElementById('equipment');
+    const panel = document.getElementById('equipDetailsPanel');
+    const stockDisplay = document.getElementById('availableStock');
+    if (!select || !panel) return;
 
-    if (!grid) return;
+    select.addEventListener('change', () => {
+      const id = parseInt(select.value);
+      if (!id) {
+        panel.innerHTML = `<div style="text-align:center;padding:2rem 0;color:var(--text-light);">
+          <i class="fas fa-tools" style="font-size:3rem;margin-bottom:1rem;opacity:0.3;"></i>
+          <p>Select an equipment to see details here.</p></div>`;
+        if (stockDisplay) stockDisplay.textContent = '—';
+        return;
+      }
+      const equip = inventory.getEquipment(id);
+      if (!equip) return;
 
-    let currentCategory = 'All';
-    let currentSearch = '';
+      if (stockDisplay) stockDisplay.textContent = equip.stocks + ' available';
 
-    const render = () => {
-      const filtered = inventory.filterEquipments(currentCategory, currentSearch);
-      inventory.renderEquipments(grid, filtered);
-    };
-
-    // Search
-    searchInput?.addEventListener('input', (e) => {
-      currentSearch = e.target.value;
-      render();
+      panel.innerHTML = `
+        <div style="text-align:center;">
+          <div style="width:60px;height:60px;background:rgba(var(--primary-rgb),0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;color:var(--primary);">
+            <i class="${inventory.getIcon(equip.category)}"></i>
+          </div>
+          <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.3rem;">${equip.name}</h3>
+          <span class="category-tag" style="margin-bottom:0.8rem;display:inline-block;">${equip.category}</span>
+          <div style="display:flex;justify-content:center;gap:2rem;margin:1rem 0;">
+            <div><div style="font-size:1.5rem;font-weight:800;color:var(--primary);">₱${equip.borrowFee}</div><div style="font-size:0.75rem;color:var(--text-light);">Borrow Fee</div></div>
+            <div><div style="font-size:1.5rem;font-weight:800;color:${equip.stocks <= 3 ? 'var(--danger)' : 'var(--success)'};">${equip.stocks}</div><div style="font-size:0.75rem;color:var(--text-light);">In Stock</div></div>
+          </div>
+          <span class="status-badge ${inventory.getStatusClass(equip.status)}">
+            <span class="status-dot"></span> ${equip.status}
+          </span>
+        </div>
+      `;
     });
-
-    // Filter
-    filterButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.dataset.filter;
-        render();
-      });
-    });
-
-    // Initial render
-    inventory.loadEquipments().then(render);
   }
 
   // ===== SHOW MODAL =====

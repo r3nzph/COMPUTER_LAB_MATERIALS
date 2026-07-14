@@ -1,0 +1,12 @@
+[
+  {
+    "id": "ADMIN001",
+    "name": "Laboratory Officer",
+    "password": "admin123"
+  },
+  {
+    "id": "ADMIN002",
+    "name": "System Administrator",
+    "password": "admin123"
+  }
+]

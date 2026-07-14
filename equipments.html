@@ -8,31 +8,23 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animation.css" />
   <link rel="stylesheet" href="css/responsive.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
 </head>
 <body>
-
   <!-- LOADING SCREEN -->
   <div class="loading-screen">
     <div class="loading-logo">COMLAB<span>.</span></div>
-    <div class="loading-bar-container">
-      <div class="loading-bar"></div>
-    </div>
+    <div class="loading-bar-container"><div class="loading-bar"></div></div>
     <div class="loading-text">LOADING EQUIPMENTS...</div>
   </div>
 
   <!-- BACKGROUND -->
-  <div class="circuit-bg">
-    <div class="circuit-lines"></div>
-  </div>
+  <div class="circuit-bg"><div class="circuit-lines"></div></div>
   <div class="particles-container"></div>
 
   <!-- NAVIGATION -->
   <nav class="navbar">
-    <a href="index.html" class="nav-logo">
-      COMLAB<span>.</span>
-      <span class="logo-dot"></span>
-    </a>
+    <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="equipments.html" class="active">Equipments</a></li>
@@ -43,19 +35,49 @@
     </ul>
     <div class="nav-right">
       <div class="nav-clock">Loading...</div>
-      <button class="nav-toggle" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <div class="user-avatar" id="userInitials">U</div>
+        <span class="user-name" id="userName">User</span>
+        <span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
     </div>
   </nav>
+
+  <!-- LOGIN MODAL -->
+  <div class="login-modal" id="loginModal">
+    <div class="login-modal-content">
+      <button class="login-close" id="loginClose">&times;</button>
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:1.5rem;font-weight:900;letter-spacing:2px;">COMLAB<span style="color:var(--primary-light);">.</span></div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Sign in to your account</p>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab active" data-tab="student">Student</button>
+        <button class="login-tab" data-tab="admin">Administrator</button>
+      </div>
+      <form class="login-form active" id="studentLoginForm">
+        <div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter password" required /></div>
+        <div class="form-options"><label><input type="checkbox" /> Remember Me</label><a href="#">Forgot Password?</a></div>
+        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+      <form class="login-form" id="adminLoginForm">
+        <div class="form-group"><label>Officer ID</label><input type="text" id="adminId" placeholder="e.g., ADMIN001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter password" required /></div>
+        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
 
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div class="section-tag reveal"><i class="fas fa-toolbox"></i> Equipment Inventory</div>
     <h1 class="reveal">Laboratory <span>Equipments</span></h1>
-    <p class="section-desc reveal">Browse available laboratory equipment, tools, and devices.</p>
+    <p class="section-desc reveal">Browse available laboratory equipment, tools, and networking devices.</p>
   </div>
 
   <!-- SEARCH & FILTERS -->
@@ -73,68 +95,61 @@
       <button class="filter-btn" data-filter="Cleaning">Cleaning</button>
       <button class="filter-btn" data-filter="Storage">Storage</button>
     </div>
-
-    <!-- EQUIPMENT GRID -->
-    <div class="equipments-grid" id="equipGrid">
-      <!-- Rendered by JavaScript -->
-    </div>
+    <div class="equipments-grid" id="equipGrid"></div>
   </section>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-content">
-      <div class="footer-col">
-        <h3>COMLAB<span>.</span></h3>
-        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment.</p>
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
-          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
-        </div>
+      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUP.</p>
+        <div class="footer-social"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a><a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a><a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a></div>
       </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="equipments.html">Equipments</a></li>
-          <li><a href="borrow.html">Borrow</a></li>
-          <li><a href="history.html">History</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Information</h4>
-        <ul>
-          <li><a href="members.html">Members</a></li>
-          <li><a href="stocks.html">Stocks</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact Us</h4>
-        <div class="footer-contact-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>University Laboratory Building, Manila</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-envelope"></i>
-          <span>comlab@university.edu</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-phone"></i>
-          <span>(02) 8123-4567</span>
-        </div>
-      </div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
+      <div class="footer-col"><h4>Information</h4><ul><li><a href="members.html">Members</a></li><li><a href="stocks.html">Stocks</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Laboratory Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
     </div>
-    <div class="footer-bottom">
-      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
-    </div>
+    <div class="footer-bottom"><p>Computer Laboratory Borrowing System &bull; TUP &bull; 2026</p></div>
   </footer>
 
-  <!-- SCRIPTS -->
   <script src="js/effects.js"></script>
   <script src="js/inventory.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/borrow.js"></script>
+
+  <!-- EQUIPMENTS PAGE SEARCH & FILTER -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await inventory.loadEquipments();
+
+      const grid = document.getElementById('equipGrid');
+      const searchInput = document.getElementById('equipSearch');
+      const filterButtons = document.querySelectorAll('.filter-btn');
+
+      let currentCategory = 'All';
+      let currentSearch = '';
+
+      function render() {
+        const filtered = inventory.filterEquipments(currentCategory, currentSearch);
+        inventory.renderEquipments(grid, filtered);
+      }
+
+      searchInput?.addEventListener('input', function() {
+        currentSearch = this.value;
+        render();
+      });
+
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filterButtons.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentCategory = this.dataset.filter;
+          render();
+        });
+      });
+
+      // Initial render
+      render();
+    });
+  </script>
 </body>
 </html>

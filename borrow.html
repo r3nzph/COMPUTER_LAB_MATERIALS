@@ -8,31 +8,23 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animation.css" />
   <link rel="stylesheet" href="css/responsive.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%238B0000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23990000'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='Arial'>C</text></svg>" />
 </head>
 <body>
-
   <!-- LOADING SCREEN -->
   <div class="loading-screen">
     <div class="loading-logo">COMLAB<span>.</span></div>
-    <div class="loading-bar-container">
-      <div class="loading-bar"></div>
-    </div>
+    <div class="loading-bar-container"><div class="loading-bar"></div></div>
     <div class="loading-text">PREPARING BORROW FORM...</div>
   </div>
 
   <!-- BACKGROUND -->
-  <div class="circuit-bg">
-    <div class="circuit-lines"></div>
-  </div>
+  <div class="circuit-bg"><div class="circuit-lines"></div></div>
   <div class="particles-container"></div>
 
   <!-- NAVIGATION -->
   <nav class="navbar">
-    <a href="index.html" class="nav-logo">
-      COMLAB<span>.</span>
-      <span class="logo-dot"></span>
-    </a>
+    <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="equipments.html">Equipments</a></li>
@@ -43,100 +35,141 @@
     </ul>
     <div class="nav-right">
       <div class="nav-clock">Loading...</div>
-      <button class="nav-toggle" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
+      <div class="nav-user" id="navUser" style="display:none;">
+        <div class="user-avatar" id="userInitials">U</div>
+        <span class="user-name" id="userName">User</span>
+        <span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span>
+      </div>
+      <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
     </div>
   </nav>
+
+  <!-- LOGIN MODAL -->
+  <div class="login-modal" id="loginModal">
+    <div class="login-modal-content">
+      <button class="login-close" id="loginClose">&times;</button>
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:1.5rem;font-weight:900;letter-spacing:2px;">COMLAB<span style="color:var(--primary-light);">.</span></div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Sign in to your account</p>
+      </div>
+      <div class="login-tabs">
+        <button class="login-tab active" data-tab="student">Student</button>
+        <button class="login-tab" data-tab="admin">Administrator</button>
+      </div>
+      <form class="login-form active" id="studentLoginForm">
+        <div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter password" required /></div>
+        <div class="form-options"><label><input type="checkbox" /> Remember Me</label><a href="#">Forgot Password?</a></div>
+        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+      <form class="login-form" id="adminLoginForm">
+        <div class="form-group"><label>Officer ID</label><input type="text" id="adminId" placeholder="e.g., ADMIN001" required /></div>
+        <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter password" required /></div>
+        <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <button type="submit" class="btn-submit" style="font-size:0.88rem;">Sign In <i class="fas fa-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
 
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div class="section-tag reveal"><i class="fas fa-clipboard-list"></i> New Transaction</div>
     <h1 class="reveal">Borrow <span>Equipment</span></h1>
-    <p class="section-desc reveal">Fill out the form below to borrow laboratory equipment.</p>
+    <p class="section-desc reveal">Select equipment and fill out the form to borrow laboratory items.</p>
   </div>
 
   <!-- BORROW FORM SECTION -->
   <section class="section" style="padding-top:0;">
-    <div class="container" style="max-width:720px;">
-      <div class="glass-card reveal">
-        <div class="card-header">
-          <div class="icon"><i class="fas fa-file-invoice"></i></div>
-          <h3>Equipment Borrowing Form</h3>
+    <div class="container" style="max-width:900px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <!-- Equipment Details Panel -->
+        <div class="glass-card reveal">
+          <div class="card-header">
+            <div class="icon"><i class="fas fa-info-circle"></i></div>
+            <h3>Equipment Details</h3>
+          </div>
+          <div id="equipDetailsPanel">
+            <div style="text-align:center;padding:2rem 0;color:var(--text-light);">
+              <i class="fas fa-tools" style="font-size:3rem;margin-bottom:1rem;opacity:0.3;"></i>
+              <p>Select an equipment from the form to see details here.</p>
+            </div>
+          </div>
         </div>
-        <form id="borrowForm">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="studentName">Student Name <span style="color:var(--danger);">*</span></label>
-              <input type="text" id="studentName" name="studentName" placeholder="Enter your full name" required />
+
+        <!-- Borrow Form Panel -->
+        <div class="glass-card reveal">
+          <div class="card-header">
+            <div class="icon"><i class="fas fa-file-invoice"></i></div>
+            <h3>Borrowing Form</h3>
+          </div>
+          <form id="borrowForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Student Name <span style="color:var(--danger);">*</span></label>
+                <input type="text" id="studentName" name="studentName" placeholder="Enter your full name" required />
+              </div>
+              <div class="form-group">
+                <label>Lab Officer <span style="color:var(--danger);">*</span></label>
+                <select id="officer" name="officer" required>
+                  <option value="">Select Officer</option>
+                  <option value="John Santos">John Santos</option>
+                  <option value="Maria Cruz">Maria Cruz</option>
+                  <option value="Alex Reyes">Alex Reyes</option>
+                  <option value="Sarah Lim">Sarah Lim</option>
+                  <option value="David Tan">David Tan</option>
+                </select>
+              </div>
             </div>
             <div class="form-group">
-              <label for="officer">Laboratory Officer <span style="color:var(--danger);">*</span></label>
-              <select id="officer" name="officer" required>
-                <option value="">Select Officer</option>
-                <option value="John Santos">John Santos</option>
-                <option value="Maria Cruz">Maria Cruz</option>
-                <option value="Alex Reyes">Alex Reyes</option>
-                <option value="Sarah Lim">Sarah Lim</option>
-                <option value="David Tan">David Tan</option>
+              <label>Equipment <span style="color:var(--danger);">*</span></label>
+              <select id="equipment" name="equipment" required>
+                <option value="">Select Equipment</option>
+              </select>
+              <input type="hidden" id="equipmentName" name="equipmentName" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Borrowing Fee</label>
+                <div class="input-fee" id="borrowFee">₱0.00</div>
+              </div>
+              <div class="form-group">
+                <label>Available Stocks</label>
+                <div class="input-fee" id="availableStock" style="color:var(--text-primary);">—</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pick-up Date <span style="color:var(--danger);">*</span></label>
+                <input type="date" id="pickupDate" name="pickupDate" required />
+              </div>
+              <div class="form-group">
+                <label>Return Date <span style="color:var(--danger);">*</span></label>
+                <input type="date" id="returnDate" name="returnDate" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Purpose <span style="color:var(--danger);">*</span></label>
+              <select id="purpose" name="purpose" required>
+                <option value="">Select Purpose</option>
+                <option value="Laboratory Activity">Laboratory Activity</option>
+                <option value="Research Project">Research Project</option>
+                <option value="Capstone Project">Capstone Project</option>
+                <option value="Thesis">Thesis</option>
+                <option value="Class Demonstration">Class Demonstration</option>
+                <option value="Other">Other</option>
               </select>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label for="equipment">Equipment <span style="color:var(--danger);">*</span></label>
-            <select id="equipment" name="equipment" required>
-              <option value="">Select Equipment</option>
-            </select>
-            <input type="hidden" id="equipmentName" name="equipmentName" />
-          </div>
-
-          <div class="form-row">
             <div class="form-group">
-              <label>Borrowing Fee</label>
-              <div class="input-fee" id="borrowFee">₱0.00</div>
+              <label>Remarks</label>
+              <textarea id="remarks" name="remarks" placeholder="Additional notes..."></textarea>
             </div>
-            <div class="form-group">
-              <label>Available Stocks</label>
-              <div class="input-fee" id="availableStock" style="color:var(--text-primary);">—</div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pickupDate">Schedule Pick-up <span style="color:var(--danger);">*</span></label>
-              <input type="date" id="pickupDate" name="pickupDate" required />
-            </div>
-            <div class="form-group">
-              <label for="returnDate">Schedule Return <span style="color:var(--danger);">*</span></label>
-              <input type="date" id="returnDate" name="returnDate" required />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="purpose">Purpose <span style="color:var(--danger);">*</span></label>
-            <select id="purpose" name="purpose" required>
-              <option value="">Select Purpose</option>
-              <option value="Laboratory Activity">Laboratory Activity</option>
-              <option value="Research Project">Research Project</option>
-              <option value="Capstone Project">Capstone Project</option>
-              <option value="Thesis">Thesis</option>
-              <option value="Class Demonstration">Class Demonstration</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="remarks">Remarks</label>
-            <textarea id="remarks" name="remarks" placeholder="Additional notes or instructions..."></textarea>
-          </div>
-
-          <button type="submit" class="btn-submit btn-glow">
-            <i class="fas fa-check-circle"></i> Confirm Borrowing
-          </button>
-        </form>
+            <button type="submit" class="btn-submit btn-glow">
+              <i class="fas fa-check-circle"></i> Confirm Borrowing
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </section>
@@ -154,58 +187,19 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-content">
-      <div class="footer-col">
-        <h3>COMLAB<span>.</span></h3>
-        <p>Computer Laboratory Borrowing System. A school project designed to streamline the borrowing and management of laboratory equipment.</p>
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
-          <a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a>
-          <a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a>
-        </div>
+      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUP.</p>
+        <div class="footer-social"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a><a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a><a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a></div>
       </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="equipments.html">Equipments</a></li>
-          <li><a href="borrow.html">Borrow</a></li>
-          <li><a href="history.html">History</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Information</h4>
-        <ul>
-          <li><a href="members.html">Members</a></li>
-          <li><a href="stocks.html">Stocks</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact Us</h4>
-        <div class="footer-contact-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>University Laboratory Building, Manila</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-envelope"></i>
-          <span>comlab@university.edu</span>
-        </div>
-        <div class="footer-contact-item">
-          <i class="fas fa-phone"></i>
-          <span>(02) 8123-4567</span>
-        </div>
-      </div>
+      <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
+      <div class="footer-col"><h4>Info</h4><ul><li><a href="members.html">Members</a></li><li><a href="stocks.html">Stocks</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Lab Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
     </div>
-    <div class="footer-bottom">
-      <p>Computer Laboratory Borrowing System &bull; School Project &bull; 2026</p>
-    </div>
+    <div class="footer-bottom"><p>Computer Laboratory Borrowing System &bull; TUP &bull; 2026</p></div>
   </footer>
 
-  <!-- SCRIPTS -->
   <script src="js/effects.js"></script>
   <script src="js/inventory.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/borrow.js"></script>
 </body>
 </html>
