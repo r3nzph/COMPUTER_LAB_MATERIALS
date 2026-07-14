@@ -407,7 +407,6 @@ class TableFilter {
 document.addEventListener('DOMContentLoaded', () => {
   new LoadingScreen();
   new ParticleSystem();
-  new LiveClock();
   new Navbar();
   new ScrollReveal();
   new CounterAnimation();

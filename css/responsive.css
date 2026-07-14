@@ -45,10 +45,10 @@
 
 /* ===== SMALL TABLETS / LARGE PHONES (600px - 768px) ===== */
 @media screen and (max-width: 768px) {
-  .navbar { padding: 0 1.2rem; }
+  .nav-inner { padding: 0 1.2rem; }
   .nav-links {
     position: fixed;
-    top: 72px;
+    top: 76px;
     left: 0;
     width: 100%;
     flex-direction: column;
@@ -67,8 +67,7 @@
   .nav-links a:hover,
   .nav-links a.active { background: rgba(153,0,0,0.05); }
   .nav-toggle { display: flex; }
-  .nav-clock { display: none; }
-  .btn-login-nav { font-size: 0.75rem; padding: 0.35rem 0.9rem; }
+  .dropdown-name { display: none; }
 
   .hero { padding: 90px 1.2rem 50px; }
   .hero-title { font-size: 2.2rem; }

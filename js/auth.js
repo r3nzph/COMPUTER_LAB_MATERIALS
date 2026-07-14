@@ -511,28 +511,75 @@ class AuthSystem {
   updateUI() {
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
-    const navUser = document.getElementById('navUser');
+    const userDropdown = document.getElementById('userDropdown');
     const userName = document.getElementById('userName');
     const userInitials = document.getElementById('userInitials');
-    const userLogout = document.getElementById('userLogout');
+    const dropdownMenu = document.getElementById('dropdownMenu');
 
     if (this.isLoggedIn()) {
       if (loginBtn) loginBtn.style.display = 'none';
       if (registerBtn) registerBtn.style.display = 'none';
-      if (navUser) {
-        navUser.style.display = 'flex';
+      if (userDropdown) {
+        userDropdown.style.display = 'block';
         if (userName) userName.textContent = this.getUserName();
         this.setAvatarImage(userInitials);
       }
+      // Show/hide admin dashboard link
+      const adminLink = document.getElementById('adminDashLink');
+      if (adminLink) adminLink.style.display = this.isAdmin() ? 'flex' : 'none';
     } else {
       if (loginBtn) loginBtn.style.display = '';
       if (registerBtn) registerBtn.style.display = '';
-      if (navUser) navUser.style.display = 'none';
+      if (userDropdown) userDropdown.style.display = 'none';
     }
 
-    // Re-render nav links based on role
+    // Close any open dropdown on re-render
+    if (dropdownMenu) dropdownMenu.classList.remove('open');
+    const trigger = document.getElementById('dropdownTrigger');
+    if (trigger) trigger.classList.remove('open');
+
     this.renderRoleNav();
-    userLogout?.addEventListener('click', () => this.logout());
+    this.setupDropdown();
+  }
+
+  setupDropdown() {
+    const trigger = document.getElementById('dropdownTrigger');
+    const menu = document.getElementById('dropdownMenu');
+    const logoutBtn = document.getElementById('userLogout');
+
+    if (!trigger || !menu) return;
+
+    // Remove old listener to prevent duplicates
+    const newTrigger = trigger.cloneNode(true);
+    trigger.parentNode.replaceChild(newTrigger, trigger);
+
+    newTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.contains('open');
+      menu.classList.toggle('open');
+      newTrigger.classList.toggle('open');
+    });
+
+    // Close on outside click
+    document.removeEventListener('click', this._closeDropdown);
+    this._closeDropdown = (e) => {
+      if (!menu.contains(e.target) && !newTrigger.contains(e.target)) {
+        menu.classList.remove('open');
+        newTrigger.classList.remove('open');
+      }
+    };
+    document.addEventListener('click', this._closeDropdown);
+
+    // Logout
+    if (logoutBtn) {
+      const newLogout = logoutBtn.cloneNode(true);
+      logoutBtn.parentNode.replaceChild(newLogout, logoutBtn);
+      newLogout.addEventListener('click', () => {
+        menu.classList.remove('open');
+        newTrigger.classList.remove('open');
+        this.logout();
+      });
+    }
   }
 
   renderRoleNav() {

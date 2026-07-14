@@ -24,22 +24,28 @@
 
   <!-- ===== NAVIGATION ===== -->
   <nav class="navbar">
-    <a href="index.html" class="nav-logo">COMLAB<span>.</span><span class="logo-dot"></span></a>
-    <ul class="nav-links" id="roleNav">
-      <!-- Rendered by auth.js based on role -->
-      <li><a href="index.html" class="active"><i class="fas fa-home" style="margin-right:4px;font-size:0.75rem;"></i> Home</a></li>
-      <li><a href="equipments.html"><i class="fas fa-tools" style="margin-right:4px;font-size:0.75rem;"></i> Equipments</a></li>
-    </ul>
-    <div class="nav-right">
-      <div class="nav-clock">Loading...</div>
-      <button class="btn-login-nav" id="loginBtn"><i class="fas fa-user-circle"></i> Login</button>
-      <button class="btn-login-nav" id="registerBtn" style="background:transparent;border:1.5px solid var(--primary);color:var(--primary);margin-left:0.3rem;">Register</button>
-      <div class="nav-user" id="navUser" style="display:none;">
-        <div class="user-avatar" id="userInitials">U</div>
-        <span class="user-name" id="userName">User</span>
-        <span class="user-logout" id="userLogout"><i class="fas fa-sign-out-alt"></i></span>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">COMLAB<span>.</span></a>
+      <ul class="nav-links" id="roleNav"></ul>
+      <div class="nav-right">
+        <button class="btn-login-outline" id="loginBtn">Login</button>
+        <button class="btn-register-solid" id="registerBtn">Register</button>
+        <div class="user-dropdown" id="userDropdown" style="display:none;">
+          <button class="dropdown-trigger" id="dropdownTrigger">
+            <span class="dropdown-avatar" id="userInitials">U</span>
+            <span class="dropdown-name" id="userName">User</span>
+            <i class="fas fa-chevron-down dropdown-chevron"></i>
+          </button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a class="dropdown-item" href="profile.html"><i class="fas fa-user"></i> Profile</a>
+            <a class="dropdown-item" href="history.html"><i class="fas fa-history"></i> My History</a>
+            <a class="dropdown-item" id="adminDashLink" href="admin.html" style="display:none;"><i class="fas fa-chart-pie"></i> Admin Dashboard</a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" id="userLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+        <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
       </div>
-      <button class="nav-toggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
