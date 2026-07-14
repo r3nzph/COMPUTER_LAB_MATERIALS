@@ -140,6 +140,36 @@ class AuthSystem {
     localStorage.setItem('comlabUser', JSON.stringify(this.currentUser));
   }
 
+  // ===== UPDATE PROFILE =====
+  updateStudentProfile(data) {
+    if (!this.isLoggedIn() || !this.isStudent()) {
+      return { success: false, message: 'Please log in first.' };
+    }
+
+    // Update currentUser (session)
+    this.currentUser.name = data.name || this.currentUser.name;
+    this.currentUser.email = data.email || '';
+    this.currentUser.contact = data.contact || '';
+    this.currentUser.section = data.section || '';
+    this.currentUser.course = data.course || this.currentUser.course;
+    this.currentUser.year = data.year || this.currentUser.year;
+    this.saveSession();
+
+    // Also update in registeredStudents if they registered via the system
+    const idx = this.registered.findIndex(r => r.id === this.currentUser.id);
+    if (idx !== -1) {
+      this.registered[idx].name = this.currentUser.name;
+      this.registered[idx].email = this.currentUser.email;
+      this.registered[idx].contact = this.currentUser.contact;
+      this.registered[idx].section = this.currentUser.section;
+      this.registered[idx].course = this.currentUser.course;
+      this.registered[idx].year = this.currentUser.year;
+      this.saveRegisteredStudents();
+    }
+
+    return { success: true, message: 'Profile updated successfully!' };
+  }
+
   isLoggedIn() { return this.currentUser !== null; }
   isAdmin() { return this.currentUser?.type === 'admin'; }
   isStudent() { return this.currentUser?.type === 'student'; }

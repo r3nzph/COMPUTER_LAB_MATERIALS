@@ -93,14 +93,42 @@
 
   <!-- Edit Profile Modal -->
   <div class="login-modal" id="editModal">
-    <div class="login-modal-content"><button class="login-close" id="editClose">&times;</button>
-      <h3 style="margin-bottom:1rem;">Edit Profile</h3>
+    <div class="login-modal-content" style="max-width:480px;"><button class="login-close" id="editClose">&times;</button>
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:1.3rem;font-weight:800;"><i class="fas fa-user-edit" style="color:var(--primary);margin-right:8px;"></i> Edit Profile</div>
+        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.2rem;">Update your personal information</p>
+      </div>
       <form id="editForm">
-        <div class="form-group"><label>Full Name</label><input type="text" id="editName" required /></div>
-        <div class="form-group"><label>Email</label><input type="email" id="editEmail" required /></div>
-        <div class="form-group"><label>Contact Number</label><input type="text" id="editContact" required /></div>
-        <div class="form-group"><label>Section</label><input type="text" id="editSection" /></div>
-        <button type="submit" class="btn-submit">Save Changes</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+          <div class="form-group"><label>First Name</label><input type="text" id="editFirstName" required /></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="editLastName" required /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+          <div class="form-group"><label>Course</label>
+            <select id="editCourse" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;background:white;">
+              <option value="BSIT">BSIT</option><option value="BSCS">BSCS</option>
+              <option value="BSIS">BSIS</option><option value="BSCpE">BSCpE</option>
+              <option value="BSEE">BSEE</option><option value="BSECE">BSECE</option>
+              <option value="BSME">BSME</option><option value="BSCE">BSCE</option>
+              <option value="BSIE">BSIE</option><option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Year Level</label>
+            <select id="editYear" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;background:white;">
+              <option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option>
+              <option value="5th Year">5th Year</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Section</label><input type="text" id="editSection" placeholder="e.g. IT-2A" /></div>
+        <div class="form-group"><label>Email</label><input type="email" id="editEmail" required placeholder="you@tup.edu.ph" /></div>
+        <div class="form-group"><label>Contact Number</label><input type="text" id="editContact" required placeholder="e.g. 09123456789" /></div>
+        <div class="edit-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
+        <div style="display:flex;gap:0.8rem;margin-top:0.5rem;">
+          <button type="submit" class="btn-submit" style="flex:1;font-size:0.85rem;"><i class="fas fa-save"></i> Save Changes</button>
+          <button type="button" id="editCancel" style="padding:0.6rem 1.2rem;border:1px solid #ddd;border-radius:10px;background:white;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--text-secondary);transition:var(--transition);">Cancel</button>
+        </div>
       </form>
     </div>
   </div>
@@ -172,25 +200,69 @@
         `).join('');
       }
 
-      // Edit Profile
-      document.getElementById('editProfileBtn').onclick = () => {
-        document.getElementById('editName').value = user.name;
+      // ===== EDIT PROFILE =====
+      const nameParts = (user.name || '').split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      function showEditError(msg){
+        const el = document.querySelector('.edit-error');
+        if(el){el.textContent=msg;el.style.display='block';setTimeout(()=>{el.style.display='none';},3000);}
+      }
+
+      document.getElementById('editProfileBtn').addEventListener('click', () => {
+        document.getElementById('editFirstName').value = firstName;
+        document.getElementById('editLastName').value = lastName;
         document.getElementById('editEmail').value = user.email || '';
         document.getElementById('editContact').value = user.contact || '';
         document.getElementById('editSection').value = user.section || '';
+        document.getElementById('editCourse').value = user.course || 'BSIT';
+        document.getElementById('editYear').value = user.year || '1st Year';
         document.getElementById('editModal').classList.add('active');
-      };
-      document.getElementById('editClose').onclick = () => document.getElementById('editModal').classList.remove('active');
-      document.getElementById('editForm').onsubmit = (e) => {
+      });
+
+      document.getElementById('editClose').addEventListener('click', () =>
+        document.getElementById('editModal').classList.remove('active'));
+      document.getElementById('editCancel').addEventListener('click', () =>
+        document.getElementById('editModal').classList.remove('active'));
+
+      document.getElementById('editForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        user.name = document.getElementById('editName').value.trim();
-        user.email = document.getElementById('editEmail').value.trim();
-        user.contact = document.getElementById('editContact').value.trim();
-        user.section = document.getElementById('editSection').value.trim();
-        auth.saveSession();
-        document.getElementById('editModal').classList.remove('active');
-        location.reload();
-      };
+        const fName = document.getElementById('editFirstName').value.trim();
+        const lName = document.getElementById('editLastName').value.trim();
+        const email = document.getElementById('editEmail').value.trim();
+        const contact = document.getElementById('editContact').value.trim();
+
+        if(!fName || !lName){showEditError('First and last name are required.');return;}
+        if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showEditError('Please enter a valid email.');return;}
+        if(!contact || !/^\+?[\d\s-]{7,15}$/.test(contact)){showEditError('Please enter a valid contact number.');return;}
+
+        const fullName = `${fName} ${lName}`;
+        const course = document.getElementById('editCourse').value;
+        const year = document.getElementById('editYear').value;
+        const section = document.getElementById('editSection').value.trim();
+
+        const result = auth.updateStudentProfile({ name: fullName, email, contact, section, course, year });
+
+        if(result.success){
+          document.getElementById('editModal').classList.remove('active');
+          // Update UI without reload
+          document.getElementById('profileName').textContent = fullName;
+          document.getElementById('profileAvatar').textContent = auth.getUserInitials();
+          document.getElementById('profileEmail').textContent = email || 'N/A';
+          document.getElementById('profileContact').textContent = contact || 'N/A';
+          document.getElementById('profileSection').textContent = section || 'N/A';
+          document.getElementById('profileCourse').textContent = `${course} ${year}`.trim();
+          // Also update navbar
+          const userNameEl = document.getElementById('userName');
+          if(userNameEl) userNameEl.textContent = fullName;
+          const userInitEl = document.getElementById('userInitials');
+          if(userInitEl) userInitEl.textContent = auth.getUserInitials();
+          Notification.show('Profile Updated', 'Your changes have been saved successfully!');
+        } else {
+          showEditError(result.message);
+        }
+      });
     });
   </script>
 </body>
