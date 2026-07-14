@@ -698,73 +698,14 @@ body {
   margin-top: 4px;
 }
 
-/* Floating icons */
-.ill-icon {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+/* ===== HERO ILLUSTRATION (SVG) ===== */
+.hero-illustration .ill-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  color: white;
-  animation: float 6s ease-in-out infinite;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-}
-.ill-icon.i1 {
-  top: 0;
-  right: 20px;
-  background: var(--gradient-1);
-  animation-delay: 0s;
-}
-.ill-icon.i2 {
-  bottom: 60px;
-  left: 10px;
-  background: linear-gradient(135deg, #1565C0, #1E88E5);
-  animation-delay: 1.5s;
-  width: 42px; height: 42px;
-  font-size: 1rem;
-}
-.ill-icon.i3 {
-  top: 80px;
-  left: -10px;
-  background: linear-gradient(135deg, #2E7D32, #43A047);
-  animation-delay: 0.8s;
-  width: 38px; height: 38px;
-  font-size: 0.9rem;
-}
-.ill-icon.i4 {
-  bottom: 10px;
-  right: 60px;
-  background: linear-gradient(135deg, #F57F17, #FBC02D);
-  animation-delay: 2s;
-  width: 36px; height: 36px;
-  font-size: 0.85rem;
-}
-
-/* Glowing circles */
-.ill-glow-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(var(--primary-rgb), 0.1);
-  animation: ringPulse 4s ease-in-out infinite;
-}
-.ill-glow-ring.r1 {
-  width: 320px; height: 320px;
-}
-.ill-glow-ring.r2 {
-  width: 400px; height: 400px;
-  animation-delay: 1s;
-}
-.ill-glow-ring.r3 {
-  width: 250px; height: 250px;
-  animation-delay: 0.5s;
-}
-.ill-glow-ring.r4 {
-  width: 480px; height: 480px;
-  animation-delay: 2s;
-  border-color: rgba(var(--primary-rgb), 0.05);
 }
 
 /* ===== FEATURE CARDS ===== */
