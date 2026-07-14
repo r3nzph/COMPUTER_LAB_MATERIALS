@@ -125,7 +125,7 @@
       <h1 class="hero-title reveal">Computer Laboratory<br /><span class="highlight">Borrowing System</span></h1>
       <p class="hero-subtitle reveal">Professional laboratory equipment borrowing and inventory management platform for <strong>Technological University of the Philippines</strong> students.</p>
       <div class="hero-buttons reveal">
-        <a href="borrow.html" class="btn btn-primary btn-glow"><i class="fas fa-clipboard-list"></i> Borrow Equipment</a>
+        <a href="borrow.html" class="btn btn-primary btn-glow" id="heroBorrowBtn"><i class="fas fa-clipboard-list"></i> Borrow Equipment</a>
         <a href="equipments.html" class="btn btn-secondary"><i class="fas fa-search"></i> Browse Inventory</a>
       </div>
     </div>
@@ -232,6 +232,14 @@
 
       loginModal.addEventListener('click', function(e) {
         if (e.target === loginModal) loginModal.classList.remove('active');
+      });
+
+      // Hero borrow button guard
+      document.getElementById('heroBorrowBtn')?.addEventListener('click', function(e) {
+        if (!auth.isLoggedIn() || !auth.isStudent()) {
+          e.preventDefault();
+          loginModal.classList.add('active');
+        }
       });
     });
   </script>

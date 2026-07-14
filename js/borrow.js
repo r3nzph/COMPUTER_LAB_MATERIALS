@@ -93,6 +93,14 @@ class BorrowManager {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
+      // Require login before borrowing
+      if (!auth.isLoggedIn() || !auth.isStudent()) {
+        const modal = document.getElementById('loginRequiredModal');
+        if (modal) modal.classList.add('active');
+        else Notification.show('Login Required', 'You must sign in as a student to borrow equipment.', 'error');
+        return;
+      }
+
       const formData = new FormData(form);
       const studentName = formData.get('studentName')?.trim();
       const officer = formData.get('officer')?.trim();
