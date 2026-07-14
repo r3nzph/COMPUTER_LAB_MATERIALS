@@ -164,12 +164,12 @@ class InventoryManager {
   renderEquipments(container, equipments) {
     if (!container) return;
     if (!equipments || equipments.length === 0) {
-      container.innerHTML = `<div class="no-results" style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;">🔍</div><h3 style="margin-bottom:0.5rem;">No Equipment Found</h3><p>Try adjusting your search or filter.</p></div>`;
+      container.innerHTML = SVG.getEmptyStateHTML('search', 'No Equipment Found', 'Try adjusting your search or filter.');
       return;
     }
     container.innerHTML = equipments.map((item) => `
       <div class="equip-card reveal" data-id="${item.id}">
-        <div class="card-icon"><i class="${this.getIcon(item.category)}"></i></div>
+        <div class="card-icon">${SVG.getEquipIconHTML(item.category, 28)}</div>
         <h3>${item.name}</h3>
         <span class="category-tag">${item.category}</span>
         <div class="card-details">
@@ -186,8 +186,7 @@ class InventoryManager {
   }
 
   getIcon(category) {
-    const icons = { 'Hand Tool': 'fas fa-tools', 'Testing': 'fas fa-microchip', 'Networking': 'fas fa-network-wired', 'Safety': 'fas fa-hard-hat', 'Cleaning': 'fas fa-broom', 'Storage': 'fas fa-database' };
-    return icons[category] || 'fas fa-cog';
+    return SVG.getEquipIconHTML(category, 28);
   }
 
   getStatusClass(status) {
