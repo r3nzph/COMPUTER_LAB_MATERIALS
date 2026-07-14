@@ -42,8 +42,7 @@ class AuthSystem {
 
   // ===== MERGE JSON + LOCALSTORAGE USERS =====
   mergeUsers() {
-    const saved = JSON.parse(localStorage.getItem('registeredStudents')) || [];
-    this.registered = saved;
+    this.registered = Store.getRegisteredStudents();
   }
 
   getAllStudents() {
@@ -51,16 +50,16 @@ class AuthSystem {
   }
 
   saveRegisteredStudents() {
-    localStorage.setItem('registeredStudents', JSON.stringify(this.registered));
+    Store.saveRegisteredStudents(this.registered);
   }
 
   // ===== PASSWORD OVERRIDES FOR SEED USERS =====
   getPasswordOverrides() {
-    return JSON.parse(localStorage.getItem('comlab_passwords')) || {};
+    return Store.getPasswordOverrides();
   }
 
   savePasswordOverrides(overrides) {
-    localStorage.setItem('comlab_passwords', JSON.stringify(overrides));
+    Store.set(STORAGE_KEYS.PASSWORDS, overrides);
   }
 
   getEffectivePassword(studentId, originalPassword) {
@@ -190,7 +189,7 @@ class AuthSystem {
   }
 
   saveSession() {
-    localStorage.setItem('comlabUser', JSON.stringify(this.currentUser));
+    Store.set(STORAGE_KEYS.USER_SESSION, this.currentUser);
   }
 
   // ===== UPDATE PROFILE =====

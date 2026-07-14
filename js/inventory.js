@@ -1,80 +1,34 @@
 /* ============================================
    COMPUTER LABORATORY BORROWING SYSTEM
-   Inventory Management - v3
+   Inventory Management - v4 (Data Layer)
    ============================================ */
 
 class InventoryManager {
   constructor() {
     this.equipments = [];
-    this.borrowedItems = JSON.parse(localStorage.getItem('borrowedItems')) || [];
-    this.borrowHistory = JSON.parse(localStorage.getItem('borrowHistory')) || [];
+    this.borrowHistory = [];
   }
 
-  // ===== LOAD EQUIPMENTS FROM JSON =====
+  // ===== LOAD FROM STORE =====
   async loadEquipments() {
-    try {
-      const response = await fetch('json/equipments.json');
-      if (!response.ok) throw new Error('Failed to load equipments');
-      const data = await response.json();
-      const savedStocks = JSON.parse(localStorage.getItem('equipmentStocks')) || {};
-      this.equipments = data.map((item) => ({
-        ...item,
-        stocks: savedStocks[item.id] ?? item.stocks,
-        status: this.computeStatus(savedStocks[item.id] ?? item.stocks)
-      }));
-      return this.equipments;
-    } catch (error) {
-      console.error('Error loading equipments:', error);
-      this.equipments = this.getFallbackData();
-      return this.equipments;
-    }
+    await Store.init();
+    this.equipments = Store.getEquipments();
+    this.borrowHistory = Store.getBorrowHistory();
+    return this.equipments;
   }
 
-  getFallbackData() {
-    return [
-      { id: 1, name: 'Precision Screwdriver Set', category: 'Hand Tool', stocks: 8, borrowFee: 20, status: 'Available' },
-      { id: 2, name: 'Long Nose Pliers', category: 'Hand Tool', stocks: 12, borrowFee: 15, status: 'Available' },
-      { id: 3, name: 'Wire Cutter', category: 'Hand Tool', stocks: 10, borrowFee: 15, status: 'Available' },
-      { id: 4, name: 'Soldering Iron', category: 'Hand Tool', stocks: 6, borrowFee: 35, status: 'Available' },
-      { id: 5, name: 'Digital Multimeter', category: 'Testing', stocks: 10, borrowFee: 50, status: 'Available' },
-      { id: 6, name: 'PSU Tester', category: 'Testing', stocks: 5, borrowFee: 30, status: 'Available' },
-      { id: 7, name: 'LAN Cable Tester', category: 'Testing', stocks: 7, borrowFee: 25, status: 'Available' },
-      { id: 8, name: 'Crimping Tool', category: 'Networking', stocks: 9, borrowFee: 40, status: 'Available' },
-      { id: 9, name: 'Network Switch', category: 'Networking', stocks: 4, borrowFee: 75, status: 'Available' },
-      { id: 10, name: 'Router', category: 'Networking', stocks: 3, borrowFee: 100, status: 'Available' },
-      { id: 11, name: 'Anti Static Wrist Strap', category: 'Safety', stocks: 15, borrowFee: 10, status: 'Available' },
-      { id: 12, name: 'Safety Goggles', category: 'Safety', stocks: 20, borrowFee: 10, status: 'Available' },
-      { id: 13, name: 'Electric Air Blower', category: 'Cleaning', stocks: 4, borrowFee: 30, status: 'Available' },
-      { id: 14, name: 'Isopropyl Alcohol', category: 'Cleaning', stocks: 10, borrowFee: 15, status: 'Available' },
-      { id: 15, name: 'USB Flash Drive', category: 'Storage', stocks: 25, borrowFee: 25, status: 'Available' }
-    ];
-  }
-
-  computeStatus(stocks) {
-    if (stocks <= 0) return 'Out of Stock';
-    if (stocks <= 3) return 'Low Stock';
-    return 'Available';
-  }
-
-  getEquipment(id) { return this.equipments.find((e) => e.id === id); }
-  getEquipmentByName(name) { return this.equipments.find((e) => e.name === name); }
+  getEquipment(id) { return this.equipments.find(e => e.id === id); }
+  getEquipmentByName(name) { return this.equipments.find(e => e.name.toLowerCase() === name.toLowerCase()); }
 
   updateStock(itemId, delta) {
-    const item = this.equipments.find((e) => e.id === itemId);
-    if (!item) return false;
-    const newStock = item.stocks + delta;
-    if (newStock < 0) return false;
-    item.stocks = newStock;
-    item.status = this.computeStatus(newStock);
-    const savedStocks = JSON.parse(localStorage.getItem('equipmentStocks')) || {};
-    savedStocks[itemId] = newStock;
-    localStorage.setItem('equipmentStocks', JSON.stringify(savedStocks));
-    return true;
+    const success = Store.adjustStock(itemId, delta);
+    if (success) this.loadEquipments();
+    return success;
   }
 
-  // ===== BORROW ITEM (now tracks studentId) =====
+  // ===== BORROW WORKFLOW =====
   borrowItem(studentName, studentId, officer, equipmentId, fee, pickupDate, returnDate, purpose, remarks) {
-    const equipment = this.equipments.find((e) => e.id === equipmentId);
+    const equipment = this.getEquipment(equipmentId);
     if (!equipment || equipment.stocks <= 0) {
       return { success: false, message: 'Equipment is out of stock.' };
     }
@@ -83,7 +37,7 @@ class InventoryManager {
     }
 
     const borrowRecord = {
-      id: 'BRW-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase(),
+      id: Store.generateBorrowId(),
       studentName,
       studentId: studentId || 'GUEST',
       officer,
@@ -98,66 +52,98 @@ class InventoryManager {
       createdAt: new Date().toISOString()
     };
 
-    this.borrowHistory.unshift(borrowRecord);
-    this.saveHistory();
+    Store.addBorrowRecord(borrowRecord);
+    Store.logActivity('Borrow Request', {
+      admin: studentName,
+      equipment: equipment.name,
+      message: `Student ${studentName} requested to borrow ${equipment.name}`
+    });
+    this.loadEquipments();
     return { success: true, data: borrowRecord };
   }
 
   returnItem(borrowId) {
-    const record = this.borrowHistory.find((r) => r.id === borrowId);
+    const record = this.borrowHistory.find(r => r.id === borrowId);
     if (!record) return false;
-    record.status = 'Returned';
+    Store.updateBorrowRecord(borrowId, { status: 'Returned' });
     this.updateStock(record.equipmentId, 1);
-    this.saveHistory();
+    Store.logActivity('Item Returned', {
+      equipment: record.equipment,
+      message: `${record.studentName} returned ${record.equipment}`
+    });
+    this.loadEquipments();
     return true;
   }
 
   approveItem(borrowId) {
-    const record = this.borrowHistory.find((r) => r.id === borrowId);
+    const record = this.borrowHistory.find(r => r.id === borrowId);
     if (!record) return false;
-    record.status = 'Approved';
-    this.saveHistory();
+    Store.updateBorrowRecord(borrowId, { status: 'Approved' });
+    Store.logActivity('Borrow Approved', {
+      equipment: record.equipment,
+      message: `Borrow request by ${record.studentName} for ${record.equipment} was approved`
+    });
+    this.loadEquipments();
     return true;
   }
 
   rejectItem(borrowId) {
-    const record = this.borrowHistory.find((r) => r.id === borrowId);
+    const record = this.borrowHistory.find(r => r.id === borrowId);
     if (!record) return false;
-    record.status = 'Rejected';
-    this.updateStock(record.equipmentId, 1); // return stock
-    this.saveHistory();
+    Store.updateBorrowRecord(borrowId, { status: 'Rejected' });
+    this.updateStock(record.equipmentId, 1);
+    Store.logActivity('Borrow Rejected', {
+      equipment: record.equipment,
+      message: `Borrow request by ${record.studentName} for ${record.equipment} was rejected`
+    });
+    this.loadEquipments();
     return true;
   }
 
   saveHistory() {
-    localStorage.setItem('borrowHistory', JSON.stringify(this.borrowHistory));
+    Store.setBorrowHistory(this.borrowHistory);
   }
 
+  // ===== STATS =====
   getStats() {
-    const total = this.equipments.length;
-    const available = this.equipments.filter((e) => e.status === 'Available').length;
-    const lowStockCount = this.equipments.filter((e) => e.status === 'Low Stock').length;
-    const outOfStock = this.equipments.filter((e) => e.status === 'Out of Stock').length;
-    const borrowed = this.borrowHistory.filter((r) => r.status === 'Pending').length;
-    return { total, available, lowStockCount, outOfStock, borrowed };
+    return Store.getStatistics();
   }
 
-  getCategories() { return [...new Set(this.equipments.map((e) => e.category))]; }
+  getCategories() { return Store.getCategories(); }
 
-  // ===== GET STUDENT-SPECIFIC BORROWS =====
   getStudentBorrows(studentId) {
-    return this.borrowHistory.filter(r => r.studentId === studentId);
+    return Store.getStudentBorrows(studentId);
   }
 
-  // ===== FILTER EQUIPMENTS =====
-  filterEquipments(category, searchText) {
-    let filtered = [...this.equipments];
-    if (category && category !== 'All') filtered = filtered.filter((e) => e.category === category);
+  // ===== FILTER & SORT =====
+  filterEquipments(category, searchText, { archived = false } = {}) {
+    let filtered = this.equipments.filter(e => !!e.archived === !!archived);
+    if (category && category !== 'All') filtered = filtered.filter(e => e.category === category);
     if (searchText) {
       const text = searchText.toLowerCase();
-      filtered = filtered.filter((e) => e.name.toLowerCase().includes(text) || e.category.toLowerCase().includes(text));
+      filtered = filtered.filter(e =>
+        e.name.toLowerCase().includes(text) ||
+        e.category.toLowerCase().includes(text)
+      );
     }
     return filtered;
+  }
+
+  sortEquipments(list, sortBy = 'name', asc = true) {
+    const sorted = [...list].sort((a, b) => {
+      let valA, valB;
+      switch (sortBy) {
+        case 'name': valA = a.name; valB = b.name; break;
+        case 'stocks': valA = a.stocks; valB = b.stocks; break;
+        case 'fee': valA = a.borrowFee; valB = b.borrowFee; break;
+        case 'newest': valA = new Date(a.dateAdded || 0); valB = new Date(b.dateAdded || 0); break;
+        case 'oldest': valA = new Date(a.dateAdded || 0); valB = new Date(b.dateAdded || 0); return asc ? valA - valB : valB - valA;
+        default: valA = a.name; valB = b.name;
+      }
+      if (typeof valA === 'string') return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      return asc ? valA - valB : valB - valA;
+    });
+    return sorted;
   }
 
   // ===== RENDER EQUIPMENT CARDS =====
@@ -167,7 +153,7 @@ class InventoryManager {
       container.innerHTML = SVG.getEmptyStateHTML('search', 'No Equipment Found', 'Try adjusting your search or filter.');
       return;
     }
-    container.innerHTML = equipments.map((item) => `
+    container.innerHTML = equipments.map(item => `
       <div class="equip-card reveal" data-id="${item.id}">
         <div class="card-icon">${SVG.getEquipIconHTML(item.category, 28)}</div>
         <h3>${item.name}</h3>
@@ -181,17 +167,26 @@ class InventoryManager {
       </div>
     `).join('');
     if (window.revealObserver) {
-      document.querySelectorAll('.reveal').forEach((el) => { window.revealObserver.observe(el); });
+      document.querySelectorAll('.reveal').forEach(el => { window.revealObserver.observe(el); });
     }
   }
 
-  getIcon(category) {
-    return SVG.getEquipIconHTML(category, 28);
-  }
+  getIcon(category) { return SVG.getEquipIconHTML(category, 28); }
 
   getStatusClass(status) {
-    const classes = { 'Available': 'available', 'Low Stock': 'low-stock', 'Out of Stock': 'low-stock', 'Borrowed': 'borrowed' };
+    const classes = {
+      'Available': 'available',
+      'Low Stock': 'low-stock',
+      'Out of Stock': 'low-stock',
+      'Borrowed': 'borrowed',
+      'Archived': 'low-stock',
+      'Under Maintenance': 'low-stock'
+    };
     return classes[status] || '';
+  }
+
+  getFallbackData() {
+    return [];
   }
 }
 

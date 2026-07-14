@@ -279,31 +279,35 @@
         </div>
       </div>
 
-      <!-- REQUESTS -->
-      <div class="admin-content-area" id="section-requests">
-        <div class="admin-header"><h1>Borrow <span>Requests</span></h1></div>
-        <div class="admin-section">
-          <div class="admin-table"><table><thead><tr><th>ID</th><th>Student</th><th>Equipment</th><th>Date</th><th>Return</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminRequestsBody">
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:50%;"></div></td><td><div class="skeleton skeleton-text" style="width:60%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:50px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:60%;"></div></td><td><div class="skeleton skeleton-text" style="width:45%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:50px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:40%;"></div></td><td><div class="skeleton skeleton-text" style="width:65%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:50px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
-          </tbody></table></div>
-        </div>
-      </div>
+
 
       <!-- EQUIPMENTS -->
       <div class="admin-content-area" id="section-equipments">
-        <div class="admin-header"><h1>Equipment <span>Management</span></h1><div class="admin-actions"><input type="text" id="adminEquipSearch" placeholder="Search..." /><select id="adminEquipCategory"><option value="All">All</option><option value="Hand Tool">Hand Tools</option><option value="Testing">Testing</option><option value="Networking">Networking</option><option value="Safety">Safety</option><option value="Cleaning">Cleaning</option><option value="Storage">Storage</option></select></div></div>          <div class="admin-section"><div class="admin-table"><table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th></tr></thead><tbody id="adminEquipBody">
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:55%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td></tr>
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:65%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td></tr>
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:45%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td></tr>
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:60%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td></tr>
+        <div class="admin-header"><h1>Equipment <span>Management</span></h1>
+          <div class="admin-actions" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="adminEquipSearch" placeholder="Search equipment..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;" />
+            <select id="adminEquipCategory" style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;">
+              <option value="All">All</option><option value="Hand Tool">Hand Tools</option><option value="Testing">Testing</option><option value="Networking">Networking</option>
+              <option value="Safety">Safety</option><option value="Cleaning">Cleaning</option><option value="Storage">Storage</option>
+            </select>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.78rem;color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" id="showArchived" /> Show Archived
+            </label>
+            <button class="btn-primary" id="btnAddEquip" style="padding:0.45rem 1rem;border-radius:8px;font-size:0.82rem;border:none;color:white;background:var(--gradient-1);cursor:pointer;font-weight:600;font-family:inherit;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+        <div class="admin-section"><div class="admin-table"><table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminEquipBody">
+            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:55%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
           </tbody></table></div></div>
       </div>
 
       <!-- STOCKS -->
       <div class="admin-content-area" id="section-stocks">
-        <div class="admin-header"><h1>Stock <span>Management</span></h1></div>
+        <div class="admin-header"><h1>Stock <span>Management</span></h1>
+          <div class="admin-actions"><input type="text" id="adminStockSearch" placeholder="Search stocks..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;" /></div>
+        </div>
         <div class="admin-cards" id="adminStockCards">
           <div class="admin-card skeleton-card skeleton-fade"><div class="ac-label skeleton skeleton-text short"></div><div class="ac-value skeleton skeleton-text" style="height:22px;width:40%;margin-top:8px;"></div><div class="skeleton-bar"></div></div>
           <div class="admin-card skeleton-card skeleton-fade"><div class="ac-label skeleton skeleton-text short"></div><div class="ac-value skeleton skeleton-text" style="height:22px;width:40%;margin-top:8px;"></div><div class="skeleton-bar"></div></div>
@@ -325,6 +329,21 @@
         </div>
       </div>
 
+      <!-- REQUESTS (full) header -->
+      <div class="admin-content-area" id="section-requests">
+        <div class="admin-header"><h1>Borrow <span>Requests</span></h1>
+          <div class="admin-actions" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <input type="text" id="requestSearch" placeholder="Search requests..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;" />
+            <select id="requestStatusFilter" style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;">
+              <option value="all">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="returned">Returned</option><option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-section"><div class="admin-table"><table><thead><tr><th>ID</th><th>Student</th><th>Equipment</th><th>Date</th><th>Return</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminRequestsBody">
+          <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:50%;"></div></td><td><div class="skeleton skeleton-text" style="width:60%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:50px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
+        </tbody></table></div></div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="admin-content-area" id="section-settings">
         <div class="admin-header"><h1>System <span>Settings</span></h1></div>
@@ -339,270 +358,69 @@
             <div class="form-group"><label>Items per page</label><select id="settingItemsPerPage" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="50">50</option></select></div>
             <div class="form-group"><label>Dashboard refresh</label><select id="settingAutoRefresh" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;"><option value="0">Manual only</option><option value="30">Every 30s</option><option value="60" selected>Every 60s</option><option value="300">Every 5min</option></select></div>
           </div>
-          <div style="display:flex;gap:0.8rem;margin-top:1.5rem;">
+          <div style="display:flex;gap:0.8rem;margin-top:1.5rem;flex-wrap:wrap;">
             <button class="btn btn-primary" id="btnSaveSettings" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;"><i class="fas fa-save"></i> Save Settings</button>
-            <button class="btn" id="btnResetSettings" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;background:rgba(255,23,68,0.06);color:var(--danger);border:1px solid rgba(255,23,68,0.15);font-family:inherit;font-weight:600;cursor:pointer;transition:var(--transition);"><i class="fas fa-undo"></i> Reset to Default</button>
+            <button class="btn" id="btnResetSettings" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;background:rgba(255,23,68,0.06);color:var(--danger);border:1px solid rgba(255,23,68,0.15);font-family:inherit;font-weight:600;cursor:pointer;transition:var(--transition);"><i class="fas fa-undo"></i> Reset Settings</button>
           </div>
+        </div>
+        <div class="admin-section">
+          <h2><i class="fas fa-history"></i> Activity Log</h2>
+          <div class="admin-table"><table><thead><tr><th>Date/Time</th><th>Action</th><th>Equipment</th><th>Admin</th><th>Details</th></tr></thead><tbody id="activityLogBody"></tbody></table></div>
+        </div>
+        <div class="admin-section">
+          <h2><i class="fas fa-exclamation-triangle"></i> Data Management</h2>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.8rem;">Reset all data to factory demo defaults. This will delete all borrowing records, equipment changes, and registered students.</p>
+          <button class="btn" id="btnResetData" style="padding:0.6rem 1.5rem;font-size:0.85rem;border-radius:8px;background:rgba(255,23,68,0.06);color:var(--danger);border:1px solid rgba(255,23,68,0.15);font-family:inherit;font-weight:600;cursor:pointer;transition:var(--transition);"><i class="fas fa-trash-alt"></i> Reset Demo Data</button>
         </div>
       </div>
     </main>
   </div>
 
-  <script src="js/svg-loader.js"></script><script src="js/effects.js"></script><script src="js/inventory.js"></script><script src="js/auth.js"></script>
+  <!-- EQUIPMENT MODAL -->
+  <div class="login-modal" id="equipModal">
+    <div class="login-modal-content" style="max-width:500px;">
+      <button class="login-close" id="equipModalClose">&times;</button>
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div style="font-size:1.3rem;font-weight:800;"><i class="fas fa-tools" style="color:var(--primary);margin-right:8px;"></i> <span id="equipModalTitle">Add Equipment</span></div>
+      </div>
+      <form id="equipForm">
+        <input type="hidden" id="equipFormId" />
+        <div class="form-group"><label>Equipment Name *</label><input type="text" id="equipFormName" placeholder="e.g. Digital Multimeter" required /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+          <div class="form-group"><label>Category *</label>
+            <select id="equipFormCategory" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;">
+              <option value="Hand Tool">Hand Tool</option><option value="Testing">Testing</option><option value="Networking">Networking</option>
+              <option value="Safety">Safety</option><option value="Cleaning">Cleaning</option><option value="Storage">Storage</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Condition</label>
+            <select id="equipFormCondition" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;">
+              <option value="Good">Good</option><option value="Fair">Fair</option><option value="Needs Repair">Needs Repair</option><option value="Damaged">Damaged</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;">
+          <div class="form-group"><label>Stocks *</label><input type="number" id="equipFormStocks" value="5" min="0" /></div>
+          <div class="form-group"><label>Min. Stocks</label><input type="number" id="equipFormMinStocks" value="3" min="0" /></div>
+          <div class="form-group"><label>Borrow Fee (₱)</label><input type="number" id="equipFormFee" value="20" min="0" step="0.5" /></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="equipFormDesc" placeholder="Optional description..." style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;min-height:50px;resize:vertical;"></textarea></div>
+        <div class="edit-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.5rem;text-align:center;"></div>
+        <div style="display:flex;gap:0.8rem;margin-top:0.5rem;">
+          <button type="submit" class="btn-submit" style="flex:1;font-size:0.85rem;"><i class="fas fa-save"></i> Save Equipment</button>
+          <button type="button" id="equipModalCancel" style="padding:0.6rem 1.2rem;border:1px solid #ddd;border-radius:10px;background:white;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--text-secondary);transition:var(--transition);">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/svg-loader.js"></script><script src="js/effects.js"></script><script src="js/data-layer.js"></script><script src="js/inventory.js"></script><script src="js/auth.js"></script><script src="js/admin-dashboard.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-      if (!auth.isLoggedIn() || !auth.isAdmin()) { window.location.href = 'index.html'; return; }
-      await inventory.loadEquipments();
-      const stats = inventory.getStats();
-      const history = inventory.borrowHistory;
-      const pending = history.filter(r => r.status === 'Pending');
-      const revenue = history.reduce((s,r) => s + (r.fee||0), 0);
-
-      document.getElementById('adminProfileId').value = auth.currentUser?.id || '';
-
-      // SIDEBAR TOGGLE (mobile)
-      const sidebar = document.getElementById('adminSidebar');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-      function closeSidebar() {
-        sidebar?.classList.remove('open');
-        sidebarOverlay?.classList.remove('open');
-        const icon = sidebarToggle?.querySelector('i');
-        if (icon) icon.className = 'fas fa-bars';
-        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
+    // Minimal inline script - admin-dashboard.js handles the rest
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!auth.isLoggedIn() || !auth.isAdmin()) {
+        window.location.href = 'index.html';
       }
-
-      function toggleSidebar() {
-        const isOpen = sidebar?.classList.toggle('open');
-        sidebarOverlay?.classList.toggle('open', isOpen);
-        const icon = sidebarToggle?.querySelector('i');
-        if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
-        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', String(isOpen));
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-      }
-
-      sidebarToggle?.addEventListener('click', toggleSidebar);
-      sidebarOverlay?.addEventListener('click', closeSidebar);
-
-      // NAVIGATION
-      document.querySelectorAll('.admin-nav a').forEach(l => l.addEventListener('click', function(e){
-        e.preventDefault();
-        document.querySelectorAll('.admin-nav a').forEach(x=>x.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.admin-content-area').forEach(x=>x.classList.remove('active'));
-        document.getElementById('section-'+this.dataset.section).classList.add('active');
-        closeSidebar(); // close sidebar on mobile after clicking a link
-      }));
-
-      // STATS CARDS
-      document.getElementById('adminStatCards').innerHTML = `
-        <div class="admin-card"><div class="ac-label">Available</div><div class="ac-value green counter" data-target="${stats.available}">0</div></div>
-        <div class="admin-card"><div class="ac-label">Pending</div><div class="ac-value yellow counter" data-target="${pending.length}">0</div></div>
-        <div class="admin-card"><div class="ac-label">Low Stocks</div><div class="ac-value red counter" data-target="${stats.lowStockCount}">0</div></div>
-        <div class="admin-card"><div class="ac-label">Revenue</div><div class="ac-value blue counter" data-target="${revenue}">₱0</div></div>
-        <div class="admin-card"><div class="ac-label">Total Items</div><div class="ac-value counter" data-target="${stats.total}">0</div></div>`;
-
-      document.querySelectorAll('#adminStatCards .counter').forEach(c => {
-        const t = parseInt(c.dataset.target)||0; let cur=0, dur=1500, s=performance.now();
-        function u(now){const p=Math.min((now-s)/dur,1);cur=Math.floor((1-Math.pow(1-p,3))*t);if(c.closest('.admin-card')?.querySelector('.ac-value')===c&&c.closest('.admin-card')?.querySelector('.ac-label')?.textContent==='Revenue')c.innerHTML='₱'+cur;else c.textContent=cur;if(p<1)requestAnimationFrame(u);else{if(c.closest('.admin-card')?.querySelector('.ac-label')?.textContent==='Revenue')c.innerHTML='₱'+t;else c.textContent=t;}}
-        requestAnimationFrame(u);
-      });
-
-      // TIMELINE
-      const tl = document.getElementById('adminTimeline');
-      if(history.length>0) tl.innerHTML = history.slice(0,4).map(r=>`<div class="timeline-item"><div class="tl-title">${r.studentName} borrowed ${r.equipment}</div><div class="tl-sub">Officer: ${r.officer} • ${r.purpose||'N/A'}</div><div class="tl-time">${new Date(r.borrowDate).toLocaleDateString()} • ${r.status}</div></div>`).join('');
-
-      // PENDING REQUESTS (dashboard)
-      const pendingBody = document.getElementById('adminPendingRequests');
-      if(pending.length===0) pendingBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-light);">No pending requests.</td></tr>';
-      else pendingBody.innerHTML = pending.slice(0,5).map(r => `<tr><td data-label="Student">${r.studentName}</td><td data-label="Equipment">${r.equipment}</td><td data-label="Date">${new Date(r.borrowDate).toLocaleDateString()}</td><td data-label="Action"><button class="btn-sm green" onclick="window.approveReq('${r.id}')"><i class="fas fa-check"></i></button> <button class="btn-sm red" onclick="window.rejectReq('${r.id}')"><i class="fas fa-times"></i></button></td></tr>`).join('');
-
-      window.approveReq = (id)=>{const r=history.find(x=>x.id===id);if(r){r.status='Approved';inventory.saveHistory();Notification.show('Approved','Request approved.');location.reload();}};
-      window.rejectReq = (id)=>{const r=history.find(x=>x.id===id);if(r){inventory.rejectItem(id);Notification.show('Rejected','Request rejected, stock returned.');location.reload();}};
-
-      // LOW STOCK ALERTS
-      const alerts = document.getElementById('lowStockAlerts');
-      const low = inventory.equipments.filter(e=>e.status==='Low Stock'||e.status==='Out of Stock');
-      if(low.length>0) alerts.innerHTML = low.map(e=>`<div class="warning-item"><div class="wi-icon" style="background:rgba(255,23,68,0.1);color:var(--danger);"><i class="fas fa-exclamation"></i></div><div style="flex:1;"><strong>${e.name}</strong> — ${e.stocks} left</div></div>`).join('');
-      else alerts.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;">✓ All equipment adequately stocked.</p>';
-
-      // ===== SETTINGS PERSISTENCE =====
-      const SETTINGS_KEY = 'comlab_admin_settings';
-      const defaultSettings = {
-        schoolName: 'Technological University of the Philippines',
-        labName: 'Computer Laboratory - Main',
-        officerName: 'Laboratory Officer',
-        itemsPerPage: '10',
-        autoRefresh: '60'
-      };
-      function loadSettings(){
-        let s;
-        try{s=JSON.parse(localStorage.getItem(SETTINGS_KEY));}catch(e){}
-        if(!s||typeof s!=='object')s={};
-        const merged = {...defaultSettings,...s};
-        document.getElementById('settingSchoolName').value = merged.schoolName;
-        document.getElementById('settingLabName').value = merged.labName;
-        document.getElementById('settingOfficer').value = merged.officerName;
-        document.getElementById('settingItemsPerPage').value = merged.itemsPerPage;
-        document.getElementById('settingAutoRefresh').value = merged.autoRefresh;
-        return merged;
-      }
-      function saveSettings(){
-        const data = {
-          schoolName: document.getElementById('settingSchoolName').value.trim() || defaultSettings.schoolName,
-          labName: document.getElementById('settingLabName').value.trim() || defaultSettings.labName,
-          officerName: document.getElementById('settingOfficer').value.trim() || defaultSettings.officerName,
-          itemsPerPage: document.getElementById('settingItemsPerPage').value,
-          autoRefresh: document.getElementById('settingAutoRefresh').value
-        };
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
-        return data;
-      }
-      function applySettingsToUI(settings){
-        // Update admin header with saved school/lab names
-        const header = document.querySelector('.admin-header h1');
-        if(header){
-          const spans = header.querySelectorAll('span');
-          if(spans.length>0) spans[0].textContent = settings.labName || 'Overview';
-        }
-        // Update page title
-        document.title = `${settings.schoolName} — ${settings.labName}`;
-        // Apply auto-refresh interval
-        const autoSec = parseInt(settings.autoRefresh) || 0;
-        if(window._autoRefreshTimer) clearInterval(window._autoRefreshTimer);
-        if(autoSec>0){
-          window._autoRefreshTimer = setInterval(()=>{
-            location.reload();
-          }, autoSec * 1000);
-        }
-      }
-      const currentSettings = loadSettings();
-      applySettingsToUI(currentSettings);
-
-      document.getElementById('btnSaveSettings').addEventListener('click', function(){
-        const saved = saveSettings();
-        applySettingsToUI(saved);
-        Notification.show('Settings Saved', `Configuration for ${saved.labName} has been saved.`);
-      });
-
-      document.getElementById('btnResetSettings').addEventListener('click', function(){
-        localStorage.removeItem(SETTINGS_KEY);
-        loadSettings();
-        applySettingsToUI(defaultSettings);
-        Notification.show('Reset Complete', 'Settings restored to factory defaults.');
-      });
-
-      // Also set the officer name on the profile input
-      document.getElementById('adminProfileName').value = currentSettings.officerName || auth.getUserName();
-
-      // ===== CHARTS =====
-      const COLORS = {available:'#00c853',lowStock:'#c79100',outOfStock:'#d32f2f',borrowed:'#1e88e5',handTool:'#990000',testing:'#d32f2f',networking:'#1e88e5',safety:'#c79100',cleaning:'#00c853',storage:'#7c4dff'};
-
-      function renderEquipStatusChart(){
-        const equip = inventory.equipments;
-        const byStatus = {Available:0,'Low Stock':0,'Out of Stock':0};
-        const borrowed = inventory.borrowHistory.filter(r=>r.status==='Approved').length;
-        equip.forEach(e=>{if(byStatus.hasOwnProperty(e.status))byStatus[e.status]++;});
-        const data = [{label:'Available',value:byStatus.Available,color:COLORS.available},{label:'Low Stock',value:byStatus['Low Stock'],color:COLORS.lowStock},{label:'Out of Stock',value:byStatus['Out of Stock'],color:COLORS.outOfStock},{label:'Borrowed',value:borrowed,color:COLORS.borrowed}].filter(d=>d.value>0);
-        if(data.length===0){document.getElementById('equipStatusChart').innerHTML='<div class="chart-placeholder" style="padding:2rem;">No equipment data</div>';document.getElementById('equipChartLegend').innerHTML='';return;}
-        const total = data.reduce((s,d)=>s+d.value,0);
-        const cx=130,cy=110,r=85,thick=28;
-        let svg = `<svg viewBox="0 0 260 220"><g transform="translate(${cx},${cy})">`;
-        let startAngle = -Math.PI/2;
-        data.forEach((d,i)=>{
-          const angle = (d.value/total)*2*Math.PI;
-          const endAngle = startAngle+angle;
-          const x1=Math.cos(startAngle)*(r+thick/2),y1=Math.sin(startAngle)*(r+thick/2);
-          const x2=Math.cos(endAngle)*(r+thick/2),y2=Math.sin(endAngle)*(r+thick/2);
-          const large = angle>Math.PI?1:0;
-          svg += `<path d="M ${x1} ${y1} A ${r+thick/2} ${r+thick/2} 0 ${large} 1 ${x2} ${y2} L ${Math.cos(endAngle)*(r-thick/2)} ${Math.sin(endAngle)*(r-thick/2)} A ${r-thick/2} ${r-thick/2} 0 ${large} 0 ${Math.cos(startAngle)*(r-thick/2)} ${Math.sin(startAngle)*(r-thick/2)} Z" fill="${d.color}" class="chart-donut-segment" data-label="${d.label}" data-value="${d.value}"><title>${d.label}: ${d.value}</title></path>`;
-          const midAngle = startAngle+angle/2;
-          const lx=Math.cos(midAngle)*(r+thick+16),ly=Math.sin(midAngle)*(r+thick+16);
-          svg += `<text x="${lx}" y="${ly}" font-size="0.7rem" fill="${d.color}" text-anchor="middle" dominant-baseline="middle" font-weight="700">${Math.round((d.value/total)*100)}%</text>`;
-          startAngle = endAngle;
-        });
-        svg += `<text class="chart-center-text" y="-4">${total}</text><text class="chart-center-label" y="16">Total</text></g></svg>`;
-        document.getElementById('equipStatusChart').innerHTML = svg;
-        const legend = document.getElementById('equipChartLegend');
-        legend.innerHTML = data.map(d=>`<span class="legend-item"><span class="legend-dot" style="background:${d.color}"></span>${d.label} (${d.value})</span>`).join('');
-      }
-
-      function renderBorrowTrendChart(){
-        const history = inventory.borrowHistory;
-        const days = [];
-        const today = new Date();
-        for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push({date:d,label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),count:0});}
-        history.forEach(r=>{
-          const d = new Date(r.borrowDate);
-          const match = days.find(x=>x.date.toDateString()===d.toDateString());
-          if(match)match.count++;
-        });
-        const max = Math.max(1,...days.map(d=>d.count));
-        const w=280,h=200,barW=28,gap=8,padL=10,padR=10,padT=20,padB=30;
-        const startX = padL;
-        let svg = `<svg viewBox="0 0 ${w} ${h}" style="max-width:100%;">`;
-        // Grid lines
-        for(let i=0;i<=4;i++){
-          const y = padT+((h-padT-padB)/4)*i;
-          svg += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="rgba(var(--primary-rgb),0.06)" stroke-width="1"/>`;
-          svg += `<text x="${padL-4}" y="${y+3}" font-size="0.6rem" fill="var(--text-light)" text-anchor="end">${Math.round(max*(1-i/4))}</text>`;
-        }
-        // Bars
-        days.forEach((d,i)=>{
-          const x = startX+i*(barW+gap);
-          const barH = (d.count/max)*(h-padT-padB);
-          const y = padT + (h-padT-padB) - barH;
-          const color = d.count>0?'#990000':'rgba(var(--primary-rgb),0.12)';
-          svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH||2}" rx="4" fill="${color}" class="chart-bar" data-day="${d.label}" data-count="${d.count}"><title>${d.label}: ${d.count} borrows</title></rect>`;
-          if(d.count>0) svg += `<text class="chart-bar-value" x="${x+barW/2}" y="${y-6}" fill="#990000">${d.count}</text>`;
-          svg += `<text class="chart-bar-label" x="${x+barW/2}" y="${padT+(h-padT-padB)+16}">${d.label}</text>`;
-        });
-        svg += `<line x1="${padL}" y1="${padT+(h-padT-padB)}" x2="${w-padR}" y2="${padT+(h-padT-padB)}" stroke="rgba(var(--primary-rgb),0.08)" stroke-width="1"/>`;
-        svg += '</svg>';
-        document.getElementById('borrowTrendChart').innerHTML = svg;
-      }
-
-      renderEquipStatusChart();
-      renderBorrowTrendChart();
-
-      // TODAY WIDGET
-      const today = new Date();
-      document.getElementById('todayWidget').textContent = today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-
-      // REQUESTS TABLE
-      function renderRequests(data=history){
-        const body = document.getElementById('adminRequestsBody');
-        if(data.length===0){body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">No requests found.</td></tr>';return;}
-        body.innerHTML = data.map(r=>`<tr><td data-label="ID" style="font-size:0.75rem;font-family:monospace;">${r.id}</td><td data-label="Student">${r.studentName}</td><td data-label="Equipment">${r.equipment}</td><td data-label="Date">${new Date(r.borrowDate).toLocaleDateString()}</td><td data-label="Return">${new Date(r.returnDate).toLocaleDateString()}</td><td data-label="Status"><span class="status-pill ${r.status==='Pending'?'pending':r.status==='Returned'?'returned':'approved'}">${r.status}</span></td><td data-label="Action" style="display:flex;gap:4px;">${r.status==='Pending'?`<button class="btn-sm green" onclick="window.approveReq('${r.id}')"><i class="fas fa-check"></i></button><button class="btn-sm red" onclick="window.rejectReq('${r.id}')"><i class="fas fa-times"></i></button>`:r.status==='Approved'?`<button class="btn-sm blue" onclick="window.returnReq('${r.id}')"><i class="fas fa-undo"></i></button>`:'<span style="color:var(--text-light);font-size:0.75rem;">Done</span>'}</td></tr>`).join('');
-      }
-      renderRequests();
-      window.returnReq = (id)=>{inventory.returnItem(id);Notification.show('Returned','Equipment returned & stock updated.');renderRequests();};
-
-      // EQUIPMENTS TABLE
-      function renderEquips(data=inventory.equipments){
-        document.getElementById('adminEquipBody').innerHTML = data.map(e=>`<tr><td data-label="ID">${String(e.id).padStart(2,'0')}</td><td data-label="Name"><strong>${e.name}</strong></td><td data-label="Category">${e.category}</td><td data-label="Stocks" style="color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};font-weight:700;">${e.stocks}</td><td data-label="Fee">₱${e.borrowFee}</td><td data-label="Status"><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
-      }
-      renderEquips();
-      document.getElementById('adminEquipSearch').addEventListener('input', function(){
-        const t=this.value.toLowerCase(),cat=document.getElementById('adminEquipCategory').value;
-        let f=inventory.equipments; if(cat!=='All')f=f.filter(e=>e.category===cat); if(t)f=f.filter(e=>e.name.toLowerCase().includes(t)); renderEquips(f);
-      });
-      document.getElementById('adminEquipCategory').addEventListener('change', function(){document.getElementById('adminEquipSearch').dispatchEvent(new Event('input'));});
-
-      // STOCK CARDS
-      document.getElementById('adminStockCards').innerHTML = inventory.equipments.map(e=>`
-        <div class="admin-card"><div class="ac-label">${e.name}</div><div class="ac-value" style="font-size:1.2rem;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};">${e.stocks} units</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(e.stocks/25)*100)}%;background:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'};"></div></div><div style="font-size:0.72rem;color:var(--text-light);margin-top:0.3rem;">₱${e.borrowFee}/item</div></div>`).join('');
-
-      // MEMBERS
-      document.getElementById('adminMembersGrid').innerHTML = [
-        {i:'JS',n:'John Santos',r:'Laboratory Officer'},
-        {i:'MC',n:'Maria Cruz',r:'Student Assistant'},
-        {i:'AR',n:'Alex Reyes',r:'Developer'},
-        {i:'SL',n:'Sarah Lim',r:'Secretary'},
-        {i:'DT',n:'David Tan',r:'Treasurer'}
-      ].map(m=>`<div class="member-card"><div class="member-avatar" style="background:var(--gradient-1);"><span>${m.i}</span><div class="avatar-ring"></div></div><h3>${m.n}</h3><div class="role">${m.r}</div></div>`).join('');
     });
   </script>
 </body>

@@ -208,6 +208,7 @@
 
   <script src="js/svg-loader.js"></script>
   <script src="js/effects.js"></script>
+  <script src="js/data-layer.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/borrow.js"></script>
@@ -246,20 +247,26 @@
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
       await inventory.loadEquipments();
+      const stats = Store.getStatistics();
+
+      // Featured equipment: show latest available items
       const grid = document.getElementById('featuredEquipGrid');
-      inventory.renderEquipments(grid, inventory.equipments.slice(0, 6));
-      const stats = inventory.getStats();
-      const pending = inventory.borrowHistory.filter(r => r.status === 'Pending').length;
+      const available = inventory.equipments.filter(e => e.status === 'Available');
+      const featured = available.length >= 6 ? available.slice(0, 6) : inventory.equipments.filter(e => !e.archived).slice(0, 6);
+      inventory.renderEquipments(grid, featured);
+
+      // Homepage stat counters - LIVE from Store
+      const statTargets = {
+        'Available Equipments': stats.available,
+        'Total Borrowed': stats.pending + stats.approved,
+        'Lab Officers': 6,
+        'Registered Students': stats.registeredStudents,
+        'Active Requests': stats.pending
+      };
 
       document.querySelectorAll('.stats-section .counter').forEach(c => {
         const id = c.closest('.stat-item')?.querySelector('.stat-label')?.textContent?.trim();
-        let target = 0;
-        if (id === 'Available Equipments') target = stats.available;
-        else if (id === 'Total Borrowed') target = pending;
-        else if (id === 'Lab Officers') target = 6;
-        else if (id === 'Registered Students') target = 8;
-        else if (id === 'Active Requests') target = pending;
-        c.setAttribute('data-target', target);
+        c.setAttribute('data-target', statTargets[id] || 0);
       });
 
       document.querySelectorAll('.stats-section .counter').forEach(counter => {
