@@ -111,9 +111,6 @@
   .navbar { padding: 0 1rem; height: 64px; }
   .nav-links { top: 64px; }
   .nav-logo { font-size: 1.2rem; }
-  .nav-user .user-name { font-size: 0.75rem; }
-  .nav-user { padding: 0.2rem 0.5rem 0.2rem 0.2rem; }
-
   .hero-title { font-size: 1.8rem; }
   .hero-illustration { height: 250px; }
   .ill-monitor { width: 170px; height: 110px; }

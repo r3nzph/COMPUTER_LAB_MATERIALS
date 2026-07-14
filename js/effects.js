@@ -210,38 +210,6 @@ class LoadingScreen {
   }
 }
 
-// ===== LIVE CLOCK =====
-class LiveClock {
-  constructor() {
-    this.clockElements = document.querySelectorAll('.nav-clock, .live-clock');
-    this.init();
-  }
-
-  init() {
-    this.update();
-    setInterval(() => this.update(), 1000);
-  }
-
-  update() {
-    const now = new Date();
-    const options = {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    };
-    const dateStr = now.toLocaleDateString('en-US', options);
-
-    this.clockElements.forEach((el) => {
-      el.textContent = dateStr;
-    });
-  }
-}
-
 // ===== NAVBAR =====
 class Navbar {
   constructor() {

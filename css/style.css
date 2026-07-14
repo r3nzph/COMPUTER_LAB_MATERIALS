@@ -1665,7 +1665,7 @@ tbody td {
 .btn, .btn-primary, .btn-secondary, .btn-submit,
 .filter-btn, .btn-add, .btn-view-more, .btn-sm,
 .btn-login-outline, .btn-register-solid, .modal-btn,
-.btn-login-nav, .btn-glow {
+.btn-glow {
   position: relative;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -1675,11 +1675,11 @@ tbody td {
 .btn:active, .btn-primary:active, .btn-secondary:active,
 .btn-submit:active, .filter-btn:active, .btn-add:active,
 .btn-sm:active, .btn-login-outline:active, .btn-register-solid:active,
-.modal-btn:active, .btn-login-nav:active {
+.modal-btn:active {
   transition: transform 0.1s ease;
 }
 .btn-primary:active, .btn-submit:active, .btn-register-solid:active,
-.modal-btn:active, .btn-login-nav:active {
+.modal-btn:active {
   box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2) !important;
   transform: scale(0.96);
 }
