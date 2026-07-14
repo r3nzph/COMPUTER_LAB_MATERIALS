@@ -180,7 +180,7 @@ class AuthSystem {
   // ===== LOGOUT =====
   logout() {
     this.currentUser = null;
-    localStorage.removeItem('comlabUser');
+    Store.set(STORAGE_KEYS.USER_SESSION, null);
     this.updateUI();
     Notification.show('Logged Out', 'You have been logged out successfully.', 'success');
     if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('profile.html') || window.location.pathname.includes('stocks.html')) {
