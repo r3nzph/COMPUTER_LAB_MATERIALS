@@ -211,11 +211,13 @@ class AdminDashboard {
   approveReq(id) {
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
+    // Decrease equipment stock by 1 on approval
+    Store.adjustStock(r.equipmentId, -1);
     Store.updateBorrowRecord(id, { status: 'Approved' });
     Store.logActivity('Borrow Approved', {
       admin: auth.getUserName(),
       equipment: r.equipment,
-      message: `Approved borrow request by ${r.studentName} for ${r.equipment}`
+      message: `Approved borrow request by ${r.studentName} for ${r.equipment} (stock -1)`
     });
     Notification.show('Approved', `Request by ${r.studentName} has been approved.`);
     this.refreshAll();
@@ -224,12 +226,12 @@ class AdminDashboard {
   rejectReq(id) {
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
+    // No stock adjustment — stock was never decreased on Pending status.
     Store.updateBorrowRecord(id, { status: 'Rejected' });
-    Store.adjustStock(r.equipmentId, 1);
     Store.logActivity('Borrow Rejected', {
       admin: auth.getUserName(),
       equipment: r.equipment,
-      message: `Rejected borrow request by ${r.studentName} for ${r.equipment} (stock returned)`
+      message: `Rejected borrow request by ${r.studentName} for ${r.equipment}`
     });
     Notification.show('Rejected', `Request by ${r.studentName} has been rejected.`);
     this.refreshAll();
@@ -238,12 +240,13 @@ class AdminDashboard {
   returnReq(id) {
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
-    Store.updateBorrowRecord(id, { status: 'Returned' });
+    // Increase stock back by 1 when equipment is returned
     Store.adjustStock(r.equipmentId, 1);
+    Store.updateBorrowRecord(id, { status: 'Returned' });
     Store.logActivity('Item Returned', {
       admin: auth.getUserName(),
       equipment: r.equipment,
-      message: `${r.studentName} returned ${r.equipment} (stock updated to ${(Store.getEquipment(r.equipmentId)?.stocks || 0)})`
+      message: `${r.studentName} returned ${r.equipment} (stock +1)`
     });
     Notification.show('Returned', `${r.equipment} has been marked as returned.`);
     this.refreshAll();
@@ -586,26 +589,101 @@ class AdminDashboard {
     if (search) search.addEventListener('input', () => this.renderStocks());
   }
 
-  // ===== MEMBERS =====
+  // ===== MEMBERS (Registered Students) =====
   renderMembers() {
-    const grid = document.getElementById('adminMembersGrid');
-    if (!grid) return;
-    const members = [
-      { i: 'JS', n: 'John Santos', r: 'Laboratory Officer', desc: 'Oversees all laboratory operations and equipment borrowing.' },
-      { i: 'MC', n: 'Maria Cruz', r: 'Student Assistant', desc: 'Assists students during borrowing and maintains records.' },
-      { i: 'AR', n: 'Alex Reyes', r: 'System Developer', desc: 'Designed and developed the COMLAB system.' },
-      { i: 'SL', n: 'Sarah Lim', r: 'Secretary', desc: 'Handles documentation and administrative tasks.' },
-      { i: 'DT', n: 'David Tan', r: 'Treasurer', desc: 'Monitors borrowing fees and financial records.' },
-      { i: 'AG', n: 'Anna Garcia', r: 'Laboratory Officer', desc: 'Oversees safety protocols and equipment maintenance.' }
-    ];
-    grid.innerHTML = members.map(m => `
-      <div class="member-card reveal">
-        <div class="member-avatar" style="background:var(--gradient-1);"><span>${m.i}</span><div class="avatar-ring"></div></div>
-        <h3>${m.n}</h3>
-        <div class="role">${m.r}</div>
-        <p style="font-size:0.82rem;color:var(--text-secondary);margin:0.5rem 0;">${m.desc}</p>
-      </div>
-    `).join('');
+    const container = document.getElementById('adminMembersContainer');
+    if (!container) return;
+
+    const students = Store.getAllStudents();
+    const borrowHistory = Store.getBorrowHistory();
+    const searchText = (document.getElementById('memberStudentSearch')?.value || '').toLowerCase();
+
+    let data = students.map(s => {
+      const borrows = borrowHistory.filter(r => r.studentId === s.id);
+      const active = borrows.filter(r => r.status === 'Pending' || r.status === 'Approved');
+      return {
+        id: s.id,
+        name: s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+        course: s.course || 'N/A',
+        year: s.year || 'N/A',
+        section: s.section || 'N/A',
+        email: s.email || 'N/A',
+        contact: s.contact || 'N/A',
+        borrowCount: borrows.length,
+        activeCount: active.length,
+        status: active.length > 0 ? 'Active' : 'Clear'
+      };
+    });
+
+    if (searchText) {
+      data = data.filter(s =>
+        s.name.toLowerCase().includes(searchText) ||
+        s.id.toLowerCase().includes(searchText) ||
+        s.course.toLowerCase().includes(searchText)
+      );
+    }
+
+    // Sort: active borrowers first, then alphabetical
+    data.sort((a, b) => b.activeCount - a.activeCount || a.name.localeCompare(b.name));
+
+    if (data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">👥</div><h3 style="margin-bottom:0.3rem;">No Students Found</h3><p>No registered students yet.</p></div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="admin-table"><table>
+        <thead><tr>
+          <th>Student</th><th>ID</th><th>Course</th><th>Year</th><th>Section</th><th>Borrows</th><th>Status</th><th>Action</th>
+        </tr></thead>
+        <tbody>${data.map(s => `
+          <tr>
+            <td data-label="Student"><div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;flex-shrink:0;">${s.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}</div>
+              <strong>${s.name}</strong>
+            </div></td>
+            <td data-label="ID" style="font-family:monospace;font-size:0.78rem;">${s.id}</td>
+            <td data-label="Course">${s.course}</td>
+            <td data-label="Year">${s.year}</td>
+            <td data-label="Section">${s.section}</td>
+            <td data-label="Borrows"><span style="font-weight:700;">${s.borrowCount}</span> <span style="font-size:0.75rem;color:${s.activeCount > 0 ? '#c79100' : 'var(--text-light)'};">(${s.activeCount} active)</span></td>
+            <td data-label="Status"><span class="status-pill ${s.status === 'Active' ? 'pending' : 'returned'}">${s.status}</span></td>
+            <td data-label="Action">
+              <button class="btn-sm red" onclick="admin.deleteMember('${s.id}')" title="Remove student"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('')}</tbody>
+      </table></div>
+      <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">${data.length} student${data.length !== 1 ? 's' : ''} registered</div>
+    `;
+  }
+
+  deleteMember(id) {
+    const student = Store.getAllStudents().find(s => s.id === id);
+    if (!student) return;
+
+    // Check if this is a seed student (from students.json) — cannot modify
+    const seedStudentIds = (Store.get(STORAGE_KEYS.STUDENTS) || []).map(s => s.id);
+    if (seedStudentIds.includes(id)) {
+      Notification.show('Cannot Remove', 'Demo student accounts cannot be removed. Register a new student to test deletion.', 'error');
+      return;
+    }
+
+    const activeBorrows = Store.getBorrowHistory().filter(r => r.studentId === id && (r.status === 'Pending' || r.status === 'Approved'));
+    if (activeBorrows.length > 0) {
+      Notification.show('Cannot Delete', `${student.name} has active borrow requests.`, 'error');
+      return;
+    }
+    if (!confirm(`Remove "${student.name}" (${id}) from the system?`)) return;
+    // Remove from registered students only
+    const updated = Store.getRegisteredStudents().filter(s => s.id !== id);
+    Store.saveRegisteredStudents(updated);
+    Store.logActivity('Student Removed', {
+      admin: auth.getUserName(),
+      message: `Removed student ${student.name} (${id}) from the system`
+    });
+    Notification.show('Removed', `${student.name} has been removed.`);
+    this.refreshAll();
   }
 
   // ===== CHARTS =====
@@ -792,4 +870,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setTimeout(() => admin.setupRequestSearch(), 100);
   setTimeout(() => admin.setupEquipmentSearch(), 100);
   setTimeout(() => admin.setupStockActions(), 100);
+  // Member/student search
+  setTimeout(() => {
+    const memberSearch = document.getElementById('memberStudentSearch');
+    if (memberSearch) memberSearch.addEventListener('input', () => admin.renderMembers());
+  }, 100);
 });

@@ -319,13 +319,19 @@
 
       <!-- MEMBERS -->
       <div class="admin-content-area" id="section-members">
-        <div class="admin-header"><h1>Laboratory <span>Members</span></h1></div>
-        <div class="members-grid" id="adminMembersGrid" style="max-width:100%;">
-          <div class="member-card skeleton-fade"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto;"></div><div class="skeleton skeleton-text" style="width:55%;margin:10px auto 6px;"></div><div class="skeleton skeleton-text short" style="margin:0 auto;"></div></div>
-          <div class="member-card skeleton-fade"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto;"></div><div class="skeleton skeleton-text" style="width:60%;margin:10px auto 6px;"></div><div class="skeleton skeleton-text short" style="margin:0 auto;"></div></div>
-          <div class="member-card skeleton-fade"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto;"></div><div class="skeleton skeleton-text" style="width:45%;margin:10px auto 6px;"></div><div class="skeleton skeleton-text short" style="margin:0 auto;"></div></div>
-          <div class="member-card skeleton-fade"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto;"></div><div class="skeleton skeleton-text" style="width:50%;margin:10px auto 6px;"></div><div class="skeleton skeleton-text short" style="margin:0 auto;"></div></div>
-          <div class="member-card skeleton-fade"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto;"></div><div class="skeleton skeleton-text" style="width:55%;margin:10px auto 6px;"></div><div class="skeleton skeleton-text short" style="margin:0 auto;"></div></div>
+        <div class="admin-header"><h1>Registered <span>Students</span></h1>
+          <div class="admin-actions">
+            <input type="text" id="memberStudentSearch" placeholder="Search students..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;" />
+          </div>
+        </div>
+        <div class="admin-section" id="adminMembersContainer">
+          <!-- Rendered by renderMembers() -->
+          <div class="skeleton-fade" style="padding:1rem;">
+            <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:30%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
+            <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:30%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
+            <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:25%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
+            <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:35%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
+          </div>
         </div>
       </div>
 

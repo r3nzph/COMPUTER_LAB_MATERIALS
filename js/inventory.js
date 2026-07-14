@@ -27,13 +27,11 @@ class InventoryManager {
   }
 
   // ===== BORROW WORKFLOW =====
+  // Stock is decreased on APPROVAL, not on creation of Pending request.
   borrowItem(studentName, studentId, officer, equipmentId, fee, pickupDate, returnDate, purpose, remarks) {
     const equipment = this.getEquipment(equipmentId);
     if (!equipment || equipment.stocks <= 0) {
       return { success: false, message: 'Equipment is out of stock.' };
-    }
-    if (!this.updateStock(equipmentId, -1)) {
-      return { success: false, message: 'Failed to update stock.' };
     }
 
     const borrowRecord = {
@@ -76,22 +74,25 @@ class InventoryManager {
   }
 
   approveItem(borrowId) {
+    // Stock decrease happens here — on admin approval
     const record = this.borrowHistory.find(r => r.id === borrowId);
     if (!record) return false;
+    // Decrease stock by 1
+    this.updateStock(record.equipmentId, -1);
     Store.updateBorrowRecord(borrowId, { status: 'Approved' });
     Store.logActivity('Borrow Approved', {
       equipment: record.equipment,
-      message: `Borrow request by ${record.studentName} for ${record.equipment} was approved`
+      message: `Borrow request by ${record.studentName} for ${record.equipment} was approved (stock -1)`
     });
     this.loadEquipments();
     return true;
   }
 
   rejectItem(borrowId) {
+    // Stock is never decreased on Pending, so no stock adjustment needed on rejection.
     const record = this.borrowHistory.find(r => r.id === borrowId);
     if (!record) return false;
     Store.updateBorrowRecord(borrowId, { status: 'Rejected' });
-    this.updateStock(record.equipmentId, 1);
     Store.logActivity('Borrow Rejected', {
       equipment: record.equipment,
       message: `Borrow request by ${record.studentName} for ${record.equipment} was rejected`
