@@ -47,6 +47,24 @@ class StorageManager {
     // Only seed if this is a fresh localStorage
     if (localStorage.getItem(STORAGE_KEYS.EQUIPMENTS)) return;
 
+    const FALLBACK_EQUIPMENTS = [
+      { name: 'Precision Screwdriver Set', category: 'Hand Tool', stocks: 8, borrowFee: 20, status: 'Available' },
+      { name: 'Long Nose Pliers', category: 'Hand Tool', stocks: 6, borrowFee: 15, status: 'Available' },
+      { name: 'Wire Cutter', category: 'Hand Tool', stocks: 7, borrowFee: 15, status: 'Available' },
+      { name: 'Soldering Iron', category: 'Hand Tool', stocks: 5, borrowFee: 25, status: 'Available' },
+      { name: 'Digital Multimeter', category: 'Testing', stocks: 10, borrowFee: 50, status: 'Available' },
+      { name: 'PSU Tester', category: 'Testing', stocks: 4, borrowFee: 40, status: 'Available' },
+      { name: 'LAN Cable Tester', category: 'Testing', stocks: 6, borrowFee: 30, status: 'Available' },
+      { name: 'Crimping Tool', category: 'Networking', stocks: 5, borrowFee: 35, status: 'Available' },
+      { name: 'Network Switch', category: 'Networking', stocks: 3, borrowFee: 60, status: 'Available' },
+      { name: 'Router', category: 'Networking', stocks: 2, borrowFee: 80, status: 'Available' },
+      { name: 'Anti-Static Wrist Strap', category: 'Safety', stocks: 10, borrowFee: 10, status: 'Available' },
+      { name: 'Safety Goggles', category: 'Safety', stocks: 12, borrowFee: 15, status: 'Available' },
+      { name: 'Electric Air Blower', category: 'Cleaning', stocks: 4, borrowFee: 30, status: 'Available' },
+      { name: 'Isopropyl Alcohol', category: 'Cleaning', stocks: 8, borrowFee: 10, status: 'Available' },
+      { name: 'USB Flash Drive', category: 'Storage', stocks: 15, borrowFee: 20, status: 'Available' }
+    ];
+
     try {
       const resp = await fetch('json/equipments.json');
       const equipData = await resp.json();
@@ -59,8 +77,16 @@ class StorageManager {
         dateAdded: new Date().toISOString()
       })));
     } catch (e) {
-      console.warn('DataLayer: Using fallback equipments');
-      this.setEquipments([]);
+      console.warn('DataLayer: Fetch failed, using inline fallback equipments');
+      this.setEquipments(FALLBACK_EQUIPMENTS.map(e => ({
+        ...e,
+        id: this.getNextEquipId(),
+        minStocks: 3,
+        condition: 'Good',
+        description: '',
+        archived: false,
+        dateAdded: new Date().toISOString()
+      })));
     }
 
     try {

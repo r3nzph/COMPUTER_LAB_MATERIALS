@@ -58,7 +58,7 @@
     .warning-item{display:flex;align-items:center;gap:8px;padding:0.5rem 0;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-size:0.85rem;}
     .warning-item .wi-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
     /* Charts */
-    .admin-charts-row{margin-bottom:0;grid-template-columns:1fr 1fr!important;}
+    .admin-charts-row{margin-bottom:0;grid-template-columns:1fr 1fr;}
     .chart-container{position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;}
     .chart-container svg{width:100%;max-width:100%;height:auto;overflow:visible;}
     .chart-container .chart-placeholder{color:var(--text-light);font-size:0.85rem;}
@@ -106,6 +106,7 @@
       .admin-main{margin-left:0;padding:1rem;}
       .admin-cards{grid-template-columns:repeat(2,1fr);}
       .admin-grid{grid-template-columns:1fr;}
+      .admin-charts-row{grid-template-columns:1fr!important;}
     }
 
     /* ===== COLLAPSIBLE SIDEBAR (phones) ===== */
@@ -141,12 +142,14 @@
       backdrop-filter: blur(4px);
       z-index: 98;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease, display 0s 0.3s;
       pointer-events: none;
     }
     .admin-sidebar-overlay.open {
+      display: block;
       opacity: 1;
       pointer-events: auto;
+      transition: opacity 0.3s ease, display 0s 0s;
     }
 
     @media(max-width:767px){
@@ -194,11 +197,32 @@
       .admin-sidebar-overlay.open {
         display: block;
       }
+      .admin-cards { grid-template-columns: repeat(2,1fr); gap: 0.6rem; }
+      .admin-card { padding: 0.8rem; }
+      .admin-card .ac-value { font-size: 1.4rem; }
 
       .admin-main {
         margin-left: 0;
         padding: 1rem 0.8rem;
       }
+      .admin-header { flex-direction: column; text-align: center; }
+      .admin-header .admin-actions { width: 100%; }
+      .admin-header .admin-actions input,
+      .admin-header .admin-actions select,
+      .admin-header .admin-actions label { width: 100%; }
+      .admin-actions select, .admin-actions label { width: auto; }
+    }
+
+    @media(max-width:480px){
+      .admin-cards { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+      .admin-card { padding: 0.7rem; }
+      .admin-card .ac-value { font-size: 1.2rem; }
+      .admin-card .ac-label { font-size: 0.7rem; }
+      .admin-main { padding: 0.8rem 0.5rem; }
+      .admin-section { padding: 0.8rem; }
+      .admin-section h2 { font-size: 0.9rem; }
+      .admin-header h1 { font-size: 1.2rem; }
+      .chart-container { min-height: 180px; }
     }
   </style>
 </head>
