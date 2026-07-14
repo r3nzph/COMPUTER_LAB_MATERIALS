@@ -1,7 +1,20 @@
 /* ============================================
-   COMLAB System - Central Data Layer v1
-   Single source of truth for all application data
+   COMLAB System - Central Data Layer v2
+   Single source of truth + Custom Event Bus
    ============================================ */
+
+// ===== EVENT BUS =====
+// All Store mutation methods dispatch custom events so every page
+// can auto-update without manual refresh or async coordination.
+const StoreEvents = {
+  INVENTORY_CHANGED: 'comlab:inventoryChanged',
+  BORROW_CHANGED: 'comlab:borrowChanged',
+  STUDENTS_CHANGED: 'comlab:studentsChanged',
+  ACTIVITY_LOGGED: 'comlab:activityLogged',
+  SETTINGS_CHANGED: 'comlab:settingsChanged',
+  AUTH_CHANGED: 'comlab:authChanged',
+  DATA_CHANGED: 'comlab:dataChanged'  // generic — fires on every change
+};
 
 const STORAGE_KEYS = {
   EQUIPMENTS: 'comlab_equipments',
@@ -81,11 +94,24 @@ class StorageManager {
     this._cache[key] = data;
   }
 
+  // ===== EVENTS =====
+  // Only emit from high-level methods (addEquipment, updateEquipment, etc.).
+  // setEquipments / setBorrowHistory / setActivityLog are pure persistence methods
+  // called internally — they do NOT emit events to avoid double-firing.
+  _emit(eventName, detail = {}) {
+    try {
+      document.dispatchEvent(new CustomEvent(eventName, { bubbles: true, detail }));
+    } catch (e) {
+      // Silent fail — events are non-critical
+    }
+  }
+
   // ===== EQUIPMENTS =====
   getEquipments() {
     return this.get(STORAGE_KEYS.EQUIPMENTS) || [];
   }
 
+  // Pure persistence — no event emission (callers emit)
   setEquipments(list) {
     this.set(STORAGE_KEYS.EQUIPMENTS, list);
   }
@@ -112,6 +138,7 @@ class StorageManager {
     data.status = data.stocks > 0 ? (data.stocks <= data.minStocks ? 'Low Stock' : 'Available') : 'Out of Stock';
     list.push(data);
     this.setEquipments(list);
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'add', equipment: data });
     return data;
   }
 
@@ -127,12 +154,15 @@ class StorageManager {
     else if (e.stocks <= (e.minStocks || 3)) e.status = 'Low Stock';
     else e.status = 'Available';
     this.setEquipments(list);
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'update', equipment: list[idx] });
     return list[idx];
   }
 
   deleteEquipment(id) {
+    const deleted = this.getEquipment(id);
     const list = this.getEquipments().filter(e => e.id !== id);
     this.setEquipments(list);
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'delete', equipmentId: id, name: deleted?.name });
   }
 
   archiveEquipment(id) {
@@ -159,6 +189,7 @@ class StorageManager {
     const newStock = (equip.stocks || 0) + delta;
     if (newStock < 0) return false;
     this.updateEquipment(id, { stocks: newStock });
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'stockAdjust', equipmentId: id, delta, newStock });
     return true;
   }
 
@@ -171,6 +202,7 @@ class StorageManager {
     return this.get(STORAGE_KEYS.BORROW_HISTORY) || [];
   }
 
+  // Pure persistence — no event emission (callers emit)
   setBorrowHistory(list) {
     this.set(STORAGE_KEYS.BORROW_HISTORY, list);
   }
@@ -188,6 +220,7 @@ class StorageManager {
     record.createdAt = new Date().toISOString();
     list.unshift(record);
     this.setBorrowHistory(list);
+    this._emit(StoreEvents.BORROW_CHANGED, { action: 'add', record });
     return record;
   }
 
@@ -197,6 +230,7 @@ class StorageManager {
     if (idx === -1) return null;
     Object.assign(list[idx], updates);
     this.setBorrowHistory(list);
+    this._emit(StoreEvents.BORROW_CHANGED, { action: 'update', record: list[idx] });
     return list[idx];
   }
 
@@ -217,23 +251,26 @@ class StorageManager {
     return this.get(STORAGE_KEYS.ACTIVITY_LOG) || [];
   }
 
+  // Pure persistence — no event emission (callers emit)
   setActivityLog(list) {
     this.set(STORAGE_KEYS.ACTIVITY_LOG, list);
   }
 
   logActivity(action, details = {}) {
     const list = this.getActivityLog();
-    list.unshift({
+    const entry = {
       date: new Date().toISOString(),
       action,
       admin: details.admin || 'System',
       equipment: details.equipment || '',
       details: details.message || '',
       id: Date.now().toString(36)
-    });
+    };
+    list.unshift(entry);
     // Keep last 200 entries
     if (list.length > 200) list.length = 200;
     this.setActivityLog(list);
+    this._emit(StoreEvents.ACTIVITY_LOGGED, { entry });
   }
 
   // ===== STATISTICS =====
@@ -286,6 +323,7 @@ class StorageManager {
 
   saveRegisteredStudents(list) {
     this.set(STORAGE_KEYS.REGISTERED, list);
+    this._emit(StoreEvents.STUDENTS_CHANGED, { count: list.length });
   }
 
   findStudent(id) {
@@ -320,6 +358,7 @@ class StorageManager {
 
   saveSettings(settings) {
     this.set(STORAGE_KEYS.SETTINGS, settings);
+    this._emit(StoreEvents.SETTINGS_CHANGED, { settings });
   }
 
   // ===== PASSWORD OVERRIDES =====
@@ -331,6 +370,7 @@ class StorageManager {
     const overrides = this.getPasswordOverrides();
     overrides[studentId] = password;
     this.set(STORAGE_KEYS.PASSWORDS, overrides);
+    this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'passwordChanged' });
   }
 
   removePasswordOverride(studentId) {
@@ -340,12 +380,16 @@ class StorageManager {
   }
 
   // ===== RESET DEMO DATA =====
-  resetDemoData() {
+  async resetDemoData() {
     const keys = Object.values(STORAGE_KEYS);
     keys.forEach(k => localStorage.removeItem(k));
     this._cache = {};
     this._initialized = false;
-    return this._seedInitialData();
+    await this._seedInitialData();
+    this._emit(StoreEvents.DATA_CHANGED, { action: 'reset' });
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'reset' });
+    this._emit(StoreEvents.BORROW_CHANGED, { action: 'reset' });
+    this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'reset' });
   }
 
   // ===== CATEGORIES =====

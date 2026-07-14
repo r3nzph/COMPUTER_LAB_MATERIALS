@@ -104,30 +104,47 @@
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
       await inventory.loadEquipments();
-      const stats = inventory.getStats();
       const dash = document.getElementById('stockDashboard');
-      dash.innerHTML = `
-        <div class="stat-card"><div class="stat-header"><div class="stat-label">Total Equipments</div><div class="stat-icon blue"><i class="fas fa-boxes"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.total}">0</span></div></div>
-        <div class="stat-card"><div class="stat-header"><div class="stat-label">Available</div><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.available}">0</span></div></div>
-        <div class="stat-card"><div class="stat-header"><div class="stat-label">Borrowed</div><div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.borrowed}">0</span></div></div>
-        <div class="stat-card"><div class="stat-header"><div class="stat-label">Low Stocks</div><div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.lowStockCount}">0</span></div></div>`;
-      document.querySelectorAll('#stockDashboard .counter').forEach(c => {
-        const t = parseInt(c.dataset.target)||0; let cur=0, dur=2000, s=performance.now();
-        function u(now){const p=Math.min((now-s)/dur,1);cur=Math.floor((1-Math.pow(1-p,3))*t);c.textContent=cur;if(p<1)requestAnimationFrame(u);else c.textContent=t;}
-        requestAnimationFrame(u);
-      });
       const tbody = document.getElementById('stockTableBody');
-      function render(data=inventory.equipments){
-        tbody.innerHTML=data.map(e=>`<tr><td data-label="ID">${String(e.id).padStart(2,'0')}</td><td data-label="Equipment"><strong>${e.name}</strong></td><td data-label="Category">${e.category}</td><td data-label="Stocks" style="font-weight:700;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'}">${e.stocks}</td><td data-label="Fee">₱${e.borrowFee}</td><td data-label="Status"><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
+
+      function renderStats() {
+        const stats = inventory.getStats();
+        dash.innerHTML = `
+          <div class="stat-card"><div class="stat-header"><div class="stat-label">Total Equipments</div><div class="stat-icon blue"><i class="fas fa-boxes"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.total}">0</span></div></div>
+          <div class="stat-card"><div class="stat-header"><div class="stat-label">Available</div><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.available}">0</span></div></div>
+          <div class="stat-card"><div class="stat-header"><div class="stat-label">Borrowed</div><div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.borrowed}">0</span></div></div>
+          <div class="stat-card"><div class="stat-header"><div class="stat-label">Low Stocks</div><div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div></div><div class="stat-number"><span class="counter" data-target="${stats.lowStockCount}">0</span></div></div>`;
+        document.querySelectorAll('#stockDashboard .counter').forEach(c => {
+          const t = parseInt(c.dataset.target)||0; let cur=0, dur=2000, s=performance.now();
+          function u(now){const p=Math.min((now-s)/dur,1);cur=Math.floor((1-Math.pow(1-p,3))*t);c.textContent=cur;if(p<1)requestAnimationFrame(u);else c.textContent=t;}
+          requestAnimationFrame(u);
+        });
       }
-      render();
-      document.getElementById('stockSearch').addEventListener('input', function(){
-        const t=this.value.toLowerCase(); const cat=document.getElementById('stockCategoryFilter').value;
-        let f=inventory.equipments; if(cat!=='All') f=f.filter(e=>e.category===cat);
-        if(t) f=f.filter(e=>e.name.toLowerCase().includes(t)); render(f);
+
+      function renderTable() {
+        const searchText = document.getElementById('stockSearch')?.value?.toLowerCase() || '';
+        const cat = document.getElementById('stockCategoryFilter')?.value || 'All';
+        let data = inventory.equipments;
+        if (cat !== 'All') data = data.filter(e => e.category === cat);
+        if (searchText) data = data.filter(e => e.name.toLowerCase().includes(searchText));
+        tbody.innerHTML = data.map(e => `<tr><td data-label="ID">${String(e.id).padStart(2,'0')}</td><td data-label="Equipment"><strong>${e.name}</strong></td><td data-label="Category">${e.category}</td><td data-label="Stocks" style="font-weight:700;color:${e.stocks<=3?'var(--danger)':e.stocks<=5?'#c79100':'var(--success)'}">${e.stocks}</td><td data-label="Fee">₱${e.borrowFee}</td><td data-label="Status"><span class="status-badge ${inventory.getStatusClass(e.status)}"><span class="status-dot"></span>${e.status}</span></td></tr>`).join('');
+      }
+
+      renderStats();
+      renderTable();
+
+      document.getElementById('stockSearch').addEventListener('input', renderTable);
+      document.getElementById('stockCategoryFilter').addEventListener('change', renderTable);
+
+      // Auto-refresh on Store events
+      document.addEventListener(StoreEvents.INVENTORY_CHANGED, () => {
+        inventory.loadEquipments().then(() => { renderStats(); renderTable(); });
       });
-      document.getElementById('stockCategoryFilter').addEventListener('change', function(){
-        document.getElementById('stockSearch').dispatchEvent(new Event('input'));
+      document.addEventListener(StoreEvents.BORROW_CHANGED, () => {
+        inventory.loadEquipments().then(() => { renderStats(); renderTable(); });
+      });
+      document.addEventListener(StoreEvents.DATA_CHANGED, () => {
+        inventory.loadEquipments().then(() => { renderStats(); renderTable(); });
       });
     });
   </script>

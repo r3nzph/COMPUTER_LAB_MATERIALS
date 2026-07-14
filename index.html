@@ -245,15 +245,17 @@
     });
   </script>
   <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-      await inventory.loadEquipments();
+    // ===== RENDER HOMEPAGE =====
+    function renderHomepageStats() {
       const stats = Store.getStatistics();
 
       // Featured equipment: show latest available items
       const grid = document.getElementById('featuredEquipGrid');
-      const available = inventory.equipments.filter(e => e.status === 'Available');
-      const featured = available.length >= 6 ? available.slice(0, 6) : inventory.equipments.filter(e => !e.archived).slice(0, 6);
-      inventory.renderEquipments(grid, featured);
+      if (grid && inventory.equipments.length > 0) {
+        const available = inventory.equipments.filter(e => e.status === 'Available');
+        const featured = available.length >= 6 ? available.slice(0, 6) : inventory.equipments.filter(e => !e.archived).slice(0, 6);
+        inventory.renderEquipments(grid, featured);
+      }
 
       // Homepage stat counters - LIVE from Store
       const statTargets = {
@@ -266,21 +268,44 @@
 
       document.querySelectorAll('.stats-section .counter').forEach(c => {
         const id = c.closest('.stat-item')?.querySelector('.stat-label')?.textContent?.trim();
-        c.setAttribute('data-target', statTargets[id] || 0);
-      });
-
-      document.querySelectorAll('.stats-section .counter').forEach(counter => {
-        const target = parseInt(counter.getAttribute('data-target')) || 0;
-        let current = 0, duration = 2000, start = performance.now();
-        function update(now) {
-          const elapsed = now - start, progress = Math.min(elapsed / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          current = Math.floor(eased * target);
-          counter.textContent = current.toLocaleString();
-          if (progress < 1) requestAnimationFrame(update);
-          else counter.textContent = target.toLocaleString();
+        const target = statTargets[id] || 0;
+        const current = parseInt(c.textContent.replace(/,/g, '')) || 0;
+        if (current !== target) {
+          c.setAttribute('data-target', target);
+          animateCounter(c, target);
         }
-        requestAnimationFrame(update);
+      });
+    }
+
+    function animateCounter(element, target) {
+      let current = 0, duration = 1500, start = performance.now();
+      function update(now) {
+        const elapsed = now - start, progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        current = Math.floor(eased * target);
+        element.textContent = current.toLocaleString();
+        if (progress < 1) requestAnimationFrame(update);
+        else element.textContent = target.toLocaleString();
+      }
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await inventory.loadEquipments();
+      renderHomepageStats();
+
+      // Auto-refresh on Store events — no manual reload needed
+      document.addEventListener(StoreEvents.INVENTORY_CHANGED, () => {
+        inventory.loadEquipments().then(() => renderHomepageStats());
+      });
+      document.addEventListener(StoreEvents.BORROW_CHANGED, () => {
+        inventory.loadEquipments().then(() => renderHomepageStats());
+      });
+      document.addEventListener(StoreEvents.STUDENTS_CHANGED, () => {
+        inventory.loadEquipments().then(() => renderHomepageStats());
+      });
+      document.addEventListener(StoreEvents.DATA_CHANGED, () => {
+        inventory.loadEquipments().then(() => renderHomepageStats());
       });
     });
   </script>

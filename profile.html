@@ -240,8 +240,7 @@
   <script src="js/borrow.js"></script>
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-      await inventory.loadEquipments();
+    function renderProfile() {
       if (!auth.isLoggedIn() || !auth.isStudent()) return;
 
       const user = auth.currentUser;
@@ -473,6 +472,23 @@
           showEditError(result.message);
         }
       });
+    }
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', async function() {
+      await inventory.loadEquipments();
+      if (!auth.isLoggedIn() || !auth.isStudent()) return;
+
+      // Initial render
+      renderProfile();
+
+      // Auto-refresh on borrow events — add only once, not inside renderProfile
+      const refreshProfile = () => {
+        inventory.loadEquipments().then(() => renderProfile());
+      };
+      document.addEventListener(StoreEvents.BORROW_CHANGED, refreshProfile);
+      document.addEventListener(StoreEvents.INVENTORY_CHANGED, refreshProfile);
+      document.addEventListener(StoreEvents.DATA_CHANGED, refreshProfile);
     });
   </script>
 </body>

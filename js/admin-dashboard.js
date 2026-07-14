@@ -164,7 +164,7 @@ class AdminDashboard {
     });
   }
 
-  // ===== ACTIVITY REFRESH =====
+  // ===== CUSTOM EVENT LISTENERS =====
   setupActivityRefresh() {
     const autoSec = parseInt(Store.getSettings().autoRefresh) || 0;
     if (window._adminRefreshTimer) clearInterval(window._adminRefreshTimer);
@@ -177,15 +177,31 @@ class AdminDashboard {
       }, autoSec * 1000);
     }
 
-    // Listen for storage events (cross-tab sync)
+    // Listen for Store custom events — auto-update without manual refresh
+    this._handleStoreEvent = () => {
+      if (this._refreshTimeout) clearTimeout(this._refreshTimeout);
+      this._refreshTimeout = setTimeout(() => this.refreshAll(), 150);
+    };
+
+    document.addEventListener(StoreEvents.INVENTORY_CHANGED, this._handleStoreEvent);
+    document.addEventListener(StoreEvents.BORROW_CHANGED, this._handleStoreEvent);
+    document.addEventListener(StoreEvents.STUDENTS_CHANGED, this._handleStoreEvent);
+
+    // Activity log and settings get their own specific handlers
+    document.addEventListener(StoreEvents.ACTIVITY_LOGGED, () => {
+      if (this._logTimeout) clearTimeout(this._logTimeout);
+      this._logTimeout = setTimeout(() => this.renderActivityLog(), 200);
+    });
+    document.addEventListener(StoreEvents.SETTINGS_CHANGED, () => {
+      this.loadSettings();
+    });
+
+    // Also listen for storage events (cross-tab sync)
     window.addEventListener('storage', (e) => {
       if (e.key && e.key.startsWith('comlab_')) {
         if (this._refreshTimeout) clearTimeout(this._refreshTimeout);
         this._refreshTimeout = setTimeout(() => {
-          inventory.loadEquipments().then(() => {
-            this.renderDashboard();
-            this.renderCharts();
-          });
+          inventory.loadEquipments().then(() => this.refreshAll());
         }, 300);
       }
     });
@@ -239,7 +255,9 @@ class AdminDashboard {
       this.renderRequests();
       this.renderEquipments();
       this.renderStocks();
+      this.renderMembers();
       this.renderCharts();
+      this.renderActivityLog();
     });
   }
 

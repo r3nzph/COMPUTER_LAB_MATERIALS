@@ -192,6 +192,14 @@
 
       // Initial render
       render();
+
+      // Auto-refresh on Store events
+      document.addEventListener(StoreEvents.INVENTORY_CHANGED, () => {
+        inventory.loadEquipments().then(() => render());
+      });
+      document.addEventListener(StoreEvents.DATA_CHANGED, () => {
+        inventory.loadEquipments().then(() => render());
+      });
     });
   </script>
 </body>

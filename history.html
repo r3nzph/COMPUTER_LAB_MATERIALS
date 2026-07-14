@@ -150,6 +150,14 @@
       render();
       search.addEventListener('input', render);
       filter.addEventListener('change', render);
+
+      // Auto-refresh on borrow events
+      document.addEventListener(StoreEvents.BORROW_CHANGED, () => {
+        inventory.loadEquipments().then(() => render());
+      });
+      document.addEventListener(StoreEvents.DATA_CHANGED, () => {
+        inventory.loadEquipments().then(() => render());
+      });
     });
   </script>
 </body>
