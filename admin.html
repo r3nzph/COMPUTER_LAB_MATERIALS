@@ -57,6 +57,26 @@
     .progress-bar .progress-fill{height:100%;border-radius:3px;transition:width 1s ease;}
     .warning-item{display:flex;align-items:center;gap:8px;padding:0.5rem 0;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-size:0.85rem;}
     .warning-item .wi-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
+    /* Charts */
+    .admin-charts-row{margin-bottom:0;}
+    .chart-container{position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;}
+    .chart-container svg{width:100%;max-width:260px;height:auto;overflow:visible;}
+    .chart-container .chart-placeholder{color:var(--text-light);font-size:0.85rem;}
+    .chart-legend{display:flex;flex-wrap:wrap;gap:0.4rem 0.8rem;margin-top:0.5rem;justify-content:center;}
+    .chart-legend .legend-item{display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-secondary);font-weight:500;}
+    .chart-legend .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .chart-legend .legend-dot.rounded{width:10px;height:10px;border-radius:3px;}
+    .chart-bar{cursor:pointer;transition:opacity 0.2s;}
+    .chart-bar:hover,.chart-bar-label{opacity:0.7;}
+    .chart-bar-label{font-size:0.65rem;fill:var(--text-secondary);text-anchor:middle;}
+    .chart-bar-value{font-size:0.7rem;font-weight:700;text-anchor:middle;}
+    .chart-center-text{font-size:1.8rem;font-weight:900;text-anchor:middle;dominant-baseline:central;}
+    .chart-center-label{font-size:0.7rem;fill:var(--text-secondary);text-anchor:middle;dominant-baseline:central;}
+    .trend-tooltip{position:absolute;background:#141414;color:white;padding:4px 10px;border-radius:6px;font-size:0.72rem;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:10;white-space:nowrap;}
+    .chart-section-animated{animation:fadeSlideUp 0.5s ease both;}
+    @keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    .chart-donut-segment{transition:transform 0.25s ease,opacity 0.25s ease;cursor:pointer;}
+    .chart-donut-segment:hover{transform:scale(1.04);opacity:0.85;}
     @media(max-width:768px){
       .admin-sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:0.8rem;}
       .admin-sidebar .admin-logo{width:100%;text-align:center;margin-bottom:0.5rem;}
@@ -112,6 +132,19 @@
               <h2><i class="fas fa-calendar"></i> Today</h2>
               <div id="todayWidget" style="font-size:0.9rem;font-weight:600;"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="admin-grid admin-charts-row">
+          <div class="admin-section">
+            <h2><i class="fas fa-chart-pie"></i> Equipment Status</h2>
+            <div id="equipStatusChart" class="chart-container"><div class="chart-placeholder"><i class="fas fa-spinner fa-spin"></i></div></div>
+            <div id="equipChartLegend" class="chart-legend"></div>
+          </div>
+          <div class="admin-section">
+            <h2><i class="fas fa-chart-bar"></i> Borrow Trend <span class="trend-subtitle" style="font-size:0.72rem;font-weight:400;color:var(--text-light);">Last 7 days</span></h2>
+            <div id="borrowTrendChart" class="chart-container"><div class="chart-placeholder"><i class="fas fa-spinner fa-spin"></i></div></div>
           </div>
         </div>
       </div>
@@ -286,6 +319,77 @@
 
       // Also set the officer name on the profile input
       document.getElementById('adminProfileName').value = currentSettings.officerName || auth.getUserName();
+
+      // ===== CHARTS =====
+      const COLORS = {available:'#00c853',lowStock:'#c79100',outOfStock:'#d32f2f',borrowed:'#1e88e5',handTool:'#990000',testing:'#d32f2f',networking:'#1e88e5',safety:'#c79100',cleaning:'#00c853',storage:'#7c4dff'};
+
+      function renderEquipStatusChart(){
+        const equip = inventory.equipments;
+        const byStatus = {Available:0,'Low Stock':0,'Out of Stock':0};
+        const borrowed = inventory.borrowHistory.filter(r=>r.status==='Approved').length;
+        equip.forEach(e=>{if(byStatus.hasOwnProperty(e.status))byStatus[e.status]++;});
+        const data = [{label:'Available',value:byStatus.Available,color:COLORS.available},{label:'Low Stock',value:byStatus['Low Stock'],color:COLORS.lowStock},{label:'Out of Stock',value:byStatus['Out of Stock'],color:COLORS.outOfStock},{label:'Borrowed',value:borrowed,color:COLORS.borrowed}].filter(d=>d.value>0);
+        if(data.length===0){document.getElementById('equipStatusChart').innerHTML='<div class="chart-placeholder" style="padding:2rem;">No equipment data</div>';document.getElementById('equipChartLegend').innerHTML='';return;}
+        const total = data.reduce((s,d)=>s+d.value,0);
+        const cx=130,cy=110,r=85,thick=28;
+        let svg = `<svg viewBox="0 0 260 220"><g transform="translate(${cx},${cy})">`;
+        let startAngle = -Math.PI/2;
+        data.forEach((d,i)=>{
+          const angle = (d.value/total)*2*Math.PI;
+          const endAngle = startAngle+angle;
+          const x1=Math.cos(startAngle)*(r+thick/2),y1=Math.sin(startAngle)*(r+thick/2);
+          const x2=Math.cos(endAngle)*(r+thick/2),y2=Math.sin(endAngle)*(r+thick/2);
+          const large = angle>Math.PI?1:0;
+          svg += `<path d="M ${x1} ${y1} A ${r+thick/2} ${r+thick/2} 0 ${large} 1 ${x2} ${y2} L ${Math.cos(endAngle)*(r-thick/2)} ${Math.sin(endAngle)*(r-thick/2)} A ${r-thick/2} ${r-thick/2} 0 ${large} 0 ${Math.cos(startAngle)*(r-thick/2)} ${Math.sin(startAngle)*(r-thick/2)} Z" fill="${d.color}" class="chart-donut-segment" data-label="${d.label}" data-value="${d.value}"><title>${d.label}: ${d.value}</title></path>`;
+          const midAngle = startAngle+angle/2;
+          const lx=Math.cos(midAngle)*(r+thick+16),ly=Math.sin(midAngle)*(r+thick+16);
+          svg += `<text x="${lx}" y="${ly}" font-size="0.7rem" fill="${d.color}" text-anchor="middle" dominant-baseline="middle" font-weight="700">${Math.round((d.value/total)*100)}%</text>`;
+          startAngle = endAngle;
+        });
+        svg += `<text class="chart-center-text" y="-4">${total}</text><text class="chart-center-label" y="16">Total</text></g></svg>`;
+        document.getElementById('equipStatusChart').innerHTML = svg;
+        const legend = document.getElementById('equipChartLegend');
+        legend.innerHTML = data.map(d=>`<span class="legend-item"><span class="legend-dot" style="background:${d.color}"></span>${d.label} (${d.value})</span>`).join('');
+      }
+
+      function renderBorrowTrendChart(){
+        const history = inventory.borrowHistory;
+        const days = [];
+        const today = new Date();
+        for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push({date:d,label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),count:0});}
+        history.forEach(r=>{
+          const d = new Date(r.borrowDate);
+          const match = days.find(x=>x.date.toDateString()===d.toDateString());
+          if(match)match.count++;
+        });
+        const max = Math.max(1,...days.map(d=>d.count));
+        const w=280,h=200,barW=28,gap=8,padL=10,padR=10,padT=20,padB=30;
+        const chartW = days.length*(barW+gap)-gap;
+        const startX = padL;
+        let svg = `<svg viewBox="0 0 ${w} ${h}" style="max-width:100%;">`;
+        // Grid lines
+        for(let i=0;i<=4;i++){
+          const y = padT+((h-padT-padB)/4)*i;
+          svg += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="rgba(var(--primary-rgb),0.06)" stroke-width="1"/>`;
+          svg += `<text x="${padL-4}" y="${y+3}" font-size="0.6rem" fill="var(--text-light)" text-anchor="end">${Math.round(max*(1-i/4))}</text>`;
+        }
+        // Bars
+        days.forEach((d,i)=>{
+          const x = startX+i*(barW+gap);
+          const barH = (d.count/max)*(h-padT-padB);
+          const y = padT + (h-padT-padB) - barH;
+          const color = d.count>0?'#990000':'rgba(var(--primary-rgb),0.12)';
+          svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH||2}" rx="4" fill="${color}" class="chart-bar" data-day="${d.label}" data-count="${d.count}"><title>${d.label}: ${d.count} borrows</title></rect>`;
+          if(d.count>0) svg += `<text class="chart-bar-value" x="${x+barW/2}" y="${y-6}" fill="#990000">${d.count}</text>`;
+          svg += `<text class="chart-bar-label" x="${x+barW/2}" y="${padT+(h-padT-padB)+16}">${d.label}</text>`;
+        });
+        svg += `<line x1="${padL}" y1="${padT+(h-padT-padB)}" x2="${w-padR}" y2="${padT+(h-padT-padB)}" stroke="rgba(var(--primary-rgb),0.08)" stroke-width="1"/>`;
+        svg += '</svg>';
+        document.getElementById('borrowTrendChart').innerHTML = svg;
+      }
+
+      renderEquipStatusChart();
+      renderBorrowTrendChart();
 
       // TODAY WIDGET
       const today = new Date();
