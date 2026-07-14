@@ -152,6 +152,95 @@
   .stocks-dashboard { grid-template-columns: 1fr; }
   .hero-illustration { height: 200px; }
   .ill-monitor { width: 140px; height: 95px; }
+  .admin-main { padding: 0.8rem; }
+}
+
+/* ===== ULTRA-WIDE SCREENS (above 1600px) ===== */
+@media screen and (min-width: 1600px) {
+  .nav-inner,
+  .footer-content,
+  .container { max-width: 1400px; }
+  .hero-title { font-size: clamp(3rem, 4vw, 5rem); }
+  .equipments-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); max-width: 1400px; }
+  .features-grid { max-width: 1300px; }
+  .hero-content { max-width: 700px; }
+  .hero-illustration { flex: 0 0 520px; height: 550px; }
+  .ill-monitor { width: 300px; height: 200px; }
+}
+
+/* ===== 4K DISPLAYS (above 2500px) ===== */
+@media screen and (min-width: 2500px) {
+  .nav-inner,
+  .footer-content,
+  .container { max-width: 1600px; }
+  .hero-title { font-size: clamp(3.5rem, 3.5vw, 6rem); }
+  .hero-content { max-width: 800px; }
+  .equipments-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); max-width: 1800px; }
+  .features-grid { max-width: 1600px; grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ===== RESPONSIVE TABLES → CARDS ON MOBILE ===== */
+@media screen and (max-width: 768px) {
+  table.responsive-card,
+  .table-container table {
+    border: 0;
+  }
+  table.responsive-card thead,
+  .table-container table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  table.responsive-card tbody tr,
+  .table-container table tbody tr {
+    display: block;
+    margin-bottom: 0.8rem;
+    border: 1px solid rgba(var(--primary-rgb), 0.08);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    padding: 0.8rem;
+  }
+  table.responsive-card tbody td,
+  .table-container table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    font-size: var(--fs-sm);
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.04);
+    text-align: right;
+  }
+  table.responsive-card tbody td:last-child,
+  .table-container table tbody td:last-child {
+    border-bottom: none;
+  }
+  table.responsive-card tbody td::before,
+  .table-container table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* ===== FOLDABLE / VERY NARROW (below 300px) ===== */
+@media screen and (max-width: 300px) {
+  .nav-logo { font-size: 1rem; }
+  .btn-login-outline,
+  .btn-register-solid { padding: 0.3rem 0.6rem; font-size: 0.7rem; min-height: 32px; }
+  .hero-title { font-size: 1.3rem; }
+  .hero-subtitle { font-size: 0.8rem; }
+  .stat-item .stat-number { font-size: 1.5rem; }
+  .stocks-dashboard { grid-template-columns: 1fr; gap: 0.5rem; }
+  .stat-card { padding: 0.8rem; }
+  .equip-card { padding: 1rem; }
 }
 
 /* ===== PRINT ===== */

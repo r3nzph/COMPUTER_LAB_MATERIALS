@@ -33,8 +33,8 @@ class AuthSystem {
     } catch (e) {
       console.warn('Auth: Using fallback accounts');
       this.students = [
-        { id: 'TUP-23-1001', name: 'Juan Dela Cruz', course: 'BSIT', year: '2nd Year', password: 'student123' },
-        { id: 'TUP-23-1002', name: 'Maria Santos', course: 'BSCS', year: '3rd Year', password: 'student123' }
+        { id: 'TUPT-23-1001', name: 'Juan Dela Cruz', course: 'BSIT', year: '2nd Year', password: 'student123' },
+        { id: 'TUPT-23-1002', name: 'Maria Santos', course: 'BSCS', year: '3rd Year', password: 'student123' }
       ];
       this.admins = [{ id: 'ADMIN001', name: 'Laboratory Officer', password: 'admin123' }];
     }
@@ -110,7 +110,7 @@ class AuthSystem {
     // Validate unique ID
     const allStudents = this.getAllStudents();
     if (allStudents.find(s => s.id === data.id)) {
-      return { success: false, message: 'TUP Student ID already exists.' };
+      return { success: false, message: 'TUPT Student ID already exists.' };
     }
 
     const newStudent = {
@@ -332,6 +332,14 @@ class AuthSystem {
 
     if (!registerModal) return;
 
+    // Auto-uppercase reg student ID
+    const regIdInput = registerModal.querySelector('input[name="regStudentId"]');
+    if (regIdInput) {
+      regIdInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    }
+
     registerBtn?.addEventListener('click', () => {
       if (loginModal) loginModal.classList.remove('active');
       registerModal.classList.add('active');
@@ -374,8 +382,8 @@ class AuthSystem {
         return;
       }
 
-      if (!/^TUP-\d{2}-\d{4}$/i.test(studentId)) {
-        this.showRegError('Student ID must be in format: TUP-XX-XXXX');
+      if (!/^TUPT-\d{2}-\d{4}$/i.test(studentId)) {
+        this.showRegError('Student ID must be in format: TUPT-XX-XXXX');
         return;
       }
 
@@ -457,6 +465,14 @@ class AuthSystem {
         if (form) form.classList.add('active');
       });
     });
+
+    // Auto-uppercase student ID input
+    const studentIdInput = document.getElementById('studentId');
+    if (studentIdInput) {
+      studentIdInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    }
 
     studentLoginForm?.addEventListener('submit', (e) => {
       e.preventDefault();

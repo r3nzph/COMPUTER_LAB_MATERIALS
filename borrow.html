@@ -62,7 +62,7 @@
         <button class="login-tab" data-tab="admin">Administrator</button>
       </div>
       <form class="login-form active" id="studentLoginForm">
-        <div class="form-group"><label>TUP Student ID</label><input type="text" id="studentId" placeholder="e.g., TUP-23-1001" required /></div>
+        <div class="form-group"><label>TUPT Student ID</label><input type="text" id="studentId" placeholder="e.g., TUPT-23-1001" required /></div>
         <div class="form-group"><label>Password</label><input type="password" id="studentPassword" placeholder="Enter password" required /></div>
         <div class="form-options"><label><input type="checkbox" /> Remember Me</label><a href="#">Forgot Password?</a></div>
         <div class="login-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.8rem;text-align:center;"></div>
@@ -188,17 +188,50 @@
     </div>
   </div>
 
+  <!-- LOGIN REQUIRED MODAL -->
+  <div class="modal-overlay" id="loginRequiredModal">
+    <div class="modal-content" style="text-align:center;">
+      <div class="modal-icon" style="background:rgba(var(--primary-rgb),0.1);color:var(--primary);">🔒</div>
+      <h2 class="modal-title">Login Required</h2>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;font-size:0.92rem;line-height:1.6;">
+        You must sign in or create a <strong>TUPT student account</strong> before borrowing laboratory equipment.
+      </p>
+      <div style="display:flex;gap:0.7rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="loginRequiredLoginBtn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Login</button>
+        <button class="btn btn-secondary" id="loginRequiredRegisterBtn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Register</button>
+        <button class="modal-btn" onclick="this.closest('.modal-overlay').classList.remove('active')" style="background:transparent;color:var(--text-secondary);box-shadow:none;">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const m = document.getElementById('loginRequiredModal');
+      if (!m) return;
+      document.getElementById('loginRequiredLoginBtn')?.addEventListener('click', function() {
+        m.classList.remove('active');
+        const lm = document.getElementById('loginModal');
+        if (lm) lm.classList.add('active');
+      });
+      document.getElementById('loginRequiredRegisterBtn')?.addEventListener('click', function() {
+        m.classList.remove('active');
+        const rm = document.getElementById('registerModal');
+        if (rm) rm.classList.add('active');
+      });
+      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active'); });
+    });
+  </script>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-content">
-      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUP.</p>
+      <div class="footer-col"><h3>COMLAB<span>.</span></h3><p>Computer Laboratory Borrowing System for TUPT.</p>
         <div class="footer-social"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a><a href="#" aria-label="Phone"><i class="fas fa-phone"></i></a><a href="#" aria-label="Location"><i class="fas fa-map-marker-alt"></i></a></div>
       </div>
       <div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="equipments.html">Equipments</a></li><li><a href="borrow.html">Borrow</a></li><li><a href="history.html">History</a></li></ul></div>
       <div class="footer-col"><h4>Info</h4><ul><li><a href="members.html">Members</a></li><li><a href="stocks.html">Stocks</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul></div>
-      <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUP Lab Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
+      <div class="footer-col"><h4>Contact</h4><div class="footer-contact-item"><i class="fas fa-map-marker-alt"></i><span>TUPT Lab Building, Manila</span></div><div class="footer-contact-item"><i class="fas fa-envelope"></i><span>comlab@tup.edu.ph</span></div><div class="footer-contact-item"><i class="fas fa-phone"></i><span>(02) 8123-4567</span></div></div>
     </div>
-    <div class="footer-bottom"><p>Computer Laboratory Borrowing System &bull; TUP &bull; 2026</p></div>
+    <div class="footer-bottom"><p>Computer Laboratory Borrowing System &bull; TUPT &bull; 2026</p></div>
   </footer>
 
   <script src="js/svg-loader.js"></script>

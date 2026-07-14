@@ -35,6 +35,12 @@
   --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 40px rgba(0,0,0,0.1);
   --shadow-glow: 0 4px 25px rgba(153, 0, 0, 0.25);
+  --fs-hero: clamp(2rem, 5vw, 4rem);
+  --fs-title: clamp(1.5rem, 3vw, 2.5rem);
+  --fs-section: clamp(1.3rem, 2.5vw, 2rem);
+  --fs-body: clamp(0.85rem, 1.2vw, 0.95rem);
+  --fs-sm: clamp(0.75rem, 1vw, 0.85rem);
+  --fs-xs: clamp(0.68rem, 0.9vw, 0.78rem);
 }
 
 * {
@@ -53,7 +59,64 @@ body {
   color: var(--text-primary);
   overflow-x: hidden;
   min-height: 100vh;
+  font-size: var(--fs-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ===== FOCUS STATES (Accessibility) ===== */
+:focus-visible {
+  outline: 2.5px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible:not(:active),
+a:focus-visible:not(:active),
+input:focus-visible:not(:active),
+select:focus-visible:not(:active),
+textarea:focus-visible:not(:active) {
+  outline: 2.5px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== TOUCH-FRIENDLY SIZING ===== */
+button, .btn, .btn-primary, .btn-secondary, .btn-submit,
+.btn-login-outline, .btn-register-solid, .filter-btn,
+.btn-add, .btn-view-more, .btn-sm, .modal-btn,
+.nav-toggle, .login-tab, .dropdown-trigger,
+input, select, textarea {
+  min-height: 44px;
+}
+
+.btn-login-outline,
+.btn-register-solid {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY ===== */
+.hero-title { font-size: var(--fs-hero); }
+.section-title { font-size: var(--fs-title); }
+.page-header h1 { font-size: var(--fs-title); }
+h2 { font-size: var(--fs-section); }
+.section-desc { font-size: var(--fs-body); }
+.hero-subtitle { font-size: var(--fs-body); }
+.hero-badge { font-size: var(--fs-xs); }
+.category-tag { font-size: var(--fs-xs); }
+.status-badge { font-size: var(--fs-xs); }
+.filter-btn { font-size: var(--fs-sm); }
+.equip-card h3 { font-size: var(--fs-body); }
+.footer-col p,
+.footer-col ul li a,
+.footer-contact-item { font-size: var(--fs-sm); }
 
 /* ===== LOADING SCREEN ===== */
 .loading-screen {

@@ -64,6 +64,13 @@ class BorrowManager {
       const btn = e.target.closest('.add-to-borrow');
       if (!btn) return;
 
+      // Require login before borrowing
+      if (!auth.isLoggedIn() || !auth.isStudent()) {
+        const modal = document.getElementById('loginRequiredModal');
+        if (modal) modal.classList.add('active');
+        return;
+      }
+
       const equipmentId = parseInt(btn.dataset.id);
       const equipment = inventory.getEquipment(equipmentId);
       if (!equipment) return;
