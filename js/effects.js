@@ -19,8 +19,6 @@ const PerformanceDetector = {
       if (navigator.connection.saveData) return true;
       if (navigator.connection.effectiveType === 'slow-2g' || navigator.connection.effectiveType === '2g') return true;
     }
-    // Check touch-only device (likely mobile)
-    if ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches) return true;
     return false;
   },
 
