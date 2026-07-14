@@ -1665,9 +1665,9 @@ tbody td {
 .btn, .btn-primary, .btn-secondary, .btn-submit,
 .filter-btn, .btn-add, .btn-view-more, .btn-sm,
 .btn-login-outline, .btn-register-solid, .modal-btn,
-.btn-login-nav, .btn-glow, .avatar-upload-btn,
-.avatar-remove-btn, .dropdown-trigger,
-.btn-register-solid, .btn-login-nav {
+.btn-login-nav, .btn-glow {
+  position: relative;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
