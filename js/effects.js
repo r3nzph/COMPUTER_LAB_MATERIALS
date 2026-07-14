@@ -3,15 +3,52 @@
    Effects & Animations
    ============================================ */
 
+// ===== PERFORMANCE DETECTION =====
+const PerformanceDetector = {
+  isLowEnd() {
+    // Check for reduced motion preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+    // Check for reduced data preference
+    if (window.matchMedia('(prefers-reduced-data: reduce)').matches) return true;
+    // Check low CPU cores
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) return true;
+    // Check low memory (Chrome only)
+    if (navigator.deviceMemory && navigator.deviceMemory <= 2) return true;
+    // Check for mobile connection (slow network)
+    if (navigator.connection) {
+      if (navigator.connection.saveData) return true;
+      if (navigator.connection.effectiveType === 'slow-2g' || navigator.connection.effectiveType === '2g') return true;
+    }
+    // Check touch-only device (likely mobile)
+    if ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches) return true;
+    return false;
+  },
+
+  getParticleCount() {
+    const base = Math.min(Math.floor(window.innerWidth / 30), 40);
+    if (this.isLowEnd()) return Math.min(base, 6);
+    return base;
+  },
+
+  shouldSkipHeavyEffects() {
+    return this.isLowEnd() || !!document.querySelector('.reduce-animations');
+  }
+};
+
+// Add no-animations class to body for low-end devices
+if (PerformanceDetector.isLowEnd()) {
+  document.documentElement.classList.add('reduce-animations');
+}
+
 // ===== PARTICLES SYSTEM =====
 class ParticleSystem {
   constructor() {
     this.container = document.querySelector('.particles-container');
     if (!this.container) return;
-    this.particleCount = Math.min(
-      Math.floor(window.innerWidth / 30),
-      40
-    );
+    // Skip particles entirely on low-end devices
+    if (PerformanceDetector.shouldSkipHeavyEffects()) return;
+    this.particleCount = PerformanceDetector.getParticleCount();
+    if (this.particleCount <= 0) return;
     this.init();
   }
 

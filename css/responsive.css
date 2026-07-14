@@ -253,6 +253,27 @@
   }
 }
 
+/* ===== .reduce-animations (JS-detected low-end devices) ===== */
+.reduce-animations .particle { display: none !important; }
+.reduce-animations .hero-orb { display: none !important; }
+.reduce-animations .stagger-children > * { transition-delay: 0s !important; opacity: 1 !important; transform: none !important; }
+.reduce-animations .reveal,
+.reduce-animations .reveal-left,
+.reduce-animations .reveal-right,
+.reduce-animations .reveal-scale { opacity: 1 !important; transform: none !important; }
+.reduce-animations .ill-monitor { animation: none !important; }
+.reduce-animations .btn-pulse-glow { animation: none !important; }
+.reduce-animations .shimmer { background: none !important; animation: none !important; }
+.reduce-animations .skeleton { background: #e8e8e8 !important; animation: none !important; }
+.reduce-animations .circuit-bg { opacity: 0.15 !important; }
+.reduce-animations .circuit-bg::before { animation: none !important; }
+.reduce-animations .member-avatar .avatar-ring { animation: none !important; }
+.reduce-animations .nav-logo::after { animation: none !important; }
+.reduce-animations .equip-card:hover,
+.reduce-animations .member-card:hover,
+.reduce-animations .feature-card:hover { transform: none !important; }
+.reduce-animations .btn:hover { transform: none !important; }
+
 /* ===== REDUCED MOTION ===== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -260,6 +281,55 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* Allow essential transitions (opacity/visibility only) */
+  .loading-screen,
+  .login-modal,
+  .modal-overlay,
+  .notification {
+    transition: opacity 0.01ms ease, visibility 0.01ms ease !important;
+  }
+
+  /* Kill decorative elements */
+  .particle { display: none !important; }
+  .hero-orb { display: none !important; }
+  .ill-monitor { animation: none !important; }
+  .ill-glow-ring { display: none !important; }
+  .member-avatar .avatar-ring { animation: none !important; }
+  .nav-logo::after { animation: none !important; }
+  .stagger-children > * { transition-delay: 0s !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .reveal-left { opacity: 1 !important; transform: none !important; }
+  .reveal-right { opacity: 1 !important; transform: none !important; }
+  .reveal-scale { opacity: 1 !important; transform: none !important; }
+  .stagger-children > * { opacity: 1 !important; transform: none !important; }
+  .btn-pulse-glow { animation: none !important; }
+  .shimmer { background: none !important; animation: none !important; }
+  .skeleton { background: #e8e8e8 !important; animation: none !important; }
+  .circuit-bg { opacity: 0.3 !important; }
+  .circuit-bg::before { animation: none !important; }
+
+  /* Prevent hover transitions from causing layout shifts */
+  .equip-card:hover { transform: none !important; }
+  .member-card:hover { transform: none !important; }
+  .feature-card:hover { transform: none !important; }
+  .btn:hover { transform: none !important; }
+}
+
+/* ===== REDUCED DATA (low-end/save-data mode) ===== */
+@media (prefers-reduced-data: reduce) {
+  .particle { display: none !important; }
+  .circuit-bg { opacity: 0.15 !important; }
+  .hero-orb { opacity: 0.08 !important; }
+  .hero-illustration img { filter: none !important; }
+  .skeleton { background: #e8e8e8 !important; animation: none !important; }
+}
+
+/* ===== REDUCED TRANSPARENCY ===== */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card { background: white !important; backdrop-filter: none !important; }
+  .card-bg { background: white !important; }
+  .navbar { background: white !important; backdrop-filter: none !important; }
 }
 
 /* ===== HIGH CONTRAST ===== */
