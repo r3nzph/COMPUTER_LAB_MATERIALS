@@ -608,7 +608,7 @@ class AdminDashboard {
       actions.style.display = 'flex';
     } else {
       const defaultImg = SVG.getEquipImagePath(e.name);
-      preview.innerHTML = `<img src="${defaultImg}" alt="${e.name}" onerror="this.onerror=null;this.innerHTML='<i class=\\'fas fa-image\\'></i>';" />`;
+      preview.innerHTML = `<img src="${defaultImg}" alt="${e.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.onerror=null;this.outerHTML='${SVG.getFallbackHTML(120)}';" />`;
       dropzone?.classList.remove('has-image');
       actions.style.display = 'none';
     }

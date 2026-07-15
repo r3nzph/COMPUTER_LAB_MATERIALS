@@ -83,11 +83,12 @@ const SVG = {
   },
 
   // ===== FALLBACK HTML (shown when image fails to load) =====
-  // Uses minimal inline content to avoid escaping issues
+  // Returns a zero-quote HTML fallback safe to embed inside onerror="this.outerHTML='...'"
+  // Uses a Unicode emoji instead of inline SVG to avoid quoting issues in JS/eval context
   getFallbackHTML(size) {
-    const iconSize = size ? Math.min(size * 0.38, 28) : 24;
+    const iconSize = size ? Math.min(size * 0.5, 32) : 24;
     return `<div style=display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(var(--primary-rgb),0.03);color:var(--text-light);font-size:.6rem;text-align:center;gap:3px;padding:4px;box-sizing:border-box;border-radius:6px;>
-      <svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" style=opacity:.4;display:block;><rect x=3 y=3 width=18 height=18 rx=3 stroke=currentColor stroke-width=1.5 fill=none/><circle cx=12 cy=11 r=3 stroke=currentColor stroke-width=1.5 fill=none/><path d=M6 19l5-6 3 2 4-4 4 8 stroke=currentColor stroke-width=1.5 fill=none/></svg>
+      <span style=display:block;font-size:${iconSize}px;line-height:1;opacity:.4;>📷</span>
       <span>No Equipment<br/>Image Available</span>
     </div>`;
   },
