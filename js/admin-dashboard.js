@@ -293,9 +293,11 @@ class AdminDashboard {
       return `<tr>
         <td data-label="ID" style="font-size:0.75rem;font-family:monospace;">${r.id}</td>
         <td data-label="Student">${r.studentName}</td>
+        <td data-label="Student ID" style="font-size:0.75rem;font-family:monospace;">${r.studentId || 'GUEST'}</td>
         <td data-label="Equipment">${r.equipment}</td>
         <td data-label="Date">${new Date(r.borrowDate).toLocaleDateString()}</td>
         <td data-label="Return">${new Date(r.returnDate).toLocaleDateString()}</td>
+        <td data-label="Fee"><strong>₱${r.fee || 0}</strong></td>
         <td data-label="Status"><span class="status-pill ${r.status === 'Pending' ? 'pending' : r.status === 'Returned' ? 'returned' : 'approved'}">${r.status}</span></td>
         <td data-label="Action" style="display:flex;gap:4px;">${actionHtml}</td>
       </tr>`;
