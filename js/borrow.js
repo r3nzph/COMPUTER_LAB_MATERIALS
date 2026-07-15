@@ -175,10 +175,9 @@ class BorrowManager {
 
       if (stockDisplay) stockDisplay.textContent = equip.stocks + ' available';
 
-      const equipImgPath = SVG.getEquipImagePath(equip.name, equip);
       const isCustomImg = equip.imagePath && equip.imagePath.startsWith('data:');
       const equipImgHtml = isCustomImg
-        ? `<img src="${equipImgPath}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;" />`
+        ? `<img src="${SVG.getEquipImagePath(equip.name, equip)}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;" />`
         : `<div style="width:60px;height:60px;background:rgba(var(--primary-rgb),0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
             ${SVG.getEquipIconHTML(equip.category, 30)}
           </div>`;
