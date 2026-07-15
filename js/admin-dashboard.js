@@ -27,7 +27,10 @@ class AdminDashboard {
     this.renderStocks();
     this.renderMembers();
     this.renderCharts();
+    this.renderCalendar();
     this.loadSettings();
+    this.setupThemeSelector();
+    this.setupBackupRestore();
     this.setupActivityRefresh();
     this.setupEquipmentModals();
     this.setupStockActions();
@@ -692,6 +695,7 @@ class AdminDashboard {
   renderCharts() {
     this.renderEquipStatusChart();
     this.renderBorrowTrendChart();
+    this.renderRevenueChart();
   }
 
   renderEquipStatusChart() {
@@ -783,6 +787,223 @@ class AdminDashboard {
   }
 
   // ===== SETTINGS =====
+  renderRevenueChart() {
+    const history = Store.getBorrowHistory();
+    const months = [];
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push({
+        date: d,
+        label: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        revenue: 0
+      });
+    }
+    history.forEach(r => {
+      const d = new Date(r.borrowDate);
+      const match = months.find(m => m.date.getMonth() === d.getMonth() && m.date.getFullYear() === d.getFullYear());
+      if (match && r.status === 'Approved') match.revenue += r.fee || 0;
+    });
+
+    const max = Math.max(1, ...months.map(m => m.revenue));
+    const w = 280, h = 200, barW = 32, gap = 12, padL = 10, padR = 10, padT = 20, padB = 30;
+    let svg = `<svg viewBox="0 0 ${w} ${h}" style="max-width:100%;">`;
+
+    for (let i = 0; i <= 4; i++) {
+      const y = padT + ((h - padT - padB) / 4) * i;
+      svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="rgba(var(--primary-rgb),0.06)" stroke-width="1"/>`;
+      svg += `<text x="${padL - 4}" y="${y + 3}" font-size="0.6rem" fill="var(--text-light)" text-anchor="end">₱${Math.round(max * (1 - i / 4))}</text>`;
+    }
+
+    months.forEach((m, i) => {
+      const x = padL + i * (barW + gap);
+      const barH = (m.revenue / max) * (h - padT - padB);
+      const y = padT + (h - padT - padB) - barH;
+      const color = m.revenue > 0 ? '#00c853' : 'rgba(var(--primary-rgb),0.12)';
+      svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH || 2}" rx="4" fill="${color}" class="chart-bar"><title>${m.label}: ₱${m.revenue}</title></rect>`;
+      if (m.revenue > 0) svg += `<text class="chart-bar-value" x="${x + barW / 2}" y="${y - 6}" fill="#00c853" font-size="0.65rem">₱${m.revenue}</text>`;
+      svg += `<text class="chart-bar-label" x="${x + barW / 2}" y="${padT + (h - padT - padB) + 16}">${m.label}</text>`;
+    });
+
+    svg += `</svg>`;
+    const container = document.getElementById('revenueChart');
+    if (container) container.innerHTML = svg;
+  }
+
+  // ===== CALENDAR =====
+  renderCalendar() {
+    const calendarEl = document.getElementById('adminCalendar');
+    if (!calendarEl) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const events = Store.getCalendarEvents(year, month);
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = now.getDate();
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let html = `<div class="calendar-header"><span class="calendar-month">${monthNames[month]} ${year}</span></div>`;
+    html += `<div class="calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>`;
+    html += `<div class="calendar-days">`;
+
+    for (let i = 0; i < firstDay; i++) {
+      html += `<div class="cal-day cal-day-empty"></div>`;
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayEvents = events.filter(e =>
+        e.date.getFullYear() === year &&
+        e.date.getMonth() === month &&
+        e.date.getDate() === day
+      );
+      const isToday = day === today;
+      const hasEvents = dayEvents.length > 0;
+      const pendingEvents = dayEvents.filter(e => e.status === 'Pending').length;
+      html += `<div class="cal-day ${isToday ? 'cal-today' : ''} ${hasEvents ? 'cal-has-events' : ''}" title="${dayEvents.map(e => `${e.title} (${e.status})`).join('\n')}">
+        <span class="cal-day-num">${day}</span>
+        ${hasEvents ? `<span class="cal-day-dot ${pendingEvents > 0 ? 'cal-dot-pending' : 'cal-dot-done'}"></span>` : ''}
+      </div>`;
+    }
+
+    html += `</div>`;
+
+    // Event list below calendar
+    if (events.length > 0) {
+      html += `<div class="calendar-events">`;
+      const todayEvents = events.filter(e => e.date.getDate() === today);
+      const showEvents = todayEvents.length > 0 ? todayEvents : events.slice(0, 3);
+      html += `<div class="cal-events-title">${todayEvents.length > 0 ? "Today's" : "This month's"} events</div>`;
+      showEvents.forEach(e => {
+        html += `<div class="cal-event-item">
+          <span class="cal-event-dot ${e.status === 'Pending' ? 'cal-dot-pending' : e.status === 'Approved' ? 'cal-dot-approved' : 'cal-dot-done'}"></span>
+          <span class="cal-event-title">${e.title}</span>
+          <span class="cal-event-status status-pill ${e.status === 'Pending' ? 'pending' : e.status === 'Approved' ? 'approved' : 'returned'}" style="font-size:0.65rem;padding:0.1rem 0.4rem;">${e.status}</span>
+        </div>`;
+      });
+      if (events.length > 3 && todayEvents.length === 0) {
+        html += `<div style="font-size:0.72rem;color:var(--text-light);text-align:center;margin-top:0.3rem;">+${events.length - 3} more events</div>`;
+      }
+      html += `</div>`;
+    }
+
+    calendarEl.innerHTML = html;
+  }
+
+  // ===== THEME =====
+  setupThemeSelector() {
+    const selector = document.getElementById('themeSelector');
+    if (!selector) return;
+    selector.value = Store.getTheme();
+    selector.addEventListener('change', (e) => {
+      Store.setTheme(e.target.value);
+      Notification.show('Theme Updated', `Theme changed to ${e.target.value}.`);
+    });
+  }
+
+  // ===== BACKUP / RESTORE / EXPORT / IMPORT =====
+  setupBackupRestore() {
+    document.getElementById('btnBackupData')?.addEventListener('click', () => {
+      const data = Store.exportAllData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comlab-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      Store.logActivity('Backup Created', {
+        admin: auth.getUserName(),
+        message: `Full system backup downloaded (${Math.round(blob.size / 1024)} KB)`
+      });
+      Notification.show('Backup Complete', 'System data has been exported successfully.');
+    });
+
+    document.getElementById('btnRestoreData')?.addEventListener('click', () => {
+      const input = document.getElementById('restoreFileInput');
+      if (!input || !input.files || !input.files[0]) {
+        Notification.show('No File', 'Please select a backup file first.', 'error');
+        return;
+      }
+      if (!confirm('⚠️ This will OVERWRITE all current data with the backup. Continue?')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          const result = Store.importAllData(data);
+          if (result.success) {
+            Store.logActivity('Data Restored', {
+              admin: auth.getUserName(),
+              message: 'Full system data restored from backup file'
+            });
+            Notification.show('Restore Complete', 'All data has been restored from backup.');
+            this.refreshAll();
+          } else {
+            Notification.show('Restore Failed', result.message, 'error');
+          }
+        } catch (err) {
+          Notification.show('Invalid File', 'Could not parse backup file: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(input.files[0]);
+    });
+
+    // Export individual sections
+    ['exportEquipments', 'exportBorrows', 'exportStudents', 'exportActivity', 'exportSettings'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', () => {
+        const sectionMap = {
+          exportEquipments: 'equipments',
+          exportBorrows: 'borrows',
+          exportStudents: 'students',
+          exportActivity: 'activity',
+          exportSettings: 'settings'
+        };
+        const section = sectionMap[id];
+        const data = Store.exportSection(section);
+        if (!data) return;
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `comlab-${section}-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        Notification.show('Export Complete', `${section} data has been exported.`);
+      });
+    });
+
+    // Import individual sections
+    document.getElementById('btnImportEquipments')?.addEventListener('click', () => this._importSection('equipments'));
+    document.getElementById('btnImportBorrows')?.addEventListener('click', () => this._importSection('borrows'));
+  }
+
+  _importSection(section) {
+    const input = document.getElementById('importFileInput');
+    if (!input || !input.files || !input.files[0]) {
+      Notification.show('No File', 'Please select a JSON file first.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const result = Store.importSection(section, data);
+        if (result.success) {
+          Notification.show('Import Complete', `${section} data imported successfully.`);
+          this.refreshAll();
+        } else {
+          Notification.show('Import Failed', result.message, 'error');
+        }
+      } catch (err) {
+        Notification.show('Invalid File', 'Could not parse JSON: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(input.files[0]);
+  }
+
   renderActivityLog() {
     const log = Store.getActivityLog();
     const body = document.getElementById('activityLogBody');

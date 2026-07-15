@@ -419,6 +419,125 @@ class StorageManager {
     this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'reset' });
   }
 
+  // ===== BACKUP / RESTORE / EXPORT / IMPORT =====
+  exportAllData() {
+    const data = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      equipments: this.getEquipments(),
+      borrowHistory: this.getBorrowHistory(),
+      registeredStudents: this.getRegisteredStudents(),
+      activityLog: this.getActivityLog(),
+      settings: this.getSettings(),
+      admins: this.getAdmins(),
+      passwords: this.getPasswordOverrides(),
+      counters: {
+        equipmentId: this.get(STORAGE_KEYS.EQUIPMENT_ID),
+        borrowId: this.get(STORAGE_KEYS.BORROW_IDS)
+      }
+    };
+    return data;
+  }
+
+  importAllData(data) {
+    if (!data || !data.version) return { success: false, message: 'Invalid backup file.' };
+    try {
+      if (data.equipments) this.setEquipments(data.equipments);
+      if (data.borrowHistory) this.setBorrowHistory(data.borrowHistory);
+      if (data.registeredStudents) this.set(STORAGE_KEYS.REGISTERED, data.registeredStudents);
+      if (data.activityLog) this.setActivityLog(data.activityLog);
+      if (data.settings) this.saveSettings(data.settings);
+      if (data.admins) this.set(STORAGE_KEYS.ADMINS, data.admins);
+      if (data.passwords) this.set(STORAGE_KEYS.PASSWORDS, data.passwords);
+      if (data.counters) {
+        if (data.counters.equipmentId) this.set(STORAGE_KEYS.EQUIPMENT_ID, data.counters.equipmentId);
+        if (data.counters.borrowId) this.set(STORAGE_KEYS.BORROW_IDS, data.counters.borrowId);
+      }
+      // Rebuild cache
+      this._cache = {};
+      this._emit(StoreEvents.DATA_CHANGED, { action: 'import' });
+      this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'import' });
+      this._emit(StoreEvents.BORROW_CHANGED, { action: 'import' });
+      this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'import' });
+      return { success: true, message: 'Data imported successfully!' };
+    } catch (e) {
+      return { success: false, message: 'Import failed: ' + e.message };
+    }
+  }
+
+  exportSection(section) {
+    const map = {
+      equipments: () => ({ equipments: this.getEquipments() }),
+      borrows: () => ({ borrowHistory: this.getBorrowHistory() }),
+      students: () => ({ registeredStudents: this.getRegisteredStudents() }),
+      activity: () => ({ activityLog: this.getActivityLog() }),
+      settings: () => ({ settings: this.getSettings() })
+    };
+    if (map[section]) {
+      const data = map[section]();
+      data.version = '1.0';
+      data.exportedAt = new Date().toISOString();
+      return data;
+    }
+    return null;
+  }
+
+  importSection(section, data) {
+    const map = {
+      equipments: (d) => { if (d.equipments) this.setEquipments(d.equipments); },
+      borrows: (d) => { if (d.borrowHistory) this.setBorrowHistory(d.borrowHistory); },
+      students: (d) => { if (d.registeredStudents) this.set(STORAGE_KEYS.REGISTERED, d.registeredStudents); },
+      activity: (d) => { if (d.activityLog) this.setActivityLog(d.activityLog); },
+      settings: (d) => { if (d.settings) this.saveSettings(d.settings); }
+    };
+    if (map[section]) {
+      map[section](data);
+      this._cache = {};
+      this._emit(StoreEvents.DATA_CHANGED, { action: 'importSection', section });
+      this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'importSection' });
+      this._emit(StoreEvents.BORROW_CHANGED, { action: 'importSection' });
+      return { success: true, message: 'Section imported successfully!' };
+    }
+    return { success: false, message: 'Unknown section.' };
+  }
+
+  // ===== THEME =====
+  getTheme() {
+    return localStorage.getItem('comlab_theme') || 'light';
+  }
+
+  setTheme(theme) {
+    localStorage.setItem('comlab_theme', theme);
+    this.applyTheme(theme);
+    this._emit(StoreEvents.SETTINGS_CHANGED, { theme });
+  }
+
+  applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+  }
+
+  initTheme() {
+    const theme = this.getTheme();
+    this.applyTheme(theme);
+    return theme;
+  }
+
+  // ===== CALENDAR HELPERS =====
+  getCalendarEvents(year, month) {
+    const history = this.getBorrowHistory();
+    return history.filter(r => {
+      const d = new Date(r.borrowDate);
+      return d.getFullYear() === year && d.getMonth() === month;
+    }).map(r => ({
+      date: new Date(r.borrowDate),
+      title: r.equipment,
+      student: r.studentName,
+      id: r.id,
+      status: r.status
+    }));
+  }
+
   // ===== CATEGORIES =====
   getCategories() {
     return ['Hand Tool', 'Testing', 'Networking', 'Safety', 'Cleaning', 'Storage'];

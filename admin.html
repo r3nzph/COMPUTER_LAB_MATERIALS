@@ -75,6 +75,47 @@
     .trend-tooltip{position:absolute;background:#141414;color:white;padding:4px 10px;border-radius:6px;font-size:0.72rem;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:10;white-space:nowrap;}
     .chart-donut-segment{transition:opacity 0.25s ease;cursor:pointer;}
     .chart-donut-segment:hover{opacity:0.7;}
+    /* ===== CALENDAR ===== */
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;}
+    .calendar-month{font-weight:700;font-size:0.9rem;}
+    .calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:0.3rem;}
+    .calendar-weekdays span{text-align:center;font-size:0.68rem;font-weight:600;color:var(--text-light);padding:0.2rem 0;}
+    .calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+    .cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:6px;font-size:0.72rem;font-weight:500;color:var(--text-secondary);cursor:default;position:relative;transition:var(--transition);}
+    .cal-day:hover{background:rgba(var(--primary-rgb),0.04);}
+    .cal-day-empty{visibility:hidden;}
+    .cal-today{background:var(--gradient-1)!important;color:white!important;font-weight:700!important;box-shadow:0 2px 8px rgba(var(--primary-rgb),0.25);}
+    .cal-has-events{cursor:pointer;}
+    .cal-day-num{line-height:1;}
+    .cal-day-dot{width:4px;height:4px;border-radius:50%;margin-top:2px;}
+    .cal-dot-pending{background:#c79100;}
+    .cal-dot-approved{background:var(--success);}
+    .cal-dot-done{background:var(--text-light);}
+    .calendar-events{margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid rgba(var(--primary-rgb),0.06);}
+    .cal-events-title{font-size:0.72rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem;}
+    .cal-event-item{display:flex;align-items:center;gap:6px;padding:0.3rem 0;font-size:0.78rem;}
+    .cal-event-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .cal-event-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cal-event-status{flex-shrink:0;}
+    /* ===== DARK THEME ===== */
+    [data-theme="dark"], .dark-theme{
+      --bg:#1a1a2e;
+      --card-bg:rgba(30,30,50,0.92);
+      --text-primary:#e0e0e0;
+      --text-secondary:#999;
+      --text-light:#666;
+      --admin-sidebar:#0d0d1a;
+    }
+    .dark-theme .admin-card,.dark-theme .admin-section{background:var(--card-bg);border-color:rgba(255,255,255,0.05);}
+    .dark-theme .navbar{background:rgba(26,26,46,0.9);}
+    .dark-theme .nav-links a{color:#999;}
+    .dark-theme .login-modal-content{background:rgba(30,30,50,0.95);}
+    .dark-theme .login-form .form-group input{background:rgba(255,255,255,0.05);color:#e0e0e0;}
+    .dark-theme .dropdown-menu{background:var(--card-bg);border-color:rgba(255,255,255,0.08);}
+    .dark-theme .cal-day{color:#999;}
+    .dark-theme .skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.04) 75%);}
+    /* ===== BACKUP SECTION ===== */
+    #btnRestoreLabel:hover{background:rgba(33,150,243,0.2)!important;}
     /* ===== SKELETON LOADING ===== */
     .skeleton{background:linear-gradient(90deg,rgba(var(--primary-rgb),0.04) 25%,rgba(var(--primary-rgb),0.1) 50%,rgba(var(--primary-rgb),0.04) 75%);background-size:200% 100%;animation:skeletonShimmer 1.5s ease-in-out infinite;border-radius:6px;}
     .skeleton-card{height:90px;margin-bottom:0;}
@@ -283,14 +324,14 @@
               <p style="font-size:0.85rem;color:var(--text-secondary);">System is running normally. All equipment available for borrowing.</p>
             </div>
             <div class="admin-section">
-              <h2><i class="fas fa-calendar"></i> Today</h2>
-              <div id="todayWidget" style="font-size:0.9rem;font-weight:600;"></div>
+              <h2><i class="fas fa-calendar"></i> Calendar</h2>
+              <div id="adminCalendar"></div>
             </div>
           </div>
         </div>
 
         <!-- CHARTS ROW -->
-        <div class="admin-grid admin-charts-row">
+        <div class="admin-grid" style="grid-template-columns:1fr 1fr 1fr;gap:1rem;">
           <div class="admin-section">
             <h2><i class="fas fa-chart-pie"></i> Equipment Status</h2>
             <div id="equipStatusChart" class="chart-container skeleton-fade"><div class="skeleton-donut"></div></div>
@@ -299,6 +340,10 @@
           <div class="admin-section">
             <h2><i class="fas fa-chart-bar"></i> Borrow Trend <span class="trend-subtitle" style="font-size:0.72rem;font-weight:400;color:var(--text-light);">Last 7 days</span></h2>
             <div id="borrowTrendChart" class="chart-container skeleton-fade"><div class="skeleton-chart-bar"><span style="height:50%"></span><span style="height:70%"></span><span style="height:35%"></span><span style="height:85%"></span><span style="height:60%"></span><span style="height:45%"></span><span style="height:55%"></span></div></div>
+          </div>
+          <div class="admin-section">
+            <h2><i class="fas fa-chart-line"></i> Revenue <span class="trend-subtitle" style="font-size:0.72rem;font-weight:400;color:var(--text-light);">Last 6 months</span></h2>
+            <div id="revenueChart" class="chart-container skeleton-fade"><div class="skeleton-chart-bar"><span style="height:30%"></span><span style="height:55%"></span><span style="height:40%"></span><span style="height:70%"></span><span style="height:50%"></span><span style="height:65%"></span></div></div>
           </div>
         </div>
       </div>
@@ -396,6 +441,53 @@
         <div class="admin-section">
           <h2><i class="fas fa-history"></i> Activity Log</h2>
           <div class="admin-table"><table><thead><tr><th>Date/Time</th><th>Action</th><th>Equipment</th><th>Admin</th><th>Details</th></tr></thead><tbody id="activityLogBody"></tbody></table></div>
+        </div>
+        <div class="admin-section">
+          <h2><i class="fas fa-palette"></i> Theme</h2>
+          <div class="form-group"><label>Dashboard Theme</label>
+            <select id="themeSelector" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;">
+              <option value="light">☀️ Light</option>
+              <option value="dark">🌙 Dark</option>
+              <option value="system">💻 System Default</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-section">
+          <h2><i class="fas fa-database"></i> Backup &amp; Restore</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div style="padding:1rem;border:1px dashed rgba(var(--primary-rgb),0.15);border-radius:8px;text-align:center;">
+              <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Full Backup</div>
+              <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.8rem;">Download all system data as JSON</p>
+              <button class="btn btn-primary" id="btnBackupData" style="padding:0.5rem 1rem;font-size:0.82rem;border-radius:8px;"><i class="fas fa-download"></i> Download Backup</button>
+            </div>
+            <div style="padding:1rem;border:1px dashed rgba(var(--primary-rgb),0.15);border-radius:8px;text-align:center;">
+              <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Restore from Backup</div>
+              <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:0.8rem;">Upload a backup JSON file</p>
+              <label style="display:inline-block;padding:0.5rem 1rem;background:rgba(33,150,243,0.1);color:#1e88e5;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:var(--transition);" id="btnRestoreLabel">
+                <i class="fas fa-upload"></i> Select File
+                <input type="file" id="restoreFileInput" accept=".json" style="display:none;" />
+              </label>
+              <button class="btn" id="btnRestoreData" style="display:block;width:100%;margin-top:0.5rem;padding:0.4rem;font-size:0.8rem;border-radius:6px;background:rgba(255,23,68,0.06);color:var(--danger);border:1px solid rgba(255,23,68,0.15);cursor:pointer;font-weight:600;font-family:inherit;"><i class="fas fa-undo-alt"></i> Restore from File</button>
+            </div>
+          </div>
+        </div>
+        <div class="admin-section">
+          <h2><i class="fas fa-file-export"></i> Export / Import Sections</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.8rem;margin-bottom:1rem;">
+            <button class="btn-sm blue" id="exportEquipments" style="padding:0.5rem;font-size:0.78rem;"><i class="fas fa-tools"></i> Export Equipments</button>
+            <button class="btn-sm blue" id="exportBorrows" style="padding:0.5rem;font-size:0.78rem;"><i class="fas fa-clipboard-list"></i> Export Borrows</button>
+            <button class="btn-sm blue" id="exportStudents" style="padding:0.5rem;font-size:0.78rem;"><i class="fas fa-users"></i> Export Students</button>
+            <button class="btn-sm blue" id="exportActivity" style="padding:0.5rem;font-size:0.78rem;"><i class="fas fa-history"></i> Export Activity</button>
+            <button class="btn-sm blue" id="exportSettings" style="padding:0.5rem;font-size:0.78rem;"><i class="fas fa-cog"></i> Export Settings</button>
+          </div>
+          <div style="display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;">
+            <label style="padding:0.5rem 1rem;background:rgba(33,150,243,0.1);color:#1e88e5;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">
+              <i class="fas fa-file-import"></i> Import File
+              <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+            </label>
+            <button class="btn-sm green" id="btnImportEquipments" style="padding:0.5rem;font-size:0.78rem;">Import → Equipments</button>
+            <button class="btn-sm green" id="btnImportBorrows" style="padding:0.5rem;font-size:0.78rem;">Import → Borrows</button>
+          </div>
         </div>
         <div class="admin-section">
           <h2><i class="fas fa-exclamation-triangle"></i> Data Management</h2>
