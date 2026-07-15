@@ -58,6 +58,8 @@
     .warning-item{display:flex;align-items:center;gap:8px;padding:0.5rem 0;border-bottom:1px solid rgba(var(--primary-rgb),0.04);font-size:0.85rem;}
     .warning-item .wi-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
     /* Charts */
+    .admin-content-area{display:none;}
+    .admin-content-area.active{display:block;}
     .admin-charts-row{margin-bottom:0;grid-template-columns:1fr 1fr;}
     .chart-container{position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;}
     .chart-container svg{width:100%;max-width:100%;height:auto;overflow:visible;}
@@ -314,21 +316,21 @@
     }
 
     .admin-sidebar-overlay {
-      display: none;
+      visibility: hidden;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
       backdrop-filter: blur(4px);
       z-index: 98;
       opacity: 0;
-      transition: opacity 0.3s ease, display 0s 0.3s;
+      transition: opacity 0.3s ease, visibility 0s 0.3s;
       pointer-events: none;
     }
     .admin-sidebar-overlay.open {
-      display: block;
+      visibility: visible;
       opacity: 1;
       pointer-events: auto;
-      transition: opacity 0.3s ease, display 0s 0s;
+      transition: opacity 0.3s ease, visibility 0s 0s;
     }
 
     @media(max-width:767px){
@@ -374,7 +376,7 @@
       }
 
       .admin-sidebar-overlay.open {
-        display: block;
+        visibility: visible;
       }
       .admin-cards { grid-template-columns: repeat(2,1fr); gap: 0.6rem; }
       .admin-card { padding: 0.8rem; }
