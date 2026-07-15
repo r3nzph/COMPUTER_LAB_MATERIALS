@@ -18,6 +18,7 @@ class AdminDashboard {
 
     await Store.init();
     await inventory.loadEquipments();
+    Store.initTheme();
 
     this.setupNavigation();
     this.setupSidebar();
@@ -160,11 +161,13 @@ class AdminDashboard {
       alerts.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;">✓ All equipment adequately stocked.</p>';
     }
 
-    // Today widget
-    const today = new Date();
-    document.getElementById('todayWidget').textContent = today.toLocaleDateString('en-US', {
-      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-    });
+    // Today widget (replaced by calendar view - kept for reference)
+    const todayEl = document.getElementById('todayWidget');
+    if (todayEl) {
+      todayEl.textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      });
+    }
   }
 
   // ===== CUSTOM EVENT LISTENERS =====

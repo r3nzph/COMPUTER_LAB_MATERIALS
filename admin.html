@@ -139,6 +139,7 @@
     .admin-dismiss-btn{padding:0.25rem 0.6rem;font-size:0.7rem;}
 
     @media(max-width:1024px){
+      .admin-grid.admin-charts-row{grid-template-columns:1fr!important;}
       .admin-sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:0.8rem;}
       .admin-sidebar .admin-logo{width:100%;text-align:center;margin-bottom:0.5rem;}
       .admin-sidebar .admin-nav{flex-direction:row;flex-wrap:wrap;justify-content:center;}
@@ -325,13 +326,13 @@
             </div>
             <div class="admin-section">
               <h2><i class="fas fa-calendar"></i> Calendar</h2>
-              <div id="adminCalendar"></div>
+              <div id="adminCalendar"><div class="skeleton-fade"><div class="calendar-weekdays"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="calendar-days">${'<div class="skeleton" style="aspect-ratio:1;border-radius:6px;"></div>'.repeat(35)}</div></div></div>
             </div>
           </div>
         </div>
 
         <!-- CHARTS ROW -->
-        <div class="admin-grid" style="grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+        <div class="admin-grid admin-charts-row" style="grid-template-columns:1fr 1fr 1fr;gap:1rem;">
           <div class="admin-section">
             <h2><i class="fas fa-chart-pie"></i> Equipment Status</h2>
             <div id="equipStatusChart" class="chart-container skeleton-fade"><div class="skeleton-donut"></div></div>
