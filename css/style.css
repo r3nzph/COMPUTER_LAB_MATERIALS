@@ -1204,6 +1204,24 @@ h2 { font-size: var(--fs-section); }
   transform: translateY(-6px);
   box-shadow: 0 12px 40px rgba(var(--primary-rgb), 0.08);
 }
+.equip-card .card-image-wrap {
+  width: 100%;
+  height: 160px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: rgba(var(--primary-rgb), 0.04);
+  position: relative;
+}
+.equip-card .equip-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.equip-card:hover .equip-card-img {
+  transform: scale(1.05);
+}
 .equip-card .card-icon {
   width: 50px; height: 50px;
   background: rgba(var(--primary-rgb), 0.07);
@@ -1236,7 +1254,7 @@ h2 { font-size: var(--fs-section); }
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.equip-card .fee { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+.equip-card .fee { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
 .equip-card .fee small { font-size: 0.7rem; font-weight: 500; color: var(--text-light); }
 .equip-card .stocks { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
 .equip-card .stocks span { color: var(--text-primary); }

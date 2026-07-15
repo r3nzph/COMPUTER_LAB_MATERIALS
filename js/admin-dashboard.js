@@ -604,7 +604,7 @@ class AdminDashboard {
       return {
         id: s.id,
         name: s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
-        course: s.course || 'N/A',
+        department: s.department || 'N/A',
         year: s.year || 'N/A',
         section: s.section || 'N/A',
         email: s.email || 'N/A',
@@ -619,7 +619,7 @@ class AdminDashboard {
       data = data.filter(s =>
         s.name.toLowerCase().includes(searchText) ||
         s.id.toLowerCase().includes(searchText) ||
-        s.course.toLowerCase().includes(searchText)
+        s.department.toLowerCase().includes(searchText)
       );
     }
 
@@ -634,7 +634,7 @@ class AdminDashboard {
     container.innerHTML = `
       <div class="admin-table"><table>
         <thead><tr>
-          <th>Student</th><th>ID</th><th>Course</th><th>Year</th><th>Section</th><th>Borrows</th><th>Status</th><th>Action</th>
+          <th>Student</th><th>ID</th><th>Department</th><th>Year</th><th>Section</th><th>Borrows</th><th>Status</th><th>Action</th>
         </tr></thead>
         <tbody>${data.map(s => `
           <tr>
@@ -643,7 +643,7 @@ class AdminDashboard {
               <strong>${s.name}</strong>
             </div></td>
             <td data-label="ID" style="font-family:monospace;font-size:0.78rem;">${s.id}</td>
-            <td data-label="Course">${s.course}</td>
+            <td data-label="Department">${s.department}</td>
             <td data-label="Year">${s.year}</td>
             <td data-label="Section">${s.section}</td>
             <td data-label="Borrows"><span style="font-weight:700;">${s.borrowCount}</span> <span style="font-size:0.75rem;color:${s.activeCount > 0 ? '#c79100' : 'var(--text-light)'};">(${s.activeCount} active)</span></td>

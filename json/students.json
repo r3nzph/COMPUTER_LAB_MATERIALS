@@ -2,14 +2,14 @@
   {
     "id": "TUPT-23-1001",
     "name": "Juan Dela Cruz",
-    "course": "BSIT",
+    "department": "BASD",
     "year": "2nd Year",
     "password": "student123"
   },
   {
     "id": "TUPT-23-1002",
     "name": "Maria Santos",
-    "course": "BSCS",
+    "department": "CAAD",
     "year": "3rd Year",
     "password": "student123"
   },

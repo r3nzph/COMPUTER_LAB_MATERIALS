@@ -73,6 +73,7 @@ class StorageManager {
         minStocks: 3,
         condition: 'Good',
         description: '',
+        imagePath: e.imagePath || SVG.getEquipImagePath(e.name),
         archived: false,
         dateAdded: new Date().toISOString()
       })));

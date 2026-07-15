@@ -5,7 +5,8 @@
     "category": "Hand Tool",
     "stocks": 8,
     "borrowFee": 20,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/screwdriver-set.jpg"
   },
   {
     "id": 2,
@@ -13,7 +14,8 @@
     "category": "Hand Tool",
     "stocks": 12,
     "borrowFee": 15,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/long-nose-pliers.jpg"
   },
   {
     "id": 3,
@@ -21,7 +23,8 @@
     "category": "Hand Tool",
     "stocks": 10,
     "borrowFee": 15,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/wire-cutter.jpg"
   },
   {
     "id": 4,
@@ -29,7 +32,8 @@
     "category": "Hand Tool",
     "stocks": 6,
     "borrowFee": 35,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/soldering-iron.jpg"
   },
   {
     "id": 5,
@@ -37,7 +41,8 @@
     "category": "Testing",
     "stocks": 10,
     "borrowFee": 50,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/digital-multimeter.jpg"
   },
   {
     "id": 6,
@@ -45,7 +50,8 @@
     "category": "Testing",
     "stocks": 5,
     "borrowFee": 30,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/psu-tester.jpg"
   },
   {
     "id": 7,
@@ -53,7 +59,8 @@
     "category": "Testing",
     "stocks": 7,
     "borrowFee": 25,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/lan-tester.jpg"
   },
   {
     "id": 8,
@@ -61,7 +68,8 @@
     "category": "Networking",
     "stocks": 9,
     "borrowFee": 40,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/crimping-tool.jpg"
   },
   {
     "id": 9,
@@ -69,7 +77,8 @@
     "category": "Networking",
     "stocks": 4,
     "borrowFee": 75,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/network-switch.jpg"
   },
   {
     "id": 10,
@@ -77,7 +86,8 @@
     "category": "Networking",
     "stocks": 3,
     "borrowFee": 100,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/placeholder.jpg"
   },
   {
     "id": 11,
@@ -85,7 +95,8 @@
     "category": "Safety",
     "stocks": 15,
     "borrowFee": 10,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/placeholder.jpg"
   },
   {
     "id": 12,
@@ -93,7 +104,8 @@
     "category": "Safety",
     "stocks": 20,
     "borrowFee": 10,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/safety-goggles.jpg"
   },
   {
     "id": 13,
@@ -101,7 +113,8 @@
     "category": "Cleaning",
     "stocks": 4,
     "borrowFee": 30,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/electric-air-blower.jpg"
   },
   {
     "id": 14,
@@ -109,7 +122,8 @@
     "category": "Cleaning",
     "stocks": 10,
     "borrowFee": 15,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/isopropyl-alcohol.jpg"
   },
   {
     "id": 15,
@@ -117,6 +131,7 @@
     "category": "Storage",
     "stocks": 25,
     "borrowFee": 25,
-    "status": "Available"
+    "status": "Available",
+    "imagePath": "images/equipments/usb-drive.jpg"
   }
 ]

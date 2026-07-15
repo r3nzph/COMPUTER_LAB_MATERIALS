@@ -39,6 +39,51 @@ const SVG = {
     'default': `<svg viewBox="0 0 48 48" fill="none"><rect x="8" y="8" width="32" height="32" rx="6" fill="#990000" opacity="0.12"/><rect x="12" y="12" width="24" height="24" rx="4" fill="white" stroke="#990000" stroke-width="1.5"/><circle cx="24" cy="24" r="6" fill="#990000" opacity="0.1" stroke="#d32f2f" stroke-width="1.5"/><circle cx="24" cy="24" r="2" fill="#990000"/></svg>`
   },
 
+  // ===== LOCAL EQUIPMENT IMAGE MAPPING =====
+  _imageMap: {
+    'Digital Multimeter': 'images/equipments/digital-multimeter.jpg',
+    'Soldering Iron': 'images/equipments/soldering-iron.jpg',
+    'LAN Cable Tester': 'images/equipments/lan-tester.jpg',
+    'Network Switch': 'images/equipments/network-switch.jpg',
+    'Safety Goggles': 'images/equipments/safety-goggles.jpg',
+    'USB Flash Drive': 'images/equipments/usb-drive.jpg',
+    'Wire Cutter': 'images/equipments/wire-cutter.jpg',
+    'Long Nose Pliers': 'images/equipments/long-nose-pliers.jpg',
+    'Electric Air Blower': 'images/equipments/electric-air-blower.jpg',
+    'PSU Tester': 'images/equipments/psu-tester.jpg',
+    'Crimping Tool': 'images/equipments/crimping-tool.jpg',
+    'Isopropyl Alcohol': 'images/equipments/isopropyl-alcohol.jpg',
+    'Precision Screwdriver Set': 'images/equipments/screwdriver-set.jpg',
+    'Anti Static Wrist Strap': 'images/equipments/placeholder.jpg',
+    'Router': 'images/equipments/placeholder.jpg',
+    'default': 'images/equipments/placeholder.jpg'
+  },
+
+  _categoryImages: {
+    'Hand Tool': 'images/categories/hand-tool.jpg',
+    'Testing': 'images/categories/testing.jpg',
+    'Networking': 'images/categories/networking.jpg',
+    'Safety': 'images/categories/safety.jpg',
+    'Cleaning': 'images/categories/cleaning.jpg',
+    'Storage': 'images/categories/storage.jpg'
+  },
+
+  // ===== GET LOCAL IMAGE PATH FOR EQUIPMENT =====
+  getEquipImagePath(equipName) {
+    return this._imageMap[equipName] || this._imageMap['default'];
+  },
+
+  // ===== GET EQUIPMENT IMAGE HTML WITH FALLBACK =====
+  getEquipImageHTML(equipName, category, size = 48) {
+    const imgPath = this.getEquipImagePath(equipName);
+    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.src='${this._imageMap['default']}';" />`;
+  },
+
+  // ===== GET EQUIPMENT CARD IMAGE (larger, for featured cards) =====
+  getEquipCardImage(equipName) {
+    return this.getEquipImageHTML(equipName, null, 180);
+  },
+
   // ===== GET ICON FOR SPECIFIC EQUIPMENT =====
   getEquipIconHTML(category, size = 28) {
     // First check per-equipment icons, fallback to category icon
@@ -56,7 +101,14 @@ const SVG = {
 
   // ===== PREMIUM FEATURED EQUIPMENT CARD =====
   getFeaturedCard(equip, size = 48) {
-    const iconHtml = this.getCustomEquipIcon(equip.name, equip.category, size);
+    // Use real image if available, fallback to SVG
+    const useRealImage = !!this._imageMap[equip.name];
+    let iconHtml;
+    if (useRealImage) {
+      iconHtml = `<img src="${this._imageMap[equip.name]}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML=\'${this.getCustomEquipIcon(equip.name, equip.category, 48).replace(/'/g, "\\'")}\';" />`;
+    } else {
+      iconHtml = this.getCustomEquipIcon(equip.name, equip.category, size);
+    }
     const stockColor = equip.stocks <= 0 ? 'var(--danger)' : equip.stocks <= (equip.minStocks || 3) ? '#c79100' : 'var(--success)';
     const borrowDisabled = equip.stocks <= 0 ? 'disabled' : '';
     return `

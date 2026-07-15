@@ -156,7 +156,10 @@ class InventoryManager {
     }
     container.innerHTML = equipments.map(item => `
       <div class="equip-card reveal" data-id="${item.id}">
-        <div class="card-icon">${SVG.getEquipIconHTML(item.category, 28)}</div>
+        <div class="card-image-wrap">
+          <img src="${SVG.getEquipImagePath(item.name)}" alt="${item.name}" class="equip-card-img" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          <div class="card-icon" style="display:none;">${SVG.getEquipIconHTML(item.category, 28)}</div>
+        </div>
         <h3>${item.name}</h3>
         <span class="category-tag">${item.category}</span>
         <div class="card-details">

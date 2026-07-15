@@ -65,7 +65,7 @@
           <div class="form-group"><label>TUPT Student ID *</label><input type="text" name="regStudentId" placeholder="TUPT-23-1001" required /></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;">
-          <div class="form-group"><label>Course *</label><select name="course" required><option value="">Select</option><option>BSIT</option><option>BSCS</option><option>BSIS</option><option>BSCPE</option><option>BSECE</option></select></div>
+          <div class="form-group"><label>Department *</label><select name="department" required><option value="">Select</option><option>BASD</option><option>CAAD</option><option>MAAD</option><option>EAAD</option></select></div>
           <div class="form-group"><label>Year Level *</label><select name="year" required><option value="">Select</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div>
           <div class="form-group"><label>Section *</label><input type="text" name="section" placeholder="A" required /></div>
         </div>
@@ -106,7 +106,7 @@
               </div>
             </div>
             <h2 id="profileName" style="font-size:1.3rem;font-weight:800;">Loading...</h2>
-            <span class="role" id="profileCourse">Loading...</span>
+            <span class="role" id="profileDepartment">Loading...</span>
             <div style="margin:0.8rem 0;display:flex;justify-content:center;gap:1.5rem;">
               <div><div style="font-weight:800;font-size:1.2rem;" id="profileBorrowCount">0</div><div style="font-size:0.75rem;color:var(--text-light);">Borrows</div></div>
               <div><div style="font-weight:800;font-size:1.2rem;" id="profileActiveCount">0</div><div style="font-size:0.75rem;color:var(--text-light);">Active</div></div>
@@ -171,14 +171,10 @@
           <div class="form-group"><label>First Name</label><input type="text" id="editFirstName" required /></div>
           <div class="form-group"><label>Last Name</label><input type="text" id="editLastName" required /></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-          <div class="form-group"><label>Course</label>
-            <select id="editCourse" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;background:white;">
-              <option value="BSIT">BSIT</option><option value="BSCS">BSCS</option>
-              <option value="BSIS">BSIS</option><option value="BSCpE">BSCpE</option>
-              <option value="BSEE">BSEE</option><option value="BSECE">BSECE</option>
-              <option value="BSME">BSME</option><option value="BSCE">BSCE</option>
-              <option value="BSIE">BSIE</option><option value="Other">Other</option>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">            <div class="form-group"><label>Department</label>
+            <select id="editDepartment" style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;background:white;">
+              <option value="BASD">BASD</option><option value="CAAD">CAAD</option>
+              <option value="MAAD">MAAD</option><option value="EAAD">EAAD</option>
             </select>
           </div>
           <div class="form-group"><label>Year Level</label>
@@ -252,7 +248,7 @@
       // Avatar display
       auth.setAvatarImage(document.getElementById('profileAvatar'));
       document.getElementById('profileName').textContent = user.name;
-      document.getElementById('profileCourse').textContent = `${user.course || ''} ${user.year || ''}`.trim() || 'Student';
+      document.getElementById('profileDepartment').textContent = `${user.department || user.course || ''} ${user.year || ''}`.trim() || 'Student';
       document.getElementById('profileBorrowCount').textContent = borrows.length;
       document.getElementById('profileActiveCount').textContent = active;
       document.getElementById('profileReturnedCount').textContent = returned;
@@ -367,7 +363,7 @@
         document.getElementById('editEmail').value = user.email || '';
         document.getElementById('editContact').value = user.contact || '';
         document.getElementById('editSection').value = user.section || '';
-        document.getElementById('editCourse').value = user.course || 'BSIT';
+        document.getElementById('editDepartment').value = user.department || user.course || 'BASD';
         document.getElementById('editYear').value = user.year || '1st Year';
         pendingAvatar = null;
         avatarInput.value = '';
@@ -444,11 +440,11 @@
         if(!contact || !/^\+?[\d\s-]{7,15}$/.test(contact)){showEditError('Please enter a valid contact number.');return;}
 
         const fullName = `${fName} ${lName}`;
-        const course = document.getElementById('editCourse').value;
+        const department = document.getElementById('editDepartment').value;
         const year = document.getElementById('editYear').value;
         const section = document.getElementById('editSection').value.trim();
 
-        const updateData = { name: fullName, email, contact, section, course, year };
+        const updateData = { name: fullName, email, contact, section, department, year };
         if(pendingAvatar) updateData.avatar = pendingAvatar;
         else if(pendingAvatar === null && user.avatar) updateData.avatar = null;
 
@@ -462,7 +458,7 @@
           document.getElementById('profileEmail').textContent = email || 'N/A';
           document.getElementById('profileContact').textContent = contact || 'N/A';
           document.getElementById('profileSection').textContent = section || 'N/A';
-          document.getElementById('profileCourse').textContent = `${course} ${year}`.trim();
+          document.getElementById('profileDepartment').textContent = `${department} ${year}`.trim();
           // Update navbar
           const userNameEl = document.getElementById('userName');
           if(userNameEl) userNameEl.textContent = fullName;

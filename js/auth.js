@@ -33,8 +33,8 @@ class AuthSystem {
     } catch (e) {
       console.warn('Auth: Using fallback accounts');
       this.students = [
-        { id: 'TUPT-23-1001', name: 'Juan Dela Cruz', course: 'BSIT', year: '2nd Year', password: 'student123' },
-        { id: 'TUPT-23-1002', name: 'Maria Santos', course: 'BSCS', year: '3rd Year', password: 'student123' }
+        { id: 'TUPT-23-1001', name: 'Juan Dela Cruz', department: 'BASD', year: '2nd Year', password: 'student123' },
+        { id: 'TUPT-23-1002', name: 'Maria Santos', department: 'CAAD', year: '3rd Year', password: 'student123' }
       ];
       this.admins = [{ id: 'ADMIN001', name: 'Laboratory Officer', password: 'admin123' }];
     }
@@ -118,7 +118,7 @@ class AuthSystem {
       middleName: data.middleName || '',
       lastName: data.lastName,
       name: `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`,
-      course: data.course,
+      department: data.department,
       year: data.year,
       section: data.section,
       email: data.email,
@@ -148,7 +148,7 @@ class AuthSystem {
       type: 'student',
       id: student.id,
       name: student.name || `${student.firstName} ${student.lastName}`,
-      course: student.course,
+      department: student.department,
       year: student.year,
       section: student.section || '',
       email: student.email || '',
@@ -203,7 +203,7 @@ class AuthSystem {
     this.currentUser.email = data.email || '';
     this.currentUser.contact = data.contact || '';
     this.currentUser.section = data.section || '';
-    this.currentUser.course = data.course || this.currentUser.course;
+    this.currentUser.department = data.department || this.currentUser.department;
     this.currentUser.year = data.year || this.currentUser.year;
     if ('avatar' in data) this.currentUser.avatar = data.avatar;
     this.saveSession();
@@ -215,7 +215,7 @@ class AuthSystem {
       this.registered[idx].email = this.currentUser.email;
       this.registered[idx].contact = this.currentUser.contact;
       this.registered[idx].section = this.currentUser.section;
-      this.registered[idx].course = this.currentUser.course;
+      this.registered[idx].department = this.currentUser.department;
       this.registered[idx].year = this.currentUser.year;
       this.saveRegisteredStudents();
     }
@@ -361,7 +361,7 @@ class AuthSystem {
       const firstName = fd.get('firstName')?.trim();
       const lastName = fd.get('lastName')?.trim();
       const studentId = fd.get('regStudentId')?.trim();
-      const course = fd.get('course')?.trim();
+      const department = fd.get('department')?.trim();
       const year = fd.get('year')?.trim();
       const section = fd.get('section')?.trim();
       const email = fd.get('email')?.trim();
@@ -371,7 +371,7 @@ class AuthSystem {
       const middleName = fd.get('middleName')?.trim();
 
       // Validations
-      if (!firstName || !lastName || !studentId || !course || !year || !section || !email || !contact || !password || !confirmPass) {
+      if (!firstName || !lastName || !studentId || !department || !year || !section || !email || !contact || !password || !confirmPass) {
         this.showRegError('Please fill in all required fields.');
         return;
       }
@@ -401,7 +401,7 @@ class AuthSystem {
         firstName,
         middleName,
         lastName,
-        course,
+        department,
         year,
         section,
         email,
