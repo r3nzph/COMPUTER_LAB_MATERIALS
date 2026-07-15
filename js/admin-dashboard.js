@@ -398,11 +398,20 @@ class AdminDashboard {
       dropzoneActions.style.display = hasCustomImage ? 'flex' : 'none';
     };
 
-    // Click on dropzone opens file picker
+    // Click / keyboard on dropzone opens file picker
+    dropzone?.setAttribute('tabindex', '0');
+    dropzone?.setAttribute('role', 'button');
     dropzone?.addEventListener('click', (e) => {
       // Don't trigger if clicking a button inside
       if (e.target.closest('button')) return;
       imageInput?.click();
+    });
+    dropzone?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (e.target.closest('button')) return;
+        imageInput?.click();
+      }
     });
 
     // ===== DRAG & DROP HANDLERS =====
@@ -485,7 +494,6 @@ class AdminDashboard {
       imagePreview.innerHTML = '<i class="fas fa-image"></i>';
       updateDropzoneUI(false);
       imageInput.value = '';
-      dropzone.classList.remove('has-image');
     };
 
     imageRemoveBtn?.addEventListener('click', (e) => {
@@ -504,7 +512,7 @@ class AdminDashboard {
       modal.classList.remove('active');
       form.reset();
       pendingImageData = undefined;
-      dropzone.classList.remove('drag-over', 'has-image');
+      dropzone.classList.remove('drag-over');
       imagePreview.innerHTML = '<i class="fas fa-image"></i>';
       updateDropzoneUI(false);
       dragCounter = 0;
