@@ -135,6 +135,139 @@
     @keyframes skeletonSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     .skeleton-fade{animation:skeletonFadeIn 0.3s ease both;}
     @keyframes skeletonFadeIn{from{opacity:0;}to{opacity:1;}}
+
+    /* ===== DRAG & DROP IMAGE UPLOAD ===== */
+    .equip-image-dropzone {
+      position:relative;
+      border: 2px dashed rgba(var(--primary-rgb),0.15);
+      border-radius: 12px;
+      padding: 1.2rem;
+      background: rgba(var(--primary-rgb),0.02);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .equip-image-dropzone:hover {
+      border-color: rgba(var(--primary-rgb),0.3);
+      background: rgba(var(--primary-rgb),0.04);
+    }
+    .equip-image-dropzone.drag-over {
+      border-color: var(--primary);
+      background: rgba(var(--primary-rgb),0.08);
+      border-style: solid;
+      box-shadow: 0 0 0 4px rgba(var(--primary-rgb),0.08);
+      transform: scale(1.01);
+    }
+    .equip-image-dropzone.has-image {
+      border-style: solid;
+      border-color: var(--success);
+      background: rgba(0,200,83,0.03);
+    }
+    .equip-image-dropzone.has-image.drag-over {
+      border-color: var(--primary);
+      background: rgba(var(--primary-rgb),0.08);
+    }
+    .dropzone-inner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      pointer-events: none;
+    }
+    .dropzone-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(var(--primary-rgb),0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: var(--text-light);
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .dropzone-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .drag-over .dropzone-preview {
+      background: rgba(var(--primary-rgb),0.12);
+      transform: scale(1.05);
+    }
+    .dropzone-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .dropzone-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+    .dropzone-title i {
+      color: var(--primary);
+      margin-right: 6px;
+    }
+    .drag-over .dropzone-title i {
+      animation: dropzoneBounce 0.6s ease infinite alternate;
+    }
+    @keyframes dropzoneBounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+    .dropzone-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.15rem;
+    }
+    .dropzone-subtitle strong {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+    .dropzone-hint {
+      font-size: 0.7rem;
+      color: var(--text-light);
+    }
+    .dropzone-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+      pointer-events: none;
+    }
+    .dropzone-actions button {
+      pointer-events: auto;
+    }
+    .dropzone-remove-btn {
+      padding: 0.4rem 0.8rem;
+      background: rgba(255,23,68,0.08);
+      color: var(--danger);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .dropzone-remove-btn:hover {
+      background: rgba(255,23,68,0.18);
+    }
+    .dropzone-change-btn {
+      padding: 0.4rem 0.8rem;
+      background: rgba(33,150,243,0.08);
+      color: #1e88e5;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .dropzone-change-btn:hover {
+      background: rgba(33,150,243,0.18);
+    }
     /* Admin sidebar toast/notification on mobile */
     .admin-dismiss-btn{padding:0.25rem 0.6rem;font-size:0.7rem;}
 
@@ -528,17 +661,21 @@
           <div class="form-group"><label>Borrow Fee (₱)</label><input type="number" id="equipFormFee" value="20" min="0" step="0.5" /></div>
         </div>
         <div class="form-group"><label>Equipment Image</label>
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <div id="equipImagePreview" style="width:70px;height:70px;border-radius:10px;overflow:hidden;background:rgba(var(--primary-rgb),0.06);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-light);flex-shrink:0;">
-              <i class="fas fa-image"></i>
+          <div class="equip-image-dropzone" id="equipImageDropzone">
+            <input type="file" id="equipFormImage" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" />
+            <div class="dropzone-inner" id="dropzoneInner">
+              <div id="equipImagePreview" class="dropzone-preview">
+                <i class="fas fa-image"></i>
+              </div>
+              <div class="dropzone-text">
+                <div class="dropzone-title"><i class="fas fa-cloud-upload-alt"></i> Drop an image here</div>
+                <div class="dropzone-subtitle">or <strong>browse files</strong> to upload</div>
+                <div class="dropzone-hint">Max 500KB · JPG, PNG, WebP</div>
+              </div>
             </div>
-            <div style="flex:1;">
-              <label style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;background:rgba(33,150,243,0.1);color:#1e88e5;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:var(--transition);">
-                <i class="fas fa-upload"></i> Upload Image
-                <input type="file" id="equipFormImage" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" />
-              </label>
-              <button type="button" id="equipImageRemove" style="display:none;padding:0.4rem 0.8rem;background:rgba(255,23,68,0.08);color:var(--danger);border:none;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--transition);margin-left:6px;"><i class="fas fa-trash-alt"></i> Reset to default</button>
-              <div style="font-size:0.72rem;color:var(--text-light);margin-top:0.3rem;">Max 500KB. JPG, PNG, WebP supported.</div>
+            <div class="dropzone-actions" id="dropzoneActions" style="display:none;">
+              <button type="button" id="equipImageRemove" class="dropzone-remove-btn"><i class="fas fa-trash-alt"></i> Reset to default</button>
+              <button type="button" class="dropzone-change-btn" id="equipImageChange"><i class="fas fa-sync-alt"></i> Choose different</button>
             </div>
           </div>
         </div>

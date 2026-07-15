@@ -374,7 +374,7 @@ class AdminDashboard {
     if (arch) arch.addEventListener('change', () => this.renderEquipments());
   }
 
-  // ===== EQUIPMENT MODALS =====
+  // ===== EQUIPMENT MODALS (with drag-and-drop image upload) =====
   setupEquipmentModals() {
     const modal = document.getElementById('equipModal');
     if (!modal) return;
@@ -385,11 +385,66 @@ class AdminDashboard {
     const imageInput = document.getElementById('equipFormImage');
     const imagePreview = document.getElementById('equipImagePreview');
     const imageRemoveBtn = document.getElementById('equipImageRemove');
+    const imageChangeBtn = document.getElementById('equipImageChange');
+    const dropzone = document.getElementById('equipImageDropzone');
+    const dropzoneActions = document.getElementById('dropzoneActions');
+    const dropzoneInner = document.getElementById('dropzoneInner');
     let pendingImageData = null; // base64 data URL or null to reset
+    let dragCounter = 0; // for nested dragenter/dragleave
 
-    // Image upload handler
+    // Helper to sync UI after image change
+    const updateDropzoneUI = (hasCustomImage) => {
+      dropzone.classList.toggle('has-image', hasCustomImage);
+      dropzoneActions.style.display = hasCustomImage ? 'flex' : 'none';
+    };
+
+    // Click on dropzone opens file picker
+    dropzone?.addEventListener('click', (e) => {
+      // Don't trigger if clicking a button inside
+      if (e.target.closest('button')) return;
+      imageInput?.click();
+    });
+
+    // ===== DRAG & DROP HANDLERS =====
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone?.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    dropzone?.addEventListener('dragenter', (e) => {
+      dragCounter++;
+      if (dragCounter === 1) {
+        dropzone.classList.add('drag-over');
+      }
+    });
+
+    dropzone?.addEventListener('dragleave', (e) => {
+      dragCounter--;
+      if (dragCounter === 0) {
+        dropzone.classList.remove('drag-over');
+      }
+    });
+
+    dropzone?.addEventListener('drop', (e) => {
+      dragCounter = 0;
+      dropzone.classList.remove('drag-over');
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        handleImageUpload(files[0]);
+      }
+    });
+
+    // ===== IMAGE UPLOAD HANDLER (shared by file input & drop) =====
     const handleImageUpload = (file) => {
       if (!file) return;
+      // Validate file type
+      const validTypes = ['image/jpeg','image/png','image/webp','image/gif'];
+      if (!validTypes.includes(file.type)) {
+        Notification.show('Invalid file type', 'Please upload a JPG, PNG, WebP, or GIF image.', 'error');
+        return;
+      }
       if (file.size > 500 * 1024) {
         Notification.show('File too large', 'Image must be under 500KB.', 'error');
         return;
@@ -410,47 +465,67 @@ class AdminDashboard {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, w, h);
           pendingImageData = canvas.toDataURL('image/jpeg', 0.8);
-          imagePreview.innerHTML = `<img src="${pendingImageData}" style="width:100%;height:100%;object-fit:cover;" alt="Preview" />`;
-          imageRemoveBtn.style.display = 'inline-flex';
+          imagePreview.innerHTML = `<img src="${pendingImageData}" alt="Preview" />`;
+          updateDropzoneUI(true);
+          Notification.show('Image uploaded', 'Equipment image has been updated.', 'success');
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     };
 
+    // ===== FILE INPUT CHANGE =====
     imageInput?.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0]);
     });
 
-    // Remove custom image → revert to default
-    imageRemoveBtn?.addEventListener('click', () => {
+    // ===== REMOVE CUSTOM IMAGE → revert to default =====
+    const resetImage = () => {
       pendingImageData = null;
       imagePreview.innerHTML = '<i class="fas fa-image"></i>';
-      imageRemoveBtn.style.display = 'none';
+      updateDropzoneUI(false);
       imageInput.value = '';
+      dropzone.classList.remove('has-image');
+    };
+
+    imageRemoveBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('Reset to the default equipment image?')) resetImage();
     });
 
+    // ===== CHANGE DIFFERENT BUTTON =====
+    imageChangeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      imageInput?.click();
+    });
+
+    // ===== CLOSE MODAL =====
     const close = () => {
       modal.classList.remove('active');
       form.reset();
       pendingImageData = undefined;
+      dropzone.classList.remove('drag-over', 'has-image');
       imagePreview.innerHTML = '<i class="fas fa-image"></i>';
-      imageRemoveBtn.style.display = 'none';
+      updateDropzoneUI(false);
+      dragCounter = 0;
     };
     closeBtn?.addEventListener('click', close);
     cancelBtn?.addEventListener('click', close);
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
 
+    // ===== OPEN ADD MODAL =====
     document.getElementById('btnAddEquip')?.addEventListener('click', () => {
       form.reset();
       document.getElementById('equipModalTitle').textContent = 'Add Equipment';
       document.getElementById('equipFormId').value = '';
       pendingImageData = undefined;
+      dropzone.classList.remove('has-image', 'drag-over');
       imagePreview.innerHTML = '<i class="fas fa-image"></i>';
-      imageRemoveBtn.style.display = 'none';
+      updateDropzoneUI(false);
       document.getElementById('equipModal').classList.add('active');
     });
 
+    // ===== FORM SUBMIT =====
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const id = document.getElementById('equipFormId').value;
@@ -516,13 +591,18 @@ class AdminDashboard {
 
     // Show current image if custom, otherwise show default
     const preview = document.getElementById('equipImagePreview');
-    const removeBtn = document.getElementById('equipImageRemove');
-    if (e.imagePath && e.imagePath.startsWith('data:')) {
-      preview.innerHTML = `<img src="${e.imagePath}" style="width:100%;height:100%;object-fit:cover;" alt="${e.name}" />`;
-      removeBtn.style.display = 'inline-flex';
+    const dropzone = document.getElementById('equipImageDropzone');
+    const actions = document.getElementById('dropzoneActions');
+    const hasCustomImage = e.imagePath && e.imagePath.startsWith('data:');
+    if (hasCustomImage) {
+      preview.innerHTML = `<img src="${e.imagePath}" alt="${e.name}" />`;
+      dropzone?.classList.add('has-image');
+      actions.style.display = 'flex';
     } else {
-      preview.innerHTML = `<img src="${SVG.getEquipImagePath(e.name)}" style="width:100%;height:100%;object-fit:cover;" alt="${e.name}" onerror="this.onerror=null;this.parentNode.innerHTML='<i class=\\'fas fa-image\\'></i>';" />`;
-      removeBtn.style.display = 'none';
+      const defaultImg = SVG.getEquipImagePath(e.name);
+      preview.innerHTML = `<img src="${defaultImg}" alt="${e.name}" onerror="this.onerror=null;this.innerHTML='<i class=\\'fas fa-image\\'></i>';" />`;
+      dropzone?.classList.remove('has-image');
+      actions.style.display = 'none';
     }
     document.getElementById('equipModal').classList.add('active');
   }
