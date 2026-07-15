@@ -154,11 +154,15 @@ class InventoryManager {
       container.innerHTML = SVG.getEmptyStateHTML('search', 'No Equipment Found', 'Try adjusting your search or filter.');
       return;
     }
-    container.innerHTML = equipments.map(item => `
+    container.innerHTML = equipments.map(item => {
+      const imgPath = SVG.getEquipImagePath(item.name, item);
+      const isCustomImg = item.imagePath && item.imagePath.startsWith('data:');
+      const fallbackSvg = SVG.getEquipIconHTML(item.category, 28);
+      return `
       <div class="equip-card reveal" data-id="${item.id}">
         <div class="card-image-wrap">
-          <img src="${SVG.getEquipImagePath(item.name)}" alt="${item.name}" class="equip-card-img" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
-          <div class="card-icon" style="display:none;">${SVG.getEquipIconHTML(item.category, 28)}</div>
+          <img src="${imgPath}" alt="${item.name}" class="equip-card-img" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          <div class="card-icon" style="display:none;">${fallbackSvg}</div>
         </div>
         <h3>${item.name}</h3>
         <span class="category-tag">${item.category}</span>
@@ -169,7 +173,7 @@ class InventoryManager {
         <span class="status-badge ${this.getStatusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
         <button class="btn-add add-to-borrow" data-id="${item.id}"><span>+</span> Add to Borrow</button>
       </div>
-    `).join('');
+    `}).join('');
     if (window.revealObserver) {
       document.querySelectorAll('.reveal').forEach(el => { window.revealObserver.observe(el); });
     }

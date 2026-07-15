@@ -368,8 +368,8 @@
             </button>
           </div>
         </div>
-        <div class="admin-section"><div class="admin-table"><table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminEquipBody">
-            <tr class="skeleton-fade"><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:55%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
+        <div class="admin-section"><div class="admin-table"><table><thead><tr><th>Image</th><th>ID</th><th>Name</th><th>Category</th><th>Stocks</th><th>Fee</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminEquipBody">
+            <tr class="skeleton-fade"><td><div class="skeleton" style="width:36px;height:36px;border-radius:6px;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text" style="width:55%;"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton skeleton-text short"></div></td><td><div class="skeleton" style="width:60px;height:22px;border-radius:50px;"></div></td><td><div style="display:flex;gap:4px;"><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div><div class="skeleton" style="width:28px;height:28px;border-radius:6px;"></div></div></td></tr>
           </tbody></table></div></div>
       </div>
 
@@ -526,6 +526,21 @@
           <div class="form-group"><label>Stocks *</label><input type="number" id="equipFormStocks" value="5" min="0" /></div>
           <div class="form-group"><label>Min. Stocks</label><input type="number" id="equipFormMinStocks" value="3" min="0" /></div>
           <div class="form-group"><label>Borrow Fee (₱)</label><input type="number" id="equipFormFee" value="20" min="0" step="0.5" /></div>
+        </div>
+        <div class="form-group"><label>Equipment Image</label>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div id="equipImagePreview" style="width:70px;height:70px;border-radius:10px;overflow:hidden;background:rgba(var(--primary-rgb),0.06);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-light);flex-shrink:0;">
+              <i class="fas fa-image"></i>
+            </div>
+            <div style="flex:1;">
+              <label style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;background:rgba(33,150,243,0.1);color:#1e88e5;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:var(--transition);">
+                <i class="fas fa-upload"></i> Upload Image
+                <input type="file" id="equipFormImage" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;" />
+              </label>
+              <button type="button" id="equipImageRemove" style="display:none;padding:0.4rem 0.8rem;background:rgba(255,23,68,0.08);color:var(--danger);border:none;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--transition);margin-left:6px;"><i class="fas fa-trash-alt"></i> Reset to default</button>
+              <div style="font-size:0.72rem;color:var(--text-light);margin-top:0.3rem;">Max 500KB. JPG, PNG, WebP supported.</div>
+            </div>
+          </div>
         </div>
         <div class="form-group"><label>Description</label><textarea id="equipFormDesc" placeholder="Optional description..." style="padding:0.55rem;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;width:100%;min-height:50px;resize:vertical;"></textarea></div>
         <div class="edit-error" style="display:none;color:var(--danger);font-size:0.82rem;margin-bottom:0.5rem;text-align:center;"></div>

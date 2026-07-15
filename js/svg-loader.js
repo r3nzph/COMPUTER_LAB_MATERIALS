@@ -69,19 +69,29 @@ const SVG = {
   },
 
   // ===== GET LOCAL IMAGE PATH FOR EQUIPMENT =====
-  getEquipImagePath(equipName) {
+  getEquipImagePath(equipName, equipData) {
+    // If equipment has a custom imagePath (e.g. base64 from admin upload), use it
+    if (equipData && equipData.imagePath && equipData.imagePath.startsWith('data:')) {
+      return equipData.imagePath;
+    }
+    // If equipment has a custom imagePath that's a file path, use it
+    if (equipData && equipData.imagePath && equipData.imagePath !== SVG.getEquipImagePath(equipData.name)) {
+      return equipData.imagePath;
+    }
+    // Fallback to static map
     return this._imageMap[equipName] || this._imageMap['default'];
   },
 
   // ===== GET EQUIPMENT IMAGE HTML WITH FALLBACK =====
-  getEquipImageHTML(equipName, category, size = 48) {
-    const imgPath = this.getEquipImagePath(equipName);
-    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.src='${this._imageMap['default']}';" />`;
+  getEquipImageHTML(equipName, category, size = 48, equipData) {
+    const imgPath = equipData ? this.getEquipImagePath(equipName, equipData) : this.getEquipImagePath(equipName);
+    const fallbackPath = this._imageMap['default'];
+    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.src='${fallbackPath}';" />`;
   },
 
   // ===== GET EQUIPMENT CARD IMAGE (larger, for featured cards) =====
-  getEquipCardImage(equipName) {
-    return this.getEquipImageHTML(equipName, null, 180);
+  getEquipCardImage(equipName, equipData) {
+    return this.getEquipImageHTML(equipName, null, 180, equipData);
   },
 
   // ===== GET ICON FOR SPECIFIC EQUIPMENT =====

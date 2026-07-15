@@ -339,8 +339,13 @@ class AdminDashboard {
       return;
     }
 
-    body.innerHTML = filtered.map(e => `
+    body.innerHTML = filtered.map(e => {
+      const imgPath = SVG.getEquipImagePath(e.name, e);
+      return `
       <tr class="${e.archived ? 'archived-row' : ''}">
+        <td data-label="Image">
+          <img src="${imgPath}" alt="${e.name}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;display:block;" loading="lazy" onerror="this.onerror=null;this.style.display='none';" />
+        </td>
         <td data-label="ID">${String(e.id).padStart(2, '0')}</td>
         <td data-label="Name"><strong>${e.name}</strong>${e.archived ? ' <span style="font-size:0.7rem;color:var(--text-light);">(Archived)</span>' : ''}</td>
         <td data-label="Category">${e.category}</td>
@@ -357,7 +362,7 @@ class AdminDashboard {
           <button class="btn-sm red" onclick="admin.deleteEquip(${e.id})" title="Delete"><i class="fas fa-trash"></i></button>
         </td>
       </tr>
-    `).join('');
+    `}).join('');
   }
 
   setupEquipmentSearch() {
@@ -377,8 +382,61 @@ class AdminDashboard {
     const closeBtn = document.getElementById('equipModalClose');
     const form = document.getElementById('equipForm');
     const cancelBtn = document.getElementById('equipModalCancel');
+    const imageInput = document.getElementById('equipFormImage');
+    const imagePreview = document.getElementById('equipImagePreview');
+    const imageRemoveBtn = document.getElementById('equipImageRemove');
+    let pendingImageData = null; // base64 data URL or null to reset
 
-    const close = () => { modal.classList.remove('active'); form.reset(); };
+    // Image upload handler
+    const handleImageUpload = (file) => {
+      if (!file) return;
+      if (file.size > 500 * 1024) {
+        Notification.show('File too large', 'Image must be under 500KB.', 'error');
+        return;
+      }
+      // Compress with canvas
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          const maxDim = 400;
+          if (w > maxDim || h > maxDim) {
+            const ratio = Math.min(maxDim / w, maxDim / h);
+            w *= ratio; h *= ratio;
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          pendingImageData = canvas.toDataURL('image/jpeg', 0.8);
+          imagePreview.innerHTML = `<img src="${pendingImageData}" style="width:100%;height:100%;object-fit:cover;" alt="Preview" />`;
+          imageRemoveBtn.style.display = 'inline-flex';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    imageInput?.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0]);
+    });
+
+    // Remove custom image → revert to default
+    imageRemoveBtn?.addEventListener('click', () => {
+      pendingImageData = null;
+      imagePreview.innerHTML = '<i class="fas fa-image"></i>';
+      imageRemoveBtn.style.display = 'none';
+      imageInput.value = '';
+    });
+
+    const close = () => {
+      modal.classList.remove('active');
+      form.reset();
+      pendingImageData = undefined;
+      imagePreview.innerHTML = '<i class="fas fa-image"></i>';
+      imageRemoveBtn.style.display = 'none';
+    };
     closeBtn?.addEventListener('click', close);
     cancelBtn?.addEventListener('click', close);
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
@@ -387,6 +445,9 @@ class AdminDashboard {
       form.reset();
       document.getElementById('equipModalTitle').textContent = 'Add Equipment';
       document.getElementById('equipFormId').value = '';
+      pendingImageData = undefined;
+      imagePreview.innerHTML = '<i class="fas fa-image"></i>';
+      imageRemoveBtn.style.display = 'none';
       document.getElementById('equipModal').classList.add('active');
     });
 
@@ -402,6 +463,11 @@ class AdminDashboard {
         description: document.getElementById('equipFormDesc').value.trim(),
         condition: document.getElementById('equipFormCondition').value || 'Good'
       };
+
+      // Handle image
+      if (pendingImageData !== undefined) {
+        data.imagePath = pendingImageData; // null = reset to default, string = custom image
+      }
 
       if (!data.name) { Notification.show('Error', 'Equipment name is required.', 'error'); return; }
       if (data.stocks < 0) { Notification.show('Error', 'Stocks cannot be negative.', 'error'); return; }
@@ -447,6 +513,17 @@ class AdminDashboard {
     document.getElementById('equipFormFee').value = e.borrowFee;
     document.getElementById('equipFormDesc').value = e.description || '';
     document.getElementById('equipFormCondition').value = e.condition || 'Good';
+
+    // Show current image if custom, otherwise show default
+    const preview = document.getElementById('equipImagePreview');
+    const removeBtn = document.getElementById('equipImageRemove');
+    if (e.imagePath && e.imagePath.startsWith('data:')) {
+      preview.innerHTML = `<img src="${e.imagePath}" style="width:100%;height:100%;object-fit:cover;" alt="${e.name}" />`;
+      removeBtn.style.display = 'inline-flex';
+    } else {
+      preview.innerHTML = `<img src="${SVG.getEquipImagePath(e.name)}" style="width:100%;height:100%;object-fit:cover;" alt="${e.name}" onerror="this.onerror=null;this.parentNode.innerHTML='<i class=\\'fas fa-image\\'></i>';" />`;
+      removeBtn.style.display = 'none';
+    }
     document.getElementById('equipModal').classList.add('active');
   }
 
