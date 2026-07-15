@@ -176,10 +176,12 @@ class BorrowManager {
       if (stockDisplay) stockDisplay.textContent = equip.stocks + ' available';
 
       const isCustomImg = equip.imagePath && equip.imagePath.startsWith('data:');
+      const fallbackSvg = SVG.getEquipIconHTML(equip.category, 30);
+      const defaultImg = SVG.getEquipImagePath(equip.name, equip);
       const equipImgHtml = isCustomImg
-        ? `<img src="${SVG.getEquipImagePath(equip.name, equip)}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;" />`
-        : `<div style="width:60px;height:60px;background:rgba(var(--primary-rgb),0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            ${SVG.getEquipIconHTML(equip.category, 30)}
+        ? `<img src="${SVG.getEquipImagePath(equip.name, equip)}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;" onerror="this.onerror=null;this.parentNode.innerHTML='${SVG._getFallbackHTML(equip.name, 60).replace(/"/g, "'").replace(/'/g, "\\'")}';" />`
+        : `<div style="width:60px;height:60px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;background:rgba(var(--primary-rgb),0.07);">
+            <img src="${defaultImg}" alt="${equip.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.parentNode.innerHTML='${SVG.getEquipIconHTML(equip.category, 30)}';this.parentNode.style.background='rgba(var(--primary-rgb),0.07)';" />
           </div>`;
       panel.innerHTML = `
         <div style="text-align:center;">

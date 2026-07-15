@@ -87,7 +87,7 @@
     "stocks": 3,
     "borrowFee": 100,
     "status": "Available",
-    "imagePath": "images/equipments/placeholder.jpg"
+    "imagePath": "images/equipments/router.jpg"
   },
   {
     "id": 11,
@@ -96,7 +96,7 @@
     "stocks": 15,
     "borrowFee": 10,
     "status": "Available",
-    "imagePath": "images/equipments/placeholder.jpg"
+    "imagePath": "images/equipments/anti-static-wrist-strap.jpg"
   },
   {
     "id": 12,

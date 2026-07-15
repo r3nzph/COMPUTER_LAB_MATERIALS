@@ -341,10 +341,11 @@ class AdminDashboard {
 
     body.innerHTML = filtered.map(e => {
       const imgPath = SVG.getEquipImagePath(e.name, e);
+      const fallbackHtml = SVG._getFallbackHTML(e.name, 36).replace(/"/g, "'").replace(/'/g, "\\'");
       return `
       <tr class="${e.archived ? 'archived-row' : ''}">
         <td data-label="Image">
-          <img src="${imgPath}" alt="${e.name}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;display:block;" loading="lazy" onerror="this.onerror=null;this.style.display='none';" />
+          <img src="${imgPath}" alt="${e.name}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;display:block;" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML='${fallbackHtml}';" />
         </td>
         <td data-label="ID">${String(e.id).padStart(2, '0')}</td>
         <td data-label="Name"><strong>${e.name}</strong>${e.archived ? ' <span style="font-size:0.7rem;color:var(--text-light);">(Archived)</span>' : ''}</td>

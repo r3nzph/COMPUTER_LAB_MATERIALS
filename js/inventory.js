@@ -157,12 +157,11 @@ class InventoryManager {
     container.innerHTML = equipments.map(item => {
       const imgPath = SVG.getEquipImagePath(item.name, item);
       const isCustomImg = item.imagePath && item.imagePath.startsWith('data:');
-      const fallbackSvg = SVG.getEquipIconHTML(item.category, 28);
+      const fallbackHtml = SVG._getFallbackHTML(item.name).replace(/"/g, "'").replace(/'/g, "\\'");
       return `
       <div class="equip-card reveal" data-id="${item.id}">
         <div class="card-image-wrap">
-          <img src="${imgPath}" alt="${item.name}" class="equip-card-img" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';" />
-          <div class="card-icon" style="display:none;">${fallbackSvg}</div>
+          <img src="${imgPath}" alt="${item.name}" class="equip-card-img" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML='${fallbackHtml}';" />
         </div>
         <h3>${item.name}</h3>
         <span class="category-tag">${item.category}</span>

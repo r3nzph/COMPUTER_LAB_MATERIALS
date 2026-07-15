@@ -54,8 +54,8 @@ const SVG = {
     'Crimping Tool': 'images/equipments/crimping-tool.jpg',
     'Isopropyl Alcohol': 'images/equipments/isopropyl-alcohol.jpg',
     'Precision Screwdriver Set': 'images/equipments/screwdriver-set.jpg',
-    'Anti Static Wrist Strap': 'images/equipments/placeholder.jpg',
-    'Router': 'images/equipments/placeholder.jpg',
+    'Anti Static Wrist Strap': 'images/equipments/anti-static-wrist-strap.jpg',
+    'Router': 'images/equipments/router.jpg',
     'default': 'images/equipments/placeholder.jpg'
   },
 
@@ -82,11 +82,20 @@ const SVG = {
     return this._imageMap[equipName] || this._imageMap['default'];
   },
 
+  // ===== FALLBACK HTML (shown when image fails to load) =====
+  _getFallbackHTML(equipName, size = null) {
+    const iconSize = size ? Math.min(size * 0.4, 32) : 28;
+    return `<div class="img-fallback" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(var(--primary-rgb),0.04);color:var(--text-light);font-size:0.65rem;text-align:center;gap:4px;padding:4px;box-sizing:border-box;">
+      <i class="fas fa-image" style="font-size:${iconSize}px;opacity:0.5;"></i>
+      <span style="line-height:1.2;">No Equipment<br/>Image Available</span>
+    </div>`;
+  },
+
   // ===== GET EQUIPMENT IMAGE HTML WITH FALLBACK =====
   getEquipImageHTML(equipName, category, size = 48, equipData) {
     const imgPath = equipData ? this.getEquipImagePath(equipName, equipData) : this.getEquipImagePath(equipName);
-    const fallbackPath = this._imageMap['default'];
-    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.src='${fallbackPath}';" />`;
+    const fallbackHtml = this._getFallbackHTML(equipName, size).replace(/"/g, "&quot;").replace(/'/g, "\\'");
+    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML='${fallbackHtml}';" />`;
   },
 
   // ===== GET EQUIPMENT CARD IMAGE (larger, for featured cards) =====
