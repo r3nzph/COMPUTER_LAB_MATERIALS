@@ -6,7 +6,7 @@
     "stocks": 8,
     "borrowFee": 20,
     "status": "Available",
-    "imagePath": "images/equipments/screwdriver-set.jpg"
+    "imagePath": "images/equipments/precision-screwdriver.jpg"
   },
   {
     "id": 2,
@@ -60,7 +60,7 @@
     "stocks": 7,
     "borrowFee": 25,
     "status": "Available",
-    "imagePath": "images/equipments/lan-tester.jpg"
+    "imagePath": "images/equipments/lan-cable-tester.jpg"
   },
   {
     "id": 8,
@@ -132,6 +132,6 @@
     "stocks": 25,
     "borrowFee": 25,
     "status": "Available",
-    "imagePath": "images/equipments/usb-drive.jpg"
+    "imagePath": "images/equipments/usb-flash-drive.jpg"
   }
 ]

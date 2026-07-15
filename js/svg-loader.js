@@ -40,20 +40,23 @@ const SVG = {
   },
 
   // ===== LOCAL EQUIPMENT IMAGE MAPPING =====
+  // ===== CENTRALIZED EQUIPMENT IMAGE MAPPING =====
+  // All equipment images are stored locally in /images/equipments/
+  // Never hardcode image paths — always use SVG.getEquipImagePath(name, data)
   _imageMap: {
     'Digital Multimeter': 'images/equipments/digital-multimeter.jpg',
     'Soldering Iron': 'images/equipments/soldering-iron.jpg',
-    'LAN Cable Tester': 'images/equipments/lan-tester.jpg',
+    'LAN Cable Tester': 'images/equipments/lan-cable-tester.jpg',
     'Network Switch': 'images/equipments/network-switch.jpg',
     'Safety Goggles': 'images/equipments/safety-goggles.jpg',
-    'USB Flash Drive': 'images/equipments/usb-drive.jpg',
+    'USB Flash Drive': 'images/equipments/usb-flash-drive.jpg',
     'Wire Cutter': 'images/equipments/wire-cutter.jpg',
     'Long Nose Pliers': 'images/equipments/long-nose-pliers.jpg',
     'Electric Air Blower': 'images/equipments/electric-air-blower.jpg',
     'PSU Tester': 'images/equipments/psu-tester.jpg',
     'Crimping Tool': 'images/equipments/crimping-tool.jpg',
     'Isopropyl Alcohol': 'images/equipments/isopropyl-alcohol.jpg',
-    'Precision Screwdriver Set': 'images/equipments/screwdriver-set.jpg',
+    'Precision Screwdriver Set': 'images/equipments/precision-screwdriver.jpg',
     'Anti Static Wrist Strap': 'images/equipments/anti-static-wrist-strap.jpg',
     'Router': 'images/equipments/router.jpg',
     'default': 'images/equipments/placeholder.jpg'
@@ -83,14 +86,12 @@ const SVG = {
   },
 
   // ===== FALLBACK HTML (shown when image fails to load) =====
-  // Returns a zero-quote HTML fallback safe to embed inside onerror="this.outerHTML='...'"
+  // Returns a zero-quote SINGLE-LINE HTML safe to embed inside onerror="this.outerHTML='...'"
   // Uses a Unicode emoji instead of inline SVG to avoid quoting issues in JS/eval context
+  // Single-line = no newlines that could confuse HTML attribute parsing
   getFallbackHTML(size) {
     const iconSize = size ? Math.min(size * 0.5, 32) : 24;
-    return `<div style=display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(var(--primary-rgb),0.03);color:var(--text-light);font-size:.6rem;text-align:center;gap:3px;padding:4px;box-sizing:border-box;border-radius:6px;>
-      <span style=display:block;font-size:${iconSize}px;line-height:1;opacity:.4;>📷</span>
-      <span>No Equipment<br/>Image Available</span>
-    </div>`;
+    return `<div style=display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(var(--primary-rgb),0.03);color:var(--text-light);font-size:.6rem;text-align:center;gap:3px;padding:4px;box-sizing:border-box;border-radius:6px;><span style=display:block;font-size:${iconSize}px;line-height:1;opacity:.4;>📷</span><span>No Equipment<br/>Image Available</span></div>`;
   },
 
   // ===== GET EQUIPMENT IMAGE HTML WITH FALLBACK =====
