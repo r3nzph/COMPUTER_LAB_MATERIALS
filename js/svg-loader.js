@@ -83,19 +83,19 @@ const SVG = {
   },
 
   // ===== FALLBACK HTML (shown when image fails to load) =====
-  _getFallbackHTML(equipName, size = null) {
-    const iconSize = size ? Math.min(size * 0.4, 32) : 28;
-    return `<div class="img-fallback" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(var(--primary-rgb),0.04);color:var(--text-light);font-size:0.65rem;text-align:center;gap:4px;padding:4px;box-sizing:border-box;">
-      <i class="fas fa-image" style="font-size:${iconSize}px;opacity:0.5;"></i>
-      <span style="line-height:1.2;">No Equipment<br/>Image Available</span>
+  // Uses minimal inline content to avoid escaping issues
+  getFallbackHTML(size) {
+    const iconSize = size ? Math.min(size * 0.38, 28) : 24;
+    return `<div style=display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(var(--primary-rgb),0.03);color:var(--text-light);font-size:.6rem;text-align:center;gap:3px;padding:4px;box-sizing:border-box;border-radius:6px;>
+      <svg viewBox="0 0 24 24" width="${iconSize}" height="${iconSize}" fill="none" style=opacity:.4;display:block;><rect x=3 y=3 width=18 height=18 rx=3 stroke=currentColor stroke-width=1.5 fill=none/><circle cx=12 cy=11 r=3 stroke=currentColor stroke-width=1.5 fill=none/><path d=M6 19l5-6 3 2 4-4 4 8 stroke=currentColor stroke-width=1.5 fill=none/></svg>
+      <span>No Equipment<br/>Image Available</span>
     </div>`;
   },
 
   // ===== GET EQUIPMENT IMAGE HTML WITH FALLBACK =====
   getEquipImageHTML(equipName, category, size = 48, equipData) {
     const imgPath = equipData ? this.getEquipImagePath(equipName, equipData) : this.getEquipImagePath(equipName);
-    const fallbackHtml = this._getFallbackHTML(equipName, size).replace(/"/g, "&quot;").replace(/'/g, "\\'");
-    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML='${fallbackHtml}';" />`;
+    return `<img src="${imgPath}" width="${size}" height="${size}" alt="${equipName}" style="object-fit:cover;border-radius:8px;" loading="lazy" onerror="this.remove();" />`;
   },
 
   // ===== GET EQUIPMENT CARD IMAGE (larger, for featured cards) =====
@@ -120,14 +120,10 @@ const SVG = {
 
   // ===== PREMIUM FEATURED EQUIPMENT CARD =====
   getFeaturedCard(equip, size = 48) {
-    // Use real image if available, fallback to SVG
-    const useRealImage = !!this._imageMap[equip.name];
+    // Use real image if available, fallback to SVG icon
+    const imgPath = this.getEquipImagePath(equip.name, equip);
     let iconHtml;
-    if (useRealImage) {
-      iconHtml = `<img src="${this._imageMap[equip.name]}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;" loading="lazy" onerror="this.onerror=null;this.parentNode.innerHTML=\'${this.getCustomEquipIcon(equip.name, equip.category, 48).replace(/'/g, "\\'")}\';" />`;
-    } else {
-      iconHtml = this.getCustomEquipIcon(equip.name, equip.category, size);
-    }
+    iconHtml = `<img src="${imgPath}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;" loading="lazy" onerror="this.onerror=null;this.outerHTML='${this.getFallbackHTML(60)}';" />`;
     const stockColor = equip.stocks <= 0 ? 'var(--danger)' : equip.stocks <= (equip.minStocks || 3) ? '#c79100' : 'var(--success)';
     const borrowDisabled = equip.stocks <= 0 ? 'disabled' : '';
     return `
