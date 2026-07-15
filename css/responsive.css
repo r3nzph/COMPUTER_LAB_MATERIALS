@@ -180,8 +180,8 @@
   }
 }
 
-/* ===== LARGE PHONES (414px) ===== */
-@media screen and (max-width: 414px) {
+/* ===== PHONES (320px - 600px) - all phone sizes ===== */
+@media screen and (max-width: 600px) {
   .navbar { height: 56px; }
   .nav-inner { padding: 0 0.8rem; }
   .nav-logo { font-size: 1.1rem; letter-spacing: 0.5px; }
@@ -276,8 +276,8 @@
   .chart-container { min-height: 180px; }
 }
 
-/* ===== MEDIUM PHONES (375px - 389px) ===== */
-@media screen and (max-width: 389px) {
+/* ===== MEDIUM PHONES (375px - 390px) ===== */
+@media screen and (max-width: 390px) {
   .nav-logo { font-size: 1rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .btn-login-outline { padding: 0.25rem 0.5rem; font-size: 0.65rem; min-height: 28px; }
   .btn-register-solid { padding: 0.25rem 0.5rem; font-size: 0.65rem; min-height: 28px; }
