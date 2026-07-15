@@ -175,11 +175,16 @@ class BorrowManager {
 
       if (stockDisplay) stockDisplay.textContent = equip.stocks + ' available';
 
+      const equipImgPath = SVG.getEquipImagePath(equip.name, equip);
+      const isCustomImg = equip.imagePath && equip.imagePath.startsWith('data:');
+      const equipImgHtml = isCustomImg
+        ? `<img src="${equipImgPath}" alt="${equip.name}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;" />`
+        : `<div style="width:60px;height:60px;background:rgba(var(--primary-rgb),0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            ${SVG.getEquipIconHTML(equip.category, 30)}
+          </div>`;
       panel.innerHTML = `
         <div style="text-align:center;">
-          <div style="width:60px;height:60px;background:rgba(var(--primary-rgb),0.07);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            ${SVG.getEquipIconHTML(equip.category, 30)}
-          </div>
+          ${equipImgHtml}
           <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.3rem;">${equip.name}</h3>
           <span class="category-tag" style="margin-bottom:0.8rem;display:inline-block;">${equip.category}</span>
           <div style="display:flex;justify-content:center;gap:2rem;margin:1rem 0;">
