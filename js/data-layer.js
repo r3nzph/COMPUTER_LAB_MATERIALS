@@ -40,6 +40,7 @@ class StorageManager {
     if (this._initialized) return;
     this._initialized = true;
     await this._seedInitialData();
+    this._migrateSeedStudents();
     return this;
   }
 
@@ -109,6 +110,22 @@ class StorageManager {
     if (!this.get(STORAGE_KEYS.ACTIVITY_LOG)) this.set(STORAGE_KEYS.ACTIVITY_LOG, []);
     if (!this.get(STORAGE_KEYS.BORROW_IDS)) this.set(STORAGE_KEYS.BORROW_IDS, 0);
     if (!this.get(STORAGE_KEYS.EQUIPMENT_ID)) this.set(STORAGE_KEYS.EQUIPMENT_ID, 100);
+  }
+
+  // ===== MIGRATIONS =====
+  _migrateSeedStudents() {
+    // Trim seed students to only the one demo account (Juan Dela Cruz)
+    // Handles existing installs that already have the old 8-student array in localStorage
+    const seed = this.get(STORAGE_KEYS.STUDENTS);
+    if (seed && seed.length > 1) {
+      this.set(STORAGE_KEYS.STUDENTS, [{
+        id: 'TUPT-23-1001',
+        name: 'Juan Dela Cruz',
+        department: 'BASD',
+        year: '2nd Year',
+        password: 'student123'
+      }]);
+    }
   }
 
   // ===== GENERIC GET/SET =====

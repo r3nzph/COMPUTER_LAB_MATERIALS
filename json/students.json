@@ -5,54 +5,5 @@
     "department": "BASD",
     "year": "2nd Year",
     "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1002",
-    "name": "Maria Santos",
-    "department": "CAAD",
-    "year": "3rd Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1003",
-    "name": "Carlos Mendoza",
-    "course": "BSIT",
-    "year": "1st Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1004",
-    "name": "Andrea Reyes",
-    "course": "BSCS",
-    "year": "2nd Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1005",
-    "name": "Miguel Torres",
-    "course": "BSIT",
-    "year": "4th Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1006",
-    "name": "Sofia Garcia",
-    "course": "BSCS",
-    "year": "3rd Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1007",
-    "name": "Jose Villanueva",
-    "course": "BSIT",
-    "year": "1st Year",
-    "password": "student123"
-  },
-  {
-    "id": "TUPT-23-1008",
-    "name": "Isabella Lopez",
-    "course": "BSCS",
-    "year": "2nd Year",
-    "password": "student123"
   }
 ]

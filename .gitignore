@@ -12,3 +12,6 @@ desktop.ini
 
 # Logs
 *.log
+
+# Misc generated files
+nul
