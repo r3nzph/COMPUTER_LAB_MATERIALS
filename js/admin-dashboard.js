@@ -30,7 +30,8 @@ class AdminDashboard {
     this.renderCalendar();
     this.loadSettings();
     this.setupThemeSelector();
-    this.setupBackupRestore();
+    this.setupDataManagement();
+    this.setupAdminAccount();
     this.setupActivityRefresh();
     this.setupEquipmentModals();
     this.setupStockActions();
@@ -271,6 +272,8 @@ class AdminDashboard {
       this.renderCharts();
       this.renderActivityLog();
       this._updateAboutSection();
+      this._refreshAdminAccount();
+      this._updateDataSummary();
     });
   }
 
@@ -1355,8 +1358,21 @@ class AdminDashboard {
     return { blob, sizeKB: Math.round(blob.size / 1024) };
   }
 
-  // ===== BACKUP / RESTORE / EXPORT / IMPORT =====
-  setupBackupRestore() {
+  // ===== DATA MANAGEMENT (EXPORT / IMPORT / BACKUP / RESTORE) =====
+  setupDataManagement() {
+    // Populate data summary panel on load
+    this._updateDataSummary();
+
+    // ===== EXPORT SYSTEM DATA =====
+    document.getElementById('btnExportData')?.addEventListener('click', () => {
+      const result = this._downloadBackup('COMLAB_Export');
+      Store.logActivity('Exported System Data', {
+        admin: auth.getUserName(),
+        message: `Full system data exported (${result.sizeKB} KB)`
+      });
+      Notification.show('Export Complete', 'System data has been exported successfully.');
+    });
+
     // ===== BACKUP DATA =====
     document.getElementById('btnBackupData')?.addEventListener('click', () => {
       const result = this._downloadBackup('COMLAB_Backup');
@@ -1418,34 +1434,6 @@ class AdminDashboard {
         }
       };
       reader.readAsText(input.files[0]);
-    });
-
-    // ===== EXPORT INDIVIDUAL SECTIONS =====
-    ['exportEquipments', 'exportBorrows', 'exportStudents', 'exportActivity', 'exportSettings'].forEach(id => {
-      document.getElementById(id)?.addEventListener('click', () => {
-        const sectionMap = {
-          exportEquipments: 'equipments',
-          exportBorrows: 'borrows',
-          exportStudents: 'students',
-          exportActivity: 'activity',
-          exportSettings: 'settings'
-        };
-        const section = sectionMap[id];
-        const data = Store.exportSection(section);
-        if (!data) return;
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `comlab-${section}-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        Store.logActivity('Export Completed', {
-          admin: auth.getUserName(),
-          message: `Exported ${section} section`
-        });
-        Notification.show('Export Complete', `${section} data has been exported.`);
-      });
     });
 
     // ===== IMPORT FILE SELECTION & PREVIEW =====
@@ -1558,8 +1546,97 @@ class AdminDashboard {
     });
 
     // ===== IMPORT INDIVIDUAL SECTIONS =====
-    document.getElementById('btnImportEquipments')?.addEventListener('click', () => this._importSection('equipments'));
-    document.getElementById('btnImportBorrows')?.addEventListener('click', () => this._importSection('borrows'));
+  }
+
+  // ===== ADMIN ACCOUNT SECTION =====
+  setupAdminAccount() {
+    this._refreshAdminAccount();
+
+    document.getElementById('btnEditAccountName')?.addEventListener('click', () => {
+      const currentName = auth.currentUser?.name || 'Administrator';
+      const newName = prompt('Enter your display name:', currentName);
+      if (!newName || newName.trim() === '' || newName === currentName) return;
+
+      const admins = Store.getAdmins();
+      const adminIdx = admins.findIndex(a => a.id === auth.currentUser?.id);
+      if (adminIdx >= 0) {
+        admins[adminIdx].name = newName.trim();
+        Store.set(STORAGE_KEYS.ADMINS, admins);
+        // Update the current user session
+        if (auth.currentUser) {
+          auth.currentUser.name = newName.trim();
+          Store.set(STORAGE_KEYS.USER_SESSION, auth.currentUser);
+        }
+        Store.logActivity('Admin Name Updated', {
+          admin: newName.trim(),
+          message: `Administrator name changed to "${newName.trim()}"`
+        });
+        Notification.show('Name Updated', `Your display name has been changed to "${newName.trim()}".`, 'success');
+        this._refreshAdminAccount();
+      }
+    });
+  }
+
+  _refreshAdminAccount() {
+    const nameEl = document.getElementById('adminAccountName');
+    const idEl = document.getElementById('adminAccountId');
+    const avatarEl = document.getElementById('adminAccountAvatar');
+    const roleEl = document.getElementById('adminAccountRole');
+
+    if (nameEl) {
+      nameEl.textContent = auth.currentUser?.name || 'Administrator';
+    }
+    if (idEl) {
+      idEl.textContent = 'ID: ' + (auth.currentUser?.id || 'N/A');
+    }
+    if (avatarEl) {
+      const name = auth.currentUser?.name || 'A';
+      avatarEl.textContent = name.charAt(0).toUpperCase();
+    }
+    if (roleEl) {
+      roleEl.innerHTML = '<i class="fas fa-crown" style="color:#c79100;"></i> Super Administrator';
+    }
+  }
+
+  // ===== DATA SUMMARY PANEL =====
+  _updateDataSummary() {
+    const grid = document.getElementById('dataSummaryGrid');
+    if (!grid) return;
+
+    const equipCount = Store.getEquipments().filter(e => !e.archived).length;
+    const memberCount = Store.getAllStudents().length;
+    const pendingCount = Store.getPendingRequests().length;
+    const historyCount = Store.getBorrowHistory().length;
+    const activityCount = Store.getActivityLog().length;
+
+    // Estimate localStorage usage
+    let totalBytes = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('comlab_')) {
+        totalBytes += (key.length + (localStorage.getItem(key)?.length || 0)) * 2; // UTF-16
+      }
+    }
+    let storageSize, storageUnit;
+    if (totalBytes < 1024) {
+      storageSize = totalBytes;
+      storageUnit = 'B';
+    } else if (totalBytes < 1024 * 1024) {
+      storageSize = (totalBytes / 1024).toFixed(1);
+      storageUnit = 'KB';
+    } else {
+      storageSize = (totalBytes / (1024 * 1024)).toFixed(2);
+      storageUnit = 'MB';
+    }
+
+    grid.innerHTML = `
+      <div class="settings-preview-item"><div class="spi-value">${equipCount}</div><div class="spi-label">🛠️ Equipments</div></div>
+      <div class="settings-preview-item"><div class="spi-value">${memberCount}</div><div class="spi-label">👥 Members</div></div>
+      <div class="settings-preview-item"><div class="spi-value">${pendingCount}</div><div class="spi-label">⏳ Pending Requests</div></div>
+      <div class="settings-preview-item"><div class="spi-value">${historyCount}</div><div class="spi-label">📋 Borrow Records</div></div>
+      <div class="settings-preview-item"><div class="spi-value">${activityCount}</div><div class="spi-label">📝 Activity Logs</div></div>
+      <div class="settings-preview-item"><div class="spi-value">${storageSize}<span style="font-size:0.65rem;font-weight:400;color:var(--text-light);"> ${storageUnit}</span></div><div class="spi-label">💾 Storage Used</div></div>
+    `;
   }
 
   _importSection(section) {
