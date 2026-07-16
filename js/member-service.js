@@ -5,7 +5,7 @@
    Every admin-only method begins with auth.requireAdmin()
    ============================================ */
 
-class MemberService {
+class MemberServiceImpl {
   constructor() {
     this._cache = null;
   }
@@ -201,5 +201,5 @@ class MemberService {
   }
 }
 
-// Global instance
-const MemberService = new MemberService();
+// Global instance — rename to MemberService so other scripts see the instance, not the class
+const MemberService = new MemberServiceImpl();

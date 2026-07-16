@@ -782,36 +782,75 @@ class AdminDashboard {
     const container = document.getElementById('adminMembersContainer');
     if (!container) return;
 
-    const search = document.getElementById('memberSearchInput')?.value || '';
-    const filterVal = document.getElementById('memberFilterSelect')?.value || 'all';
-    const sortVal = document.getElementById('memberSortSelect')?.value || 'name';
+    // Show loading state with a 500ms max timeout
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-secondary);"><div style="font-size:2rem;margin-bottom:0.5rem;opacity:0.4;"><i class="fas fa-spinner fa-pulse"></i></div><p>Loading members...</p></div>';
+    if (this._renderMemberTimeout) clearTimeout(this._renderMemberTimeout);
+    this._renderMemberTimeout = setTimeout(() => {
+      // If still showing loading after 500ms, show error
+      if (container.querySelector('.fa-spinner')) {
+        container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">⚠️</div><h3 style="margin-bottom:0.3rem;">Unable to Load Members</h3><p>Data loading timed out. Please try again.</p></div>';
+      }
+    }, 500);
 
-    let members = MemberService.getAllMembers();
-    members = MemberService.searchMembers(members, search);
-    members = MemberService.filterMembers(members, filterVal);
-    members = MemberService.sortMembers(members, sortVal, true);
+    try {
+      const search = document.getElementById('memberSearchInput')?.value || '';
+      const filterVal = document.getElementById('memberFilterSelect')?.value || 'all';
+      const sortVal = document.getElementById('memberSortSelect')?.value || 'name';
 
-    // Update stat cards
-    const stats = MemberService.getMemberDashboardStats();
-    document.getElementById('memberStatCards').style.display = 'grid';
-    document.getElementById('memTotalCount').textContent = stats.registered;
-    document.getElementById('memActiveCount').textContent = stats.active;
-    document.getElementById('memSuspendedCount').textContent = stats.suspended;
-    document.getElementById('memBorrowingCount').textContent = stats.currentlyBorrowing;
-    document.getElementById('memNewCount').textContent = stats.newThisMonth;
+      if (typeof MemberService === 'undefined' || !MemberService.getAllMembers) {
+        throw new Error('MemberService is not available');
+      }
 
-    if (members.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">👥</div><h3 style="margin-bottom:0.3rem;">No Members Found</h3><p>No registered members matching your criteria.</p></div>';
-      document.getElementById('memberCountDisplay').textContent = '';
-      return;
-    }
+      let members;
+      try {
+        members = MemberService.getAllMembers();
+      } catch (e) {
+        console.error('MemberService.getAllMembers() failed:', e);
+        throw new Error('Failed to load members from storage');
+      }
+      if (!Array.isArray(members)) members = [];
 
-    container.innerHTML = `
-      <div class="admin-table"><table>
-        <thead><tr>
-          <th>Member</th><th>ID</th><th>Department</th><th>Year/Section</th><th>Borrows</th><th>Status</th><th>Actions</th>
-        </tr></thead>
-        <tbody>${members.map(m => {
+      try {
+        members = MemberService.searchMembers(members, search);
+        members = MemberService.filterMembers(members, filterVal);
+        members = MemberService.sortMembers(members, sortVal, true);
+      } catch (e) {
+        console.error('MemberService search/filter/sort failed:', e);
+        // Continue with unsorted members
+      }
+
+      // Cancel the loading timeout since we succeeded
+      if (this._renderMemberTimeout) clearTimeout(this._renderMemberTimeout);
+
+      // Update stat cards
+      try {
+        const stats = MemberService.getMemberDashboardStats();
+        const statCards = document.getElementById('memberStatCards');
+        if (statCards) {
+          statCards.style.display = 'grid';
+          document.getElementById('memTotalCount').textContent = stats.registered;
+          document.getElementById('memActiveCount').textContent = stats.active;
+          document.getElementById('memSuspendedCount').textContent = stats.suspended;
+          document.getElementById('memBorrowingCount').textContent = stats.currentlyBorrowing;
+          document.getElementById('memNewCount').textContent = stats.newThisMonth;
+        }
+      } catch (e) {
+        console.error('Failed to update member stat cards:', e);
+      }
+
+      if (!Array.isArray(members) || members.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">👥</div><h3 style="margin-bottom:0.3rem;">No Registered Students</h3><p>Students who register will automatically appear here. No registered members matching your criteria.</p></div>';
+        const countDisplay = document.getElementById('memberCountDisplay');
+        if (countDisplay) countDisplay.textContent = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="admin-table"><table>
+          <thead><tr>
+            <th>Member</th><th>ID</th><th>Department</th><th>Year/Section</th><th>Borrows</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody>${members.map(m => {
           const statusClass = m.status === 'Suspended' ? 'pending' : (m.hasActiveBorrows ? 'pending' : 'returned');
           const statusText = m.status === 'Suspended' ? 'Suspended' : (m.hasActiveBorrows ? 'Borrowing' : 'Clear');
           const picHtml = MemberService.getProfilePicHTML(m.profilePic, m.fullName, 32);
@@ -1362,6 +1401,10 @@ class AdminDashboard {
   setupDataManagement() {
     // Populate data summary panel on load
     this._updateDataSummary();
+
+    // Auto-refresh data summary every 30 seconds
+    if (this._dataSummaryTimer) clearInterval(this._dataSummaryTimer);
+    this._dataSummaryTimer = setInterval(() => this._updateDataSummary(), 30000);
 
     // ===== EXPORT SYSTEM DATA =====
     document.getElementById('btnExportData')?.addEventListener('click', () => {
