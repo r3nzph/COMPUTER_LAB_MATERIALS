@@ -228,6 +228,38 @@ class AuthSystem {
   isStudent() { return this.currentUser?.type === 'student'; }
   getUserName() { return this.currentUser?.name || 'Guest'; }
 
+  // ===== ROLE-BASED PERMISSION GUARD =====
+  // Call at the start of any admin-only function.
+  // Returns true if allowed, false if denied (and redirects).
+  requireAdmin() {
+    if (!this.isLoggedIn()) {
+      Notification.show('Access Denied', 'You must be logged in as an administrator.', 'error');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      return false;
+    }
+    if (!this.isAdmin()) {
+      Notification.show('Access Denied', 'Administrator privileges required.', 'error');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      return false;
+    }
+    return true;
+  }
+
+  // Guard for student-only actions.
+  requireStudent() {
+    if (!this.isLoggedIn()) {
+      Notification.show('Access Denied', 'You must be logged in first.', 'error');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      return false;
+    }
+    if (!this.isStudent()) {
+      Notification.show('Access Denied', 'Student access required.', 'error');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      return false;
+    }
+    return true;
+  }
+
   getUserInitials() {
     const name = this.getUserName();
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

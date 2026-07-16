@@ -8,11 +8,10 @@ class AdminDashboard {
   constructor() {
     this.pendingRefresh = null;
     this.init();
-  }
-
-  async init() {
+  }    async init() {
     if (!auth.isLoggedIn() || !auth.isAdmin()) {
-      window.location.href = 'index.html';
+      Notification.show('Access Denied', 'Administrator privileges required.', 'error');
+      setTimeout(function() { window.location.href = 'index.html'; }, 1500);
       return;
     }
 
@@ -35,6 +34,7 @@ class AdminDashboard {
     this.setupActivityRefresh();
     this.setupEquipmentModals();
     this.setupStockActions();
+    this.setupMemberModals();
   }
 
   // ===== NAVIGATION =====
@@ -215,6 +215,7 @@ class AdminDashboard {
 
   // ===== BORROW APPROVAL ACTIONS =====
   approveReq(id) {
+    if (!auth.requireAdmin()) return;
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
     // Decrease equipment stock by 1 on approval
@@ -230,6 +231,7 @@ class AdminDashboard {
   }
 
   rejectReq(id) {
+    if (!auth.requireAdmin()) return;
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
     // No stock adjustment — stock was never decreased on Pending status.
@@ -244,6 +246,7 @@ class AdminDashboard {
   }
 
   returnReq(id) {
+    if (!auth.requireAdmin()) return;
     const r = Store.getBorrowHistory().find(x => x.id === id);
     if (!r) return;
     // Increase stock back by 1 when equipment is returned
@@ -537,6 +540,7 @@ class AdminDashboard {
     // ===== FORM SUBMIT =====
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (!auth.requireAdmin()) return;
       const id = document.getElementById('equipFormId').value;
       const data = {
         name: document.getElementById('equipFormName').value.trim(),
@@ -617,6 +621,7 @@ class AdminDashboard {
   }
 
   deleteEquip(id) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     // Check if equipment is currently borrowed
@@ -637,6 +642,7 @@ class AdminDashboard {
   }
 
   archiveEquip(id) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     Store.archiveEquipment(id);
@@ -650,6 +656,7 @@ class AdminDashboard {
   }
 
   restoreEquip(id) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     Store.restoreEquipment(id);
@@ -663,6 +670,7 @@ class AdminDashboard {
   }
 
   duplicateEquip(id) {
+    if (!auth.requireAdmin()) return;
     const copy = Store.duplicateEquipment(id);
     if (copy) {
       Store.logActivity('Equipment Duplicated', {
@@ -708,6 +716,7 @@ class AdminDashboard {
   }
 
   stockAdjust(id, delta) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     if (e.stocks + delta < 0) {
@@ -725,6 +734,7 @@ class AdminDashboard {
   }
 
   stockRestock(id) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     const min = e.minStocks || 3;
@@ -744,6 +754,7 @@ class AdminDashboard {
   }
 
   markMaintenance(id) {
+    if (!auth.requireAdmin()) return;
     const e = Store.getEquipment(id);
     if (!e) return;
     const newStatus = e.status === 'Under Maintenance' ? 'Available' : 'Under Maintenance';
@@ -763,101 +774,357 @@ class AdminDashboard {
     if (search) search.addEventListener('input', () => this.renderStocks());
   }
 
-  // ===== MEMBERS (Registered Students) =====
+  // ===== MEMBERS (User Management System) =====
   renderMembers() {
     const container = document.getElementById('adminMembersContainer');
     if (!container) return;
 
-    const students = Store.getAllStudents();
-    const borrowHistory = Store.getBorrowHistory();
-    const searchText = (document.getElementById('memberStudentSearch')?.value || '').toLowerCase();
+    const search = document.getElementById('memberSearchInput')?.value || '';
+    const filterVal = document.getElementById('memberFilterSelect')?.value || 'all';
+    const sortVal = document.getElementById('memberSortSelect')?.value || 'name';
 
-    let data = students.map(s => {
-      const borrows = borrowHistory.filter(r => r.studentId === s.id);
-      const active = borrows.filter(r => r.status === 'Pending' || r.status === 'Approved');
-      return {
-        id: s.id,
-        name: s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
-        department: s.department || 'N/A',
-        year: s.year || 'N/A',
-        section: s.section || 'N/A',
-        email: s.email || 'N/A',
-        contact: s.contact || 'N/A',
-        borrowCount: borrows.length,
-        activeCount: active.length,
-        status: active.length > 0 ? 'Active' : 'Clear'
-      };
-    });
+    let members = MemberService.getAllMembers();
+    members = MemberService.searchMembers(members, search);
+    members = MemberService.filterMembers(members, filterVal);
+    members = MemberService.sortMembers(members, sortVal, true);
 
-    if (searchText) {
-      data = data.filter(s =>
-        s.name.toLowerCase().includes(searchText) ||
-        s.id.toLowerCase().includes(searchText) ||
-        s.department.toLowerCase().includes(searchText)
-      );
-    }
+    // Update stat cards
+    const stats = MemberService.getMemberDashboardStats();
+    document.getElementById('memberStatCards').style.display = 'grid';
+    document.getElementById('memTotalCount').textContent = stats.registered;
+    document.getElementById('memActiveCount').textContent = stats.active;
+    document.getElementById('memSuspendedCount').textContent = stats.suspended;
+    document.getElementById('memBorrowingCount').textContent = stats.currentlyBorrowing;
+    document.getElementById('memNewCount').textContent = stats.newThisMonth;
 
-    // Sort: active borrowers first, then alphabetical
-    data.sort((a, b) => b.activeCount - a.activeCount || a.name.localeCompare(b.name));
-
-    if (data.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">👥</div><h3 style="margin-bottom:0.3rem;">No Students Found</h3><p>No registered students yet.</p></div>';
+    if (members.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">👥</div><h3 style="margin-bottom:0.3rem;">No Members Found</h3><p>No registered members matching your criteria.</p></div>';
+      document.getElementById('memberCountDisplay').textContent = '';
       return;
     }
 
     container.innerHTML = `
       <div class="admin-table"><table>
         <thead><tr>
-          <th>Student</th><th>ID</th><th>Department</th><th>Year</th><th>Section</th><th>Borrows</th><th>Status</th><th>Action</th>
+          <th>Member</th><th>ID</th><th>Department</th><th>Year/Section</th><th>Borrows</th><th>Status</th><th>Actions</th>
         </tr></thead>
-        <tbody>${data.map(s => `
+        <tbody>${members.map(m => {
+          const statusClass = m.status === 'Suspended' ? 'pending' : (m.hasActiveBorrows ? 'pending' : 'returned');
+          const statusText = m.status === 'Suspended' ? 'Suspended' : (m.hasActiveBorrows ? 'Borrowing' : 'Clear');
+          const picHtml = MemberService.getProfilePicHTML(m.profilePic, m.fullName, 32);
+          return `
           <tr>
-            <td data-label="Student"><div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-1);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;flex-shrink:0;">${s.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}</div>
-              <strong>${s.name}</strong>
+            <td data-label="Member"><div style="display:flex;align-items:center;gap:8px;">
+              ${picHtml}
+              <div><strong>${m.fullName}</strong>${m.email && m.email !== 'N/A' ? `<div style="font-size:0.7rem;color:var(--text-light);">${m.email}</div>` : ''}</div>
             </div></td>
-            <td data-label="ID" style="font-family:monospace;font-size:0.78rem;">${s.id}</td>
-            <td data-label="Department">${s.department}</td>
-            <td data-label="Year">${s.year}</td>
-            <td data-label="Section">${s.section}</td>
-            <td data-label="Borrows"><span style="font-weight:700;">${s.borrowCount}</span> <span style="font-size:0.75rem;color:${s.activeCount > 0 ? '#c79100' : 'var(--text-light)'};">(${s.activeCount} active)</span></td>
-            <td data-label="Status"><span class="status-pill ${s.status === 'Active' ? 'pending' : 'returned'}">${s.status}</span></td>
-            <td data-label="Action">
-              <button class="btn-sm red" onclick="admin.deleteMember('${s.id}')" title="Remove student"><i class="fas fa-trash"></i></button>
+            <td data-label="ID" style="font-family:monospace;font-size:0.78rem;">${m.id}</td>
+            <td data-label="Department">${m.department || 'N/A'}</td>
+            <td data-label="Year/Section">${m.year || ''} ${m.section ? m.section : ''}</td>
+            <td data-label="Borrows"><span style="font-weight:700;">${m.borrowCount}</span> <span style="font-size:0.75rem;color:${m.hasActiveBorrows ? '#c79100' : 'var(--text-light)'};">(${m.activeCount} active)</span></td>
+            <td data-label="Status"><span class="status-pill ${statusClass}">${statusText}</span></td>
+            <td data-label="Actions" style="display:flex;gap:3px;flex-wrap:wrap;">
+              <button class="btn-sm blue" onclick="admin.viewMemberProfile('${m.id}')" title="View Profile"><i class="fas fa-eye"></i></button>
+              <button class="btn-sm blue" onclick="admin.openEditMember('${m.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+              ${m.status === 'Suspended'
+                ? `<button class="btn-sm green" onclick="admin.reactivateMember('${m.id}')" title="Reactivate"><i class="fas fa-check-circle"></i></button>`
+                : `<button class="btn-sm" style="background:rgba(255,152,0,0.1);color:#e65100;" onclick="admin.suspendMember('${m.id}')" title="Suspend"><i class="fas fa-pause-circle"></i></button>`
+              }
+              ${m.status !== 'Suspended'
+                ? `<button class="btn-sm" style="background:rgba(156,39,176,0.1);color:#7b1fa2;" onclick="admin.resetMemberPassword('${m.id}')" title="Reset Password"><i class="fas fa-key"></i></button>`
+                : ''
+              }
+              <button class="btn-sm red" onclick="admin.deleteMember('${m.id}')" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
           </tr>
-        `).join('')}</tbody>
+        `}).join('')}</tbody>
       </table></div>
-      <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.5rem;">${data.length} student${data.length !== 1 ? 's' : ''} registered</div>
     `;
+    document.getElementById('memberCountDisplay').textContent = `${members.length} member${members.length !== 1 ? 's' : ''} found`;
   }
 
-  deleteMember(id) {
-    const student = Store.getAllStudents().find(s => s.id === id);
-    if (!student) return;
+  // ===== VIEW MEMBER PROFILE =====
+  viewMemberProfile(id) {
+    const member = MemberService.getMember(id);
+    if (!member) { Notification.show('Error', 'Member not found.', 'error'); return; }
 
-    // Check if this is a seed student (from students.json) — cannot modify
-    const seedStudentIds = (Store.get(STORAGE_KEYS.STUDENTS) || []).map(s => s.id);
-    if (seedStudentIds.includes(id)) {
+    const borrows = Store.getBorrowHistory().filter(r => r.studentId === id);
+    const activeBorrows = borrows.filter(r => r.status === 'Pending' || r.status === 'Approved');
+    const timeline = MemberService.getActivityTimeline(id);
+    const picHtml = MemberService.getProfilePicHTML(member.profilePic, member.fullName, 80);
+
+    const content = document.getElementById('memberProfileContent');
+    content.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        ${picHtml}
+        <div style="flex:1;min-width:200px;">
+          <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:0.2rem;">${member.fullName}</h2>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <span class="settings-badge"><i class="fas fa-id-card"></i> ${member.id}</span>
+            <span class="settings-badge"><i class="fas fa-building"></i> ${member.department || 'N/A'}</span>
+            <span class="settings-badge"><i class="fas fa-graduation-cap"></i> ${member.year || ''} ${member.section || ''}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="status-pill ${member.status === 'Suspended' ? 'pending' : 'returned'}" style="font-size:0.8rem;padding:0.2rem 0.8rem;">${member.status || 'Active'}</div>
+          <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.3rem;">${member.borrowCount} borrows</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem;">
+        <div class="settings-preview-item">
+          <div style="font-size:0.85rem;">📧</div>
+          <div class="spi-label">Email</div>
+          <div style="font-size:0.8rem;">${member.email || 'N/A'}</div>
+        </div>
+        <div class="settings-preview-item">
+          <div style="font-size:0.85rem;">📞</div>
+          <div class="spi-label">Contact</div>
+          <div style="font-size:0.8rem;">${member.contact || 'N/A'}</div>
+        </div>
+        <div class="settings-preview-item">
+          <div style="font-size:0.85rem;">📅</div>
+          <div class="spi-label">Registered</div>
+          <div style="font-size:0.8rem;">${member.registrationDate ? new Date(member.registrationDate).toLocaleDateString() : 'N/A'}</div>
+        </div>
+        <div class="settings-preview-item">
+          <div style="font-size:0.85rem;">🔐</div>
+          <div class="spi-label">Last Login</div>
+          <div style="font-size:0.8rem;">${member.lastLogin ? new Date(member.lastLogin).toLocaleDateString() : 'N/A'}</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">📋 Current Borrows (${activeBorrows.length})</div>
+        ${activeBorrows.length > 0
+          ? `<div class="admin-table"><table><thead><tr><th>Equipment</th><th>Date</th><th>Return</th><th>Status</th></tr></thead><tbody>${activeBorrows.map(r => `
+            <tr>
+              <td>${r.equipment}</td>
+              <td style="font-size:0.75rem;">${new Date(r.borrowDate).toLocaleDateString()}</td>
+              <td style="font-size:0.75rem;">${new Date(r.returnDate).toLocaleDateString()}</td>
+              <td><span class="status-pill ${r.status === 'Pending' ? 'pending' : 'approved'}">${r.status}</span></td>
+            </tr>
+          `).join('')}</tbody></table></div>`
+          : '<p style="color:var(--text-light);font-size:0.82rem;">No active borrows.</p>'
+        }
+      </div>
+
+      <div>
+        <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">📝 Activity Timeline</div>
+        ${timeline.length > 0
+          ? `<div style="max-height:200px;overflow-y:auto;">${timeline.slice(0, 10).map(t => `
+            <div class="warning-item">
+              <div class="wi-icon" style="background:rgba(var(--primary-rgb),0.06);color:var(--primary);font-size:0.6rem;"><i class="fas fa-circle"></i></div>
+              <div style="flex:1;">
+                <strong style="font-size:0.82rem;">${t.action}</strong>
+                ${t.details ? `<div style="font-size:0.72rem;color:var(--text-light);">${t.details}</div>` : ''}
+              </div>
+              <div style="font-size:0.65rem;color:var(--text-light);white-space:nowrap;">${new Date(t.date).toLocaleDateString()} ${new Date(t.date).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+            </div>
+          `).join('')}</div>`
+          : '<p style="color:var(--text-light);font-size:0.82rem;">No activity recorded yet.</p>'
+        }
+      </div>
+    `;
+    document.getElementById('memberProfileModal').classList.add('active');
+  }
+
+  // ===== OPEN EDIT MEMBER MODAL =====
+  openEditMember(id) {
+    const member = MemberService.getMember(id);
+    if (!member) { Notification.show('Error', 'Member not found.', 'error'); return; }
+
+    const seedIds = (Store.get(STORAGE_KEYS.STUDENTS) || []).map(s => s.id);
+    if (seedIds.includes(id)) {
+      Notification.show('Cannot Edit', 'Demo student accounts cannot be modified. Register a new student to test editing.', 'error');
+      return;
+    }
+
+    document.getElementById('memberEditTitle').textContent = 'Edit Member';
+    document.getElementById('memberEditId').value = id;
+    document.getElementById('memberEditName').value = member.fullName;
+    document.getElementById('memberEditStudentId').value = member.id;
+    document.getElementById('memberEditDepartment').value = member.department || '';
+    document.getElementById('memberEditYear').value = member.year || '';
+    document.getElementById('memberEditSection').value = member.section || '';
+    document.getElementById('memberEditEmail').value = member.email || '';
+    document.getElementById('memberEditContact').value = member.contact || '';
+
+    // Handle profile picture preview
+    const preview = document.getElementById('memberEditPicPreview');
+    const removeBtn = document.getElementById('memberEditPicRemove');
+    if (member.profilePic && member.profilePic.startsWith('data:')) {
+      preview.innerHTML = `<img src="${member.profilePic}" alt="${member.fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+      removeBtn.style.display = 'inline-block';
+    } else {
+      preview.innerHTML = MemberService.getProfilePicHTML(null, member.fullName, 60);
+      removeBtn.style.display = 'none';
+    }
+
+    this._pendingMemberPic = null;
+    document.getElementById('memberEditModal').classList.add('active');
+  }
+
+  // ===== SAVE MEMBER EDIT =====
+  saveMemberEdit(id, data) {
+    // Merge with existing member data
+    const updates = {};
+    if (data.name) updates.name = data.name;
+    if (data.department !== undefined) updates.department = data.department;
+    if (data.year !== undefined) updates.year = data.year;
+    if (data.section !== undefined) updates.section = data.section;
+    if (data.email !== undefined) updates.email = data.email;
+    if (data.contact !== undefined) updates.contact = data.contact;
+    if (this._pendingMemberPic !== undefined) {
+      updates.profilePic = this._pendingMemberPic;
+    }
+
+    const result = MemberService.updateMember(id, updates);
+    if (result) {
+      this._pendingMemberPic = undefined;
+      Notification.show('Member Updated', `${data.name || result.name}'s profile has been updated.`);
+      this.refreshAll();
+    }
+  }
+
+  // ===== DELETE MEMBER =====
+  deleteMember(id) {
+    const member = MemberService.getMember(id);
+    if (!member) return;
+
+    const seedIds = (Store.get(STORAGE_KEYS.STUDENTS) || []).map(s => s.id);
+    if (seedIds.includes(id)) {
       Notification.show('Cannot Remove', 'Demo student accounts cannot be removed. Register a new student to test deletion.', 'error');
       return;
     }
 
-    const activeBorrows = Store.getBorrowHistory().filter(r => r.studentId === id && (r.status === 'Pending' || r.status === 'Approved'));
-    if (activeBorrows.length > 0) {
-      Notification.show('Cannot Delete', `${student.name} has active borrow requests.`, 'error');
-      return;
+    const result = MemberService.deleteMember(id);
+    if (result.success) {
+      Notification.show('Member Deleted', result.message);
+      this.refreshAll();
+    } else {
+      Notification.show('Cannot Delete', result.message, 'error');
     }
-    if (!confirm(`Remove "${student.name}" (${id}) from the system?`)) return;
-    // Remove from registered students only
-    const updated = Store.getRegisteredStudents().filter(s => s.id !== id);
-    Store.saveRegisteredStudents(updated);
-    Store.logActivity('Student Removed', {
-      admin: auth.getUserName(),
-      message: `Removed student ${student.name} (${id}) from the system`
-    });
-    Notification.show('Removed', `${student.name} has been removed.`);
+  }
+
+  // ===== SUSPEND MEMBER =====
+  suspendMember(id) {
+    const member = MemberService.getMember(id);
+    if (!member) return;
+    if (!confirm(`Suspend "${member.fullName}"? They will not be able to login or borrow equipment.`)) return;
+    const result = MemberService.suspendMember(id);
+    if (!result) { Notification.show('Cannot Modify', 'Demo accounts cannot be modified.', 'error'); return; }
+    Notification.show('Member Suspended', `${member.fullName}'s account has been suspended.`);
     this.refreshAll();
+  }
+
+  // ===== REACTIVATE MEMBER =====
+  reactivateMember(id) {
+    const member = MemberService.getMember(id);
+    if (!member) return;
+    if (!confirm(`Reactivate "${member.fullName}"? They will regain access to the system.`)) return;
+    const result = MemberService.reactivateMember(id);
+    if (!result) { Notification.show('Cannot Modify', 'Demo accounts cannot be modified.', 'error'); return; }
+    Notification.show('Member Reactivated', `${member.fullName}'s account has been reactivated.`);
+    this.refreshAll();
+  }
+
+  // ===== RESET PASSWORD =====
+  resetMemberPassword(id) {
+    const result = MemberService.resetPassword(id);
+    if (!result) { Notification.show('Error', 'Member not found.', 'error'); return; }
+    if (confirm(`Temporary password generated for ${result.member.fullName}:\n\n🔑 ${result.password}\n\nDo you want to copy this to clipboard?`)) {
+      try {
+        navigator.clipboard.writeText(result.password);
+        Notification.show('Password Reset', `Temporary password copied to clipboard: ${result.password}`);
+      } catch {
+        Notification.show('Password Reset', `Temporary password: ${result.password}`, 'success');
+      }
+    } else {
+      Notification.show('Password Reset', `Temporary password: ${result.password}`, 'success');
+    }
+    this.refreshAll();
+  }
+
+  // ===== SETUP MEMBER MODALS =====
+  setupMemberModals() {
+    // Profile modal close
+    document.getElementById('memberProfileClose')?.addEventListener('click', () => {
+      document.getElementById('memberProfileModal').classList.remove('active');
+    });
+    document.getElementById('memberProfileModal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('memberProfileModal').classList.remove('active');
+      }
+    });
+
+    // Edit modal
+    const editModal = document.getElementById('memberEditModal');
+    const editForm = document.getElementById('memberEditForm');
+    const editClose = document.getElementById('memberEditClose');
+    const editCancel = document.getElementById('memberEditCancel');
+
+    editClose?.addEventListener('click', () => editModal?.classList.remove('active'));
+    editCancel?.addEventListener('click', () => editModal?.classList.remove('active'));
+    editModal?.addEventListener('click', (e) => { if (e.target === e.currentTarget) editModal?.classList.remove('active'); });
+
+    // Edit form submit
+    this._pendingMemberPic = undefined;
+    editForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('memberEditId')?.value;
+      if (!id) return;
+      const data = {
+        name: document.getElementById('memberEditName')?.value?.trim(),
+        department: document.getElementById('memberEditDepartment')?.value,
+        year: document.getElementById('memberEditYear')?.value,
+        section: document.getElementById('memberEditSection')?.value,
+        email: document.getElementById('memberEditEmail')?.value?.trim(),
+        contact: document.getElementById('memberEditContact')?.value?.trim()
+      };
+      if (!data.name) { Notification.show('Error', 'Name is required.', 'error'); return; }
+      this.saveMemberEdit(id, data);
+      editModal.classList.remove('active');
+    });
+
+    // Profile pic upload
+    const picInput = document.getElementById('memberEditPicInput');
+    document.getElementById('memberEditPicBtn')?.addEventListener('click', () => picInput?.click());
+    picInput?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+        Notification.show('Invalid Type', 'Please upload a JPG, PNG, or WebP image.', 'error');
+        return;
+      }
+      if (file.size > 500 * 1024) {
+        Notification.show('File Too Large', 'Image must be under 500KB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this._pendingMemberPic = e.target.result;
+        const preview = document.getElementById('memberEditPicPreview');
+        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+        document.getElementById('memberEditPicRemove').style.display = 'inline-block';
+        Notification.show('Photo Uploaded', 'Profile picture will be saved when you save changes.', 'success');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Remove profile pic
+    document.getElementById('memberEditPicRemove')?.addEventListener('click', () => {
+      this._pendingMemberPic = null;
+      const preview = document.getElementById('memberEditPicPreview');
+      preview.innerHTML = '<i class="fas fa-user" style="font-size:1.5rem;color:var(--text-light);"></i>';
+      document.getElementById('memberEditPicRemove').style.display = 'none';
+      Notification.show('Photo Removed', 'Profile picture will be cleared when you save changes.');
+    });
+
+    // Member list search/filter/sort
+    document.getElementById('memberSearchInput')?.addEventListener('input', () => this.renderMembers());
+    document.getElementById('memberFilterSelect')?.addEventListener('change', () => this.renderMembers());
+    document.getElementById('memberSortSelect')?.addEventListener('change', () => this.renderMembers());
   }
 
   // ===== CHARTS =====
@@ -1541,9 +1808,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setTimeout(() => admin.setupRequestSearch(), 100);
   setTimeout(() => admin.setupEquipmentSearch(), 100);
   setTimeout(() => admin.setupStockActions(), 100);
-  // Member/student search
+  // Member/student search (legacy - new member system handles this in setupMemberModals)
   setTimeout(() => {
-    const memberSearch = document.getElementById('memberStudentSearch');
-    if (memberSearch) memberSearch.addEventListener('input', () => admin.renderMembers());
+    const oldSearch = document.getElementById('memberStudentSearch');
+    if (oldSearch) oldSearch.addEventListener('input', () => admin.renderMembers());
   }, 100);
 });

@@ -388,6 +388,76 @@ class StorageManager {
     this._emit(StoreEvents.SETTINGS_CHANGED, { settings });
   }
 
+  // ===== STUDENT MANAGEMENT =====
+  // New storage keys for enhanced member management
+  getStudentActivityStore() {
+    return this.get('comlab_student_activity') || {};
+  }
+
+  setStudentActivityStore(data) {
+    this.set('comlab_student_activity', data);
+  }
+
+  logStudentActivity(studentId, action, details = {}) {
+    const store = this.getStudentActivityStore();
+    if (!store[studentId]) store[studentId] = [];
+    const entry = {
+      date: new Date().toISOString(),
+      action,
+      details: details.message || '',
+      admin: details.admin || 'System',
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4)
+    };
+    store[studentId].unshift(entry);
+    if (store[studentId].length > 100) store[studentId].length = 100;
+    this.setStudentActivityStore(store);
+    this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'activityLogged', studentId });
+  }
+
+  getStudentActivity(studentId) {
+    const store = this.getStudentActivityStore();
+    return store[studentId] || [];
+  }
+
+  updateStudent(id, updates) {
+    const registered = this.getRegisteredStudents();
+    const idx = registered.findIndex(s => s.id === id);
+    if (idx === -1) {
+      // Also check seed students - we shouldn't modify those
+      return null;
+    }
+    Object.assign(registered[idx], updates);
+    this.saveRegisteredStudents(registered);
+    return registered[idx];
+  }
+
+  getStudentStats() {
+    const all = this.getAllStudents();
+    const registered = this.getRegisteredStudents();
+    const history = this.getBorrowHistory();
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const active = registered.filter(s => s.accountStatus !== 'Suspended' && s.accountStatus !== 'Disabled');
+    const suspended = registered.filter(s => s.accountStatus === 'Suspended' || s.accountStatus === 'Disabled');
+    const currentlyBorrowing = registered.filter(s =>
+      history.some(r => r.studentId === s.id && (r.status === 'Pending' || r.status === 'Approved'))
+    );
+    const newThisMonth = registered.filter(s => {
+      const d = new Date(s.registrationDate || s.dateAdded || s.memberSince || 0);
+      return d >= thisMonthStart;
+    });
+
+    return {
+      total: all.length,
+      registered: registered.length,
+      active: active.length,
+      suspended: suspended.length,
+      currentlyBorrowing: currentlyBorrowing.length,
+      newThisMonth: newThisMonth.length
+    };
+  }
+
   // ===== PASSWORD OVERRIDES =====
   getPasswordOverrides() {
     return this.get(STORAGE_KEYS.PASSWORDS) || {};
@@ -557,6 +627,7 @@ class StorageManager {
       borrowHistory: this.getBorrowHistory(),
       registeredStudents: this.getRegisteredStudents(),
       activityLog: this.getActivityLog(),
+      studentActivity: this.getStudentActivityStore(),
       settings: this.getSettings(),
       admins: this.getAdmins(),
       passwords: this.getPasswordOverrides(),
@@ -578,6 +649,7 @@ class StorageManager {
       if (data.borrowHistory) this.setBorrowHistory(data.borrowHistory);
       if (data.registeredStudents) this.set(STORAGE_KEYS.REGISTERED, data.registeredStudents);
       if (data.activityLog) this.setActivityLog(data.activityLog);
+      if (data.studentActivity) this.setStudentActivityStore(data.studentActivity);
       // Use this.set() instead of saveSettings() to avoid premature SETTINGS_CHANGED event
       if (data.settings) this.set(STORAGE_KEYS.SETTINGS, data.settings);
       if (data.admins) this.set(STORAGE_KEYS.ADMINS, data.admins);

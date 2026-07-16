@@ -524,21 +524,122 @@
         </div>
       </div>
 
-      <!-- MEMBERS -->
+      <!-- ===== MEMBERS (User Management) ===== -->
       <div class="admin-content-area" id="section-members">
-        <div class="admin-header"><h1>Registered <span>Students</span></h1>
-          <div class="admin-actions">
-            <input type="text" id="memberStudentSearch" placeholder="Search students..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;" />
+        <div class="admin-header">
+          <h1>User <span>Management</span></h1>
+          <div class="admin-actions" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="memberSearchInput" placeholder="Search by name, ID, department..." style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;min-width:200px;" />
+            <select id="memberFilterSelect" style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;">
+              <option value="all">All Members</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+              <option value="borrowing">Currently Borrowing</option>
+              <option value="no-borrows">No Borrow Record</option>
+              <option value="recent">Recently Registered</option>
+            </select>
+            <select id="memberSortSelect" style="padding:0.45rem 0.8rem;border:1.5px solid rgba(var(--primary-rgb),0.08);border-radius:8px;font-size:0.82rem;font-family:inherit;">
+              <option value="name">Sort by Name</option>
+              <option value="id">Sort by ID</option>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
           </div>
         </div>
+
+        <!-- Member overview cards -->
+        <div class="admin-cards" id="memberStatCards" style="display:none;">
+          <div class="admin-card"><div class="ac-label">Total Members</div><div class="ac-value blue" id="memTotalCount">0</div></div>
+          <div class="admin-card"><div class="ac-label">Active</div><div class="ac-value green" id="memActiveCount">0</div></div>
+          <div class="admin-card"><div class="ac-label">Suspended</div><div class="ac-value red" id="memSuspendedCount">0</div></div>
+          <div class="admin-card"><div class="ac-label">Currently Borrowing</div><div class="ac-value yellow" id="memBorrowingCount">0</div></div>
+          <div class="admin-card"><div class="ac-label">New This Month</div><div class="ac-value blue" id="memNewCount">0</div></div>
+        </div>
+
+        <!-- Member list container -->
         <div class="admin-section" id="adminMembersContainer">
-          <!-- Rendered by renderMembers() -->
           <div class="skeleton-fade" style="padding:1rem;">
             <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:30%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
             <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:30%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
             <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:25%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
-            <div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-text" style="width:35%;"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div><div class="skeleton skeleton-text short"></div></div>
           </div>
+        </div>
+
+        <!-- Member count -->
+        <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:0.3rem;" id="memberCountDisplay"></div>
+      </div>
+
+      <!-- ===== MEMBER PROFILE MODAL ===== -->
+      <div class="login-modal" id="memberProfileModal">
+        <div class="login-modal-content" style="max-width:600px;max-height:90vh;overflow-y:auto;">
+          <button class="login-close" id="memberProfileClose">&times;</button>
+          <div id="memberProfileContent" style="padding:0.5rem 0;"></div>
+        </div>
+      </div>
+
+      <!-- ===== MEMBER EDIT MODAL ===== -->
+      <div class="login-modal" id="memberEditModal">
+        <div class="login-modal-content" style="max-width:500px;">
+          <button class="login-close" id="memberEditClose">&times;</button>
+          <div style="text-align:center;margin-bottom:1.2rem;">
+            <div style="font-size:1.3rem;font-weight:800;"><i class="fas fa-user-edit" style="color:var(--primary);margin-right:8px;"></i> <span id="memberEditTitle">Edit Member</span></div>
+          </div>
+          <form id="memberEditForm">
+            <input type="hidden" id="memberEditId" />
+            <div class="form-group"><label>Full Name *</label><input type="text" id="memberEditName" required /></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group"><label>Student ID</label><input type="text" id="memberEditStudentId" disabled /></div>
+              <div class="form-group"><label>Department</label>
+                <select id="memberEditDepartment" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;">
+                  <option value="">Select Department</option>
+                  <option value="College of Engineering">College of Engineering</option>
+                  <option value="College of Science">College of Science</option>
+                  <option value="College of Information Technology">College of Information Technology</option>
+                  <option value="College of Education">College of Education</option>
+                  <option value="College of Arts and Letters">College of Arts and Letters</option>
+                  <option value="College of Business">College of Business</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group"><label>Year Level</label>
+                <select id="memberEditYear" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;">
+                  <option value="">Select Year</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                  <option value="5th Year">5th Year</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Section</label>
+                <select id="memberEditSection" style="padding:0.5rem;border-radius:6px;border:1px solid #ddd;font-family:inherit;font-size:0.85rem;">
+                  <option value="">Select Section</option>
+                  <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                  <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group"><label>Email</label><input type="email" id="memberEditEmail" /></div>
+              <div class="form-group"><label>Contact Number</label><input type="text" id="memberEditContact" /></div>
+            </div>
+            <div class="form-group"><label>Profile Picture</label>
+              <div style="display:flex;align-items:center;gap:1rem;">
+                <div id="memberEditPicPreview" style="width:60px;height:60px;border-radius:50%;background:rgba(var(--primary-rgb),0.06);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--text-light);overflow:hidden;flex-shrink:0;"><i class="fas fa-user"></i></div>
+                <div style="flex:1;">
+                  <input type="file" id="memberEditPicInput" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+                  <button type="button" class="btn-sm blue" id="memberEditPicBtn"><i class="fas fa-camera"></i> Upload Photo</button>
+                  <button type="button" class="btn-sm red" id="memberEditPicRemove" style="display:none;"><i class="fas fa-trash"></i> Remove</button>
+                  <div style="font-size:0.7rem;color:var(--text-light);margin-top:0.3rem;">Max 500KB · JPG, PNG</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:0.8rem;margin-top:1rem;">
+              <button type="submit" class="btn-submit" style="flex:1;"><i class="fas fa-save"></i> Save Changes</button>
+              <button type="button" id="memberEditCancel" style="padding:0.6rem 1.2rem;border:1px solid #ddd;border-radius:10px;background:white;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.85rem;color:var(--text-secondary);transition:var(--transition);">Cancel</button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -889,12 +990,13 @@
     </div>
   </div>
 
-  <script src="js/svg-loader.js"></script><script src="js/effects.js"></script><script src="js/data-layer.js"></script><script src="js/inventory.js"></script><script src="js/auth.js"></script><script src="js/admin-dashboard.js"></script>
+  <script src="js/svg-loader.js"></script><script src="js/effects.js"></script><script src="js/data-layer.js"></script><script src="js/inventory.js"></script><script src="js/auth.js"></script><script src="js/member-service.js"></script><script src="js/admin-dashboard.js"></script>
   <script>
-    // Minimal inline script - admin-dashboard.js handles the rest
+    // Role-based access guard — redirect non-admins with "Access Denied"
     document.addEventListener('DOMContentLoaded', function() {
       if (!auth.isLoggedIn() || !auth.isAdmin()) {
-        window.location.href = 'index.html';
+        Notification.show('Access Denied', 'Administrator privileges required.', 'error');
+        setTimeout(function() { window.location.href = 'index.html'; }, 1500);
       }
     });
   </script>
