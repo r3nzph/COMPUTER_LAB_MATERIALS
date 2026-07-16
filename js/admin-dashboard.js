@@ -883,9 +883,13 @@ class AdminDashboard {
       </table></div>
     `;
     document.getElementById('memberCountDisplay').textContent = `${members.length} member${members.length !== 1 ? 's' : ''} found`;
+  } catch (e) {
+    console.error('renderMembers() failed:', e);
+    container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.3;">⚠️</div><h3 style="margin-bottom:0.3rem;">Unable to Load Members</h3><p>' + (e.message || 'An unexpected error occurred.') + '</p></div>';
   }
 
   // ===== VIEW MEMBER PROFILE =====
+  }
   viewMemberProfile(id) {
     const member = MemberService.getMember(id);
     if (!member) { Notification.show('Error', 'Member not found.', 'error'); return; }
