@@ -8,7 +8,7 @@ class AuthSystem {
     this.students = [];        // from JSON seed
     this.registered = [];      // from localStorage
     this.admins = [];
-    this.currentUser = JSON.parse(localStorage.getItem('comlabUser')) || null;
+    this.currentUser = JSON.parse(localStorage.getItem('comlabUser')) || JSON.parse(sessionStorage.getItem('comlabUser')) || null;
     this.init();
   }
 
@@ -180,7 +180,9 @@ class AuthSystem {
   // ===== LOGOUT =====
   logout() {
     this.currentUser = null;
-    Store.set(STORAGE_KEYS.USER_SESSION, null);
+    this._rememberMe = true; // Reset for next login
+    localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+    sessionStorage.removeItem('comlabUser');
     this.updateUI();
     Notification.show('Logged Out', 'You have been logged out successfully.', 'success');
     if (window.location.pathname.includes('admin.html') || window.location.pathname.includes('profile.html') || window.location.pathname.includes('stocks.html')) {
@@ -189,7 +191,23 @@ class AuthSystem {
   }
 
   saveSession() {
-    Store.set(STORAGE_KEYS.USER_SESSION, this.currentUser);
+    if (!this.currentUser) return;
+    // Detect where the session currently lives, so it persists correctly
+    // even after page navigation (where instance flags don't survive).
+    const inLocal = localStorage.getItem('comlabUser');
+    const inSession = sessionStorage.getItem('comlabUser');
+    // Preference: existing storage > login-time flag > localStorage (default)
+    const persistent = inLocal !== null ? true : (inSession !== null ? false : (this._rememberMe ?? true));
+
+    if (persistent) {
+      // Persist across browser sessions (localStorage)
+      Store.set(STORAGE_KEYS.USER_SESSION, this.currentUser);
+      sessionStorage.removeItem('comlabUser');
+    } else {
+      // Tab-only session (sessionStorage)
+      sessionStorage.setItem('comlabUser', JSON.stringify(this.currentUser));
+      localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+    }
   }
 
   // ===== UPDATE PROFILE =====
@@ -521,6 +539,9 @@ class AuthSystem {
       const password = document.getElementById('studentPassword')?.value;
       if (!id || !password) { this.showLoginError('Please fill in all fields.'); return; }
 
+      // Capture Remember Me state while the modal is still open
+      this._rememberMe = document.querySelector('.form-options input[type="checkbox"]')?.checked ?? true;
+
       const result = this.loginStudent(id, password);
       if (result.success) {
         closeModal();
@@ -536,6 +557,9 @@ class AuthSystem {
       const id = document.getElementById('adminId')?.value.trim();
       const password = document.getElementById('adminPassword')?.value;
       if (!id || !password) { this.showLoginError('Please fill in all fields.'); return; }
+
+      // Capture Remember Me state while the modal is still open
+      this._rememberMe = document.querySelector('.form-options input[type="checkbox"]')?.checked ?? true;
 
       const result = this.loginAdmin(id, password);
       if (result.success) {
