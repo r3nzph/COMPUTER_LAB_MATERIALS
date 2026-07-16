@@ -419,7 +419,136 @@ class StorageManager {
     this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'reset' });
   }
 
+  // ===== RESET DEMO DATA (KEEP ADMINS + SETTINGS) =====
+  async resetDemoDataKeepAdmins() {
+    // Preserve admin accounts, registered students, settings, passwords
+    const admins = this.getAdmins();
+    const students = this.getRegisteredStudents();
+    const settings = this.getSettings();
+    const passwords = this.getPasswordOverrides();
+
+    const keys = Object.values(STORAGE_KEYS);
+    keys.forEach(k => localStorage.removeItem(k));
+    this._cache = {};
+    this._initialized = false;
+    await this._seedInitialData();
+
+    // Restore preserved data
+    if (admins.length) this.set(STORAGE_KEYS.ADMINS, admins);
+    if (students.length) this.set(STORAGE_KEYS.REGISTERED, students);
+    if (settings) this.saveSettings(settings);
+    if (Object.keys(passwords).length) this.set(STORAGE_KEYS.PASSWORDS, passwords);
+
+    this._emit(StoreEvents.DATA_CHANGED, { action: 'resetDemo' });
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'resetDemo' });
+    this._emit(StoreEvents.BORROW_CHANGED, { action: 'resetDemo' });
+    this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'resetDemo' });
+  }
+
+  // ===== FACTORY RESET =====
+  async factoryReset() {
+    // Clear ALL localStorage including theme
+    const keys = [
+      ...Object.values(STORAGE_KEYS),
+      'comlab_theme'
+    ];
+    keys.forEach(k => localStorage.removeItem(k));
+    this._cache = {};
+    this._initialized = false;
+    await this._seedInitialData();
+    this._emit(StoreEvents.DATA_CHANGED, { action: 'factoryReset' });
+    this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'factoryReset' });
+    this._emit(StoreEvents.BORROW_CHANGED, { action: 'factoryReset' });
+    this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'factoryReset' });
+    // Clear registered students that were seeded (keep only seed data from JSON)
+    this.set(STORAGE_KEYS.REGISTERED, []);
+    // Reset theme to light
+    this.setTheme('light');
+  }
+
   // ===== BACKUP / RESTORE / EXPORT / IMPORT =====
+
+  // ===== VALIDATE BACKUP DATA STRUCTURE =====
+  _validateBackupData(data) {
+    if (!data || typeof data !== 'object') {
+      return { valid: false, message: 'Invalid backup: not a valid JSON object.' };
+    }
+    if (!data.version || typeof data.version !== 'string') {
+      return { valid: false, message: 'Invalid backup: missing or invalid version field.' };
+    }
+
+    const sections = {
+      equipments: { type: 'array', label: 'equipment items' },
+      borrowHistory: { type: 'array', label: 'borrow records' },
+      registeredStudents: { type: 'array', label: 'registered students' },
+      activityLog: { type: 'array', label: 'activity log entries' },
+      settings: { type: 'object', label: 'settings' },
+      admins: { type: 'array', label: 'admin accounts' },
+      passwords: { type: 'object', label: 'password overrides' },
+      counters: { type: 'object', label: 'counters' }
+    };
+
+    for (const [key, cfg] of Object.entries(sections)) {
+      if (data[key] !== undefined && data[key] !== null) {
+        const actualType = Array.isArray(data[key]) ? 'array' : typeof data[key];
+        if (cfg.type === 'array' && !Array.isArray(data[key])) {
+          return { valid: false, message: `Invalid backup: "${key}" should be an array.` };
+        }
+        if (cfg.type === 'object' && (typeof data[key] !== 'object' || Array.isArray(data[key]))) {
+          return { valid: false, message: `Invalid backup: "${key}" should be an object.` };
+        }
+      }
+    }
+
+    // Validate counters
+    if (data.counters) {
+      if (data.counters.equipmentId !== undefined && (typeof data.counters.equipmentId !== 'number' || data.counters.equipmentId < 0)) {
+        return { valid: false, message: 'Invalid backup: equipmentId counter must be a positive number.' };
+      }
+      if (data.counters.borrowId !== undefined && (typeof data.counters.borrowId !== 'number' || data.counters.borrowId < 0)) {
+        return { valid: false, message: 'Invalid backup: borrowId counter must be a positive number.' };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  // ===== VALIDATE SECTION DATA STRUCTURE =====
+  _validateSectionData(section, data) {
+    if (!data || typeof data !== 'object') {
+      return { valid: false, message: 'Invalid data: not a valid JSON object.' };
+    }
+
+    const requiredKeys = {
+      equipments: 'equipments',
+      borrows: 'borrowHistory',
+      students: 'registeredStudents',
+      activity: 'activityLog',
+      settings: 'settings'
+    };
+
+    const key = requiredKeys[section];
+    if (!key) {
+      return { valid: false, message: `Unknown section: "${section}".` };
+    }
+
+    if (!data[key]) {
+      return { valid: false, message: `Invalid data for section "${section}": missing "${key}" field.` };
+    }
+
+    if (section !== 'settings') {
+      if (!Array.isArray(data[key])) {
+        return { valid: false, message: `Invalid data for section "${section}": "${key}" must be an array.` };
+      }
+    } else {
+      if (typeof data[key] !== 'object' || Array.isArray(data[key])) {
+        return { valid: false, message: `Invalid data for section "${section}": "${key}" must be an object.` };
+      }
+    }
+
+    return { valid: true };
+  }
+
   exportAllData() {
     const data = {
       version: '1.0',
@@ -440,25 +569,35 @@ class StorageManager {
   }
 
   importAllData(data) {
-    if (!data || !data.version) return { success: false, message: 'Invalid backup file.' };
+    // Validate structure first
+    const validation = this._validateBackupData(data);
+    if (!validation.valid) return { success: false, message: validation.message };
+
     try {
       if (data.equipments) this.setEquipments(data.equipments);
       if (data.borrowHistory) this.setBorrowHistory(data.borrowHistory);
       if (data.registeredStudents) this.set(STORAGE_KEYS.REGISTERED, data.registeredStudents);
       if (data.activityLog) this.setActivityLog(data.activityLog);
-      if (data.settings) this.saveSettings(data.settings);
+      // Use this.set() instead of saveSettings() to avoid premature SETTINGS_CHANGED event
+      if (data.settings) this.set(STORAGE_KEYS.SETTINGS, data.settings);
       if (data.admins) this.set(STORAGE_KEYS.ADMINS, data.admins);
       if (data.passwords) this.set(STORAGE_KEYS.PASSWORDS, data.passwords);
       if (data.counters) {
-        if (data.counters.equipmentId) this.set(STORAGE_KEYS.EQUIPMENT_ID, data.counters.equipmentId);
-        if (data.counters.borrowId) this.set(STORAGE_KEYS.BORROW_IDS, data.counters.borrowId);
+        if (typeof data.counters.equipmentId === 'number' && data.counters.equipmentId >= 0) {
+          this.set(STORAGE_KEYS.EQUIPMENT_ID, data.counters.equipmentId);
+        }
+        if (typeof data.counters.borrowId === 'number' && data.counters.borrowId >= 0) {
+          this.set(STORAGE_KEYS.BORROW_IDS, data.counters.borrowId);
+        }
       }
       // Rebuild cache
       this._cache = {};
+      // Emit events AFTER all data is persisted
       this._emit(StoreEvents.DATA_CHANGED, { action: 'import' });
       this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'import' });
       this._emit(StoreEvents.BORROW_CHANGED, { action: 'import' });
       this._emit(StoreEvents.STUDENTS_CHANGED, { action: 'import' });
+      this._emit(StoreEvents.SETTINGS_CHANGED, { action: 'import' });
       return { success: true, message: 'Data imported successfully!' };
     } catch (e) {
       return { success: false, message: 'Import failed: ' + e.message };
@@ -483,19 +622,27 @@ class StorageManager {
   }
 
   importSection(section, data) {
-    const map = {
-      equipments: (d) => { if (d.equipments) this.setEquipments(d.equipments); },
-      borrows: (d) => { if (d.borrowHistory) this.setBorrowHistory(d.borrowHistory); },
-      students: (d) => { if (d.registeredStudents) this.set(STORAGE_KEYS.REGISTERED, d.registeredStudents); },
-      activity: (d) => { if (d.activityLog) this.setActivityLog(d.activityLog); },
-      settings: (d) => { if (d.settings) this.saveSettings(d.settings); }
+    // Validate section data structure first
+    const validation = this._validateSectionData(section, data);
+    if (!validation.valid) return { success: false, message: validation.message };
+
+    const importers = {
+      equipments: (d) => { this.setEquipments(d.equipments); },
+      borrows: (d) => { this.setBorrowHistory(d.borrowHistory); },
+      students: (d) => { this.set(STORAGE_KEYS.REGISTERED, d.registeredStudents); },
+      activity: (d) => { this.setActivityLog(d.activityLog); },
+      settings: (d) => { this.set(STORAGE_KEYS.SETTINGS, d.settings); }
     };
-    if (map[section]) {
-      map[section](data);
+
+    if (importers[section]) {
+      importers[section](data);
       this._cache = {};
       this._emit(StoreEvents.DATA_CHANGED, { action: 'importSection', section });
       this._emit(StoreEvents.INVENTORY_CHANGED, { action: 'importSection' });
       this._emit(StoreEvents.BORROW_CHANGED, { action: 'importSection' });
+      if (section === 'settings') {
+        this._emit(StoreEvents.SETTINGS_CHANGED, { action: 'importSection' });
+      }
       return { success: true, message: 'Section imported successfully!' };
     }
     return { success: false, message: 'Unknown section.' };

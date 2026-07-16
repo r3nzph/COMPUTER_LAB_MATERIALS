@@ -56,7 +56,7 @@ const SVG = {
     'PSU Tester': 'images/equipments/psu-tester.jpg',
     'Crimping Tool': 'images/equipments/crimping-tool.jpg',
     'Isopropyl Alcohol': 'images/equipments/isopropyl-alcohol.jpg',
-    'Precision Screwdriver Set': 'images/equipments/precision-screwdriver.jpg',
+    'Precision Screwdriver Set': 'images/equipments/precision-screwdriver-set.jpg',
     'Anti Static Wrist Strap': 'images/equipments/anti-static-wrist-strap.jpg',
     'Router': 'images/equipments/router.jpg',
     'default': 'images/equipments/placeholder.jpg'

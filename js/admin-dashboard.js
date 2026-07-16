@@ -267,6 +267,7 @@ class AdminDashboard {
       this.renderMembers();
       this.renderCharts();
       this.renderActivityLog();
+      this._updateAboutSection();
     });
   }
 
@@ -1072,42 +1073,75 @@ class AdminDashboard {
     });
   }
 
+  // ===== DOWNLOAD BACKUP HELPER (reused by backup, reset, factory reset) =====
+  _downloadBackup(prefix = 'COMLAB_Backup') {
+    const data = Store.exportAllData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    a.download = `${prefix}_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return { blob, sizeKB: Math.round(blob.size / 1024) };
+  }
+
   // ===== BACKUP / RESTORE / EXPORT / IMPORT =====
   setupBackupRestore() {
+    // ===== BACKUP DATA =====
     document.getElementById('btnBackupData')?.addEventListener('click', () => {
-      const data = Store.exportAllData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `comlab-backup-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const result = this._downloadBackup('COMLAB_Backup');
       Store.logActivity('Backup Created', {
         admin: auth.getUserName(),
-        message: `Full system backup downloaded (${Math.round(blob.size / 1024)} KB)`
+        message: `Full system backup downloaded (${result.sizeKB} KB)`
       });
-      Notification.show('Backup Complete', 'System data has been exported successfully.');
+      Notification.show('Backup Complete', 'System backup has been downloaded successfully.');
     });
 
+    // ===== RESTORE FILE NAME DISPLAY =====
+    document.getElementById('restoreFileInput')?.addEventListener('change', (e) => {
+      const nameEl = document.getElementById('restoreFileName');
+      if (nameEl && e.target.files?.[0]) {
+        nameEl.textContent = '📄 ' + e.target.files[0].name + ' (' + Math.round(e.target.files[0].size / 1024) + ' KB)';
+      }
+    });
+
+    // ===== RESTORE FROM BACKUP =====
     document.getElementById('btnRestoreData')?.addEventListener('click', () => {
       const input = document.getElementById('restoreFileInput');
       if (!input || !input.files || !input.files[0]) {
         Notification.show('No File', 'Please select a backup file first.', 'error');
         return;
       }
-      if (!confirm('⚠️ This will OVERWRITE all current data with the backup. Continue?')) return;
+
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target.result);
+          // Validate
+          if (!data.version) {
+            Notification.show('Invalid Backup', 'The selected file is not a valid COMLAB backup. Missing version field.', 'error');
+            return;
+          }
+          // Show preview
+          const equipCount = data.equipments?.length || 0;
+          const borrowCount = data.borrowHistory?.length || 0;
+          const studentCount = data.registeredStudents?.length || 0;
+          const msg = `This will OVERWRITE all current data with the backup.\n\n📊 Backup contains:\n• ${equipCount} equipment items\n• ${borrowCount} borrow records\n• ${studentCount} registered students\n• ${data.activityLog?.length || 0} activity log entries\n\n⚠️ This cannot be undone. Continue?`;
+          if (!confirm(msg)) return;
+
           const result = Store.importAllData(data);
           if (result.success) {
-            Store.logActivity('Data Restored', {
+            Store.logActivity('Backup Restored', {
               admin: auth.getUserName(),
-              message: 'Full system data restored from backup file'
+              message: `Full system data restored from backup (${equipCount} equipments, ${borrowCount} borrows)`
             });
             Notification.show('Restore Complete', 'All data has been restored from backup.');
+            input.value = '';
+            const nameEl = document.getElementById('restoreFileName');
+            if (nameEl) nameEl.textContent = '';
             this.refreshAll();
           } else {
             Notification.show('Restore Failed', result.message, 'error');
@@ -1119,7 +1153,7 @@ class AdminDashboard {
       reader.readAsText(input.files[0]);
     });
 
-    // Export individual sections
+    // ===== EXPORT INDIVIDUAL SECTIONS =====
     ['exportEquipments', 'exportBorrows', 'exportStudents', 'exportActivity', 'exportSettings'].forEach(id => {
       document.getElementById(id)?.addEventListener('click', () => {
         const sectionMap = {
@@ -1139,11 +1173,124 @@ class AdminDashboard {
         a.download = `comlab-${section}-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        Store.logActivity('Export Completed', {
+          admin: auth.getUserName(),
+          message: `Exported ${section} section`
+        });
         Notification.show('Export Complete', `${section} data has been exported.`);
       });
     });
 
-    // Import individual sections
+    // ===== IMPORT FILE SELECTION & PREVIEW =====
+    let _pendingImportData = null;
+
+    document.getElementById('importFileInput')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      const nameEl = document.getElementById('importFileName');
+      const previewArea = document.getElementById('importPreviewArea');
+      const previewContent = document.getElementById('importPreviewContent');
+
+      if (!file) {
+        if (nameEl) nameEl.textContent = 'No file selected';
+        if (previewArea) previewArea.style.display = 'none';
+        _pendingImportData = null;
+        return;
+      }
+
+      if (nameEl) nameEl.textContent = '📄 ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data || typeof data !== 'object') {
+            Notification.show('Invalid File', 'The selected file is not valid JSON.', 'error');
+            if (previewArea) previewArea.style.display = 'none';
+            _pendingImportData = null;
+            return;
+          }
+          _pendingImportData = data;
+
+          // Build preview
+          const counts = [
+            { label: 'Equipments', value: data.equipments?.length || 0, icon: '🛠️' },
+            { label: 'Borrow Records', value: data.borrowHistory?.length || 0, icon: '📋' },
+            { label: 'Students', value: data.registeredStudents?.length || 0, icon: '👥' },
+            { label: 'Activity Logs', value: data.activityLog?.length || 0, icon: '📝' },
+            { label: 'Settings', value: data.settings ? '✓' : '—', icon: '⚙️' },
+            { label: 'Admins', value: data.admins?.length || 0, icon: '🔐' },
+          ];
+
+          if (previewContent) {
+            previewContent.innerHTML = counts.map(c => `
+              <div class="settings-preview-item">
+                <div style="font-size:1.2rem;">${c.icon}</div>
+                <div class="spi-value">${c.value}</div>
+                <div class="spi-label">${c.label}</div>
+              </div>
+            `).join('');
+          }
+          if (previewArea) previewArea.style.display = 'block';
+          Notification.show('File Loaded', 'JSON file parsed successfully. Review the preview and click Import.', 'success');
+        } catch (err) {
+          Notification.show('Invalid File', 'Could not parse JSON: ' + err.message, 'error');
+          if (previewArea) previewArea.style.display = 'none';
+          _pendingImportData = null;
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // ===== EXECUTE IMPORT =====
+    document.getElementById('btnImportData')?.addEventListener('click', () => {
+      if (!_pendingImportData) {
+        Notification.show('No Data', 'Please select a valid JSON file first.', 'error');
+        return;
+      }
+      if (!_pendingImportData.version) {
+        Notification.show('Invalid Format', 'The file is missing the version field. Is this a COMLAB backup file?', 'error');
+        return;
+      }
+
+      const counts = [
+        _pendingImportData.equipments?.length || 0,
+        _pendingImportData.borrowHistory?.length || 0
+      ];
+      if (!confirm(`⚠️ This will IMPORT data into the system.\n\n📊 Contains:\n• ${counts[0]} equipment items\n• ${counts[1]} borrow records\n• ${_pendingImportData.registeredStudents?.length || 0} registered students\n\nExisting data with matching IDs will be overwritten. Continue?`)) return;
+
+      const result = Store.importAllData(_pendingImportData);
+      if (result.success) {
+        Store.logActivity('Import Completed', {
+          admin: auth.getUserName(),
+          message: `Data import completed (${counts[0]} equipments, ${counts[1]} borrows)`
+        });
+        Notification.show('Import Complete', 'Data has been imported successfully. All sections synchronized.');
+        // Clear import state
+        _pendingImportData = null;
+        const input = document.getElementById('importFileInput');
+        if (input) input.value = '';
+        const nameEl = document.getElementById('importFileName');
+        if (nameEl) nameEl.textContent = 'No file selected';
+        const previewArea = document.getElementById('importPreviewArea');
+        if (previewArea) previewArea.style.display = 'none';
+        this.refreshAll();
+      } else {
+        Notification.show('Import Failed', result.message, 'error');
+      }
+    });
+
+    // ===== CLEAR IMPORT =====
+    document.getElementById('btnClearImport')?.addEventListener('click', () => {
+      _pendingImportData = null;
+      const input = document.getElementById('importFileInput');
+      if (input) input.value = '';
+      const nameEl = document.getElementById('importFileName');
+      if (nameEl) nameEl.textContent = 'No file selected';
+      const previewArea = document.getElementById('importPreviewArea');
+      if (previewArea) previewArea.style.display = 'none';
+    });
+
+    // ===== IMPORT INDIVIDUAL SECTIONS =====
     document.getElementById('btnImportEquipments')?.addEventListener('click', () => this._importSection('equipments'));
     document.getElementById('btnImportBorrows')?.addEventListener('click', () => this._importSection('borrows'));
   }
@@ -1154,13 +1301,43 @@ class AdminDashboard {
       Notification.show('No File', 'Please select a JSON file first.', 'error');
       return;
     }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target.result);
+
+        // Validate structure before proceeding
+        const validation = Store._validateSectionData(section, data);
+        if (!validation.valid) {
+          Notification.show('Validation Failed', validation.message, 'error');
+          return;
+        }
+
+        // Show preview and confirmation
+        const labelMap = {
+          equipments: 'equipment items',
+          borrows: 'borrow records',
+          students: 'registered students',
+          activity: 'activity log entries',
+          settings: 'system settings'
+        };
+        const keyMap = { equipments: 'equipments', borrows: 'borrowHistory', students: 'registeredStudents', activity: 'activityLog', settings: 'settings' };
+        const key = keyMap[section];
+        const count = section === 'settings' ? 1 : (data[key]?.length || 0);
+        const label = labelMap[section] || section;
+
+        if (!confirm(`Import ${count} ${label} into the system?\n\nThis will overwrite existing ${label} in the same section. Continue?`)) return;
+
         const result = Store.importSection(section, data);
         if (result.success) {
-          Notification.show('Import Complete', `${section} data imported successfully.`);
+          Store.logActivity('Import Completed', {
+            admin: auth.getUserName(),
+            message: `Imported ${count} ${label} from file`
+          });
+          Notification.show('Import Complete', `${count} ${label} imported successfully.`);
+          // Clear the file input after successful import
+          input.value = '';
           this.refreshAll();
         } else {
           Notification.show('Import Failed', result.message, 'error');
@@ -1193,17 +1370,17 @@ class AdminDashboard {
 
   loadSettings() {
     const settings = Store.getSettings();
-    const s = n => { const el = document.getElementById(n); if (el) el.value = settings[n.replace('setting', '').replace(/^./, c => c.toLowerCase())] || ''; };
 
-    document.getElementById('settingSchoolName').value = settings.schoolName;
-    document.getElementById('settingLabName').value = settings.labName;
-    document.getElementById('settingOfficer').value = settings.officerName;
+    document.getElementById('settingSchoolName').value = settings.schoolName || '';
+    document.getElementById('settingLabName').value = settings.labName || '';
+    document.getElementById('settingOfficer').value = settings.officerName || '';
     document.getElementById('settingItemsPerPage').value = settings.itemsPerPage || '10';
     document.getElementById('settingAutoRefresh').value = settings.autoRefresh || '60';
     document.getElementById('adminProfileId').value = auth.currentUser?.id || '';
 
     this.applySettingsToUI(settings);
 
+    // ===== SAVE SETTINGS =====
     document.getElementById('btnSaveSettings')?.addEventListener('click', () => {
       const data = {
         schoolName: document.getElementById('settingSchoolName').value.trim() || 'TUPT',
@@ -1214,11 +1391,15 @@ class AdminDashboard {
       };
       Store.saveSettings(data);
       this.applySettingsToUI(data);
-      // Update auto-refresh
       this.setupActivityRefresh();
+      Store.logActivity('Settings Updated', {
+        admin: auth.getUserName(),
+        message: 'System settings were updated'
+      });
       Notification.show('Settings Saved', 'Configuration has been saved successfully.');
     });
 
+    // ===== RESET SETTINGS TO DEFAULTS =====
     document.getElementById('btnResetSettings')?.addEventListener('click', () => {
       if (!confirm('Reset all settings to factory defaults?')) return;
       Store.saveSettings({
@@ -1229,16 +1410,115 @@ class AdminDashboard {
         autoRefresh: '60'
       });
       this.loadSettings();
+      Store.logActivity('Settings Reset', {
+        admin: auth.getUserName(),
+        message: 'Settings restored to factory defaults'
+      });
       Notification.show('Reset Complete', 'Settings restored to factory defaults.');
     });
 
-    document.getElementById('btnResetData')?.addEventListener('click', async () => {
-      if (!confirm('⚠️ This will delete ALL data and restore demo defaults. Continue?')) return;
-      await Store.resetDemoData();
+    // ===== RESET DEMO DATA (with typing confirmation + auto backup) =====
+    const resetDemoInput = document.getElementById('resetDemoConfirmInput');
+    const btnResetDemo = document.getElementById('btnResetDemoData');
+
+    const checkResetDemoConfirm = () => {
+      const isValid = resetDemoInput?.value === 'RESET DEMO';
+      if (btnResetDemo) btnResetDemo.disabled = !isValid;
+      if (resetDemoInput) resetDemoInput.classList.toggle('valid', isValid);
+    };
+
+    resetDemoInput?.addEventListener('input', checkResetDemoConfirm);
+    resetDemoInput?.addEventListener('focus', () => {
+      if (resetDemoInput.value) checkResetDemoConfirm();
+    });
+
+    btnResetDemo?.addEventListener('click', async () => {
+      if (resetDemoInput?.value !== 'RESET DEMO') return;
+
+      // Auto backup before reset
+      try {
+        this._downloadBackup('COMLAB_Backup_BeforeReset');
+        if (!confirm('Your backup has been downloaded. Do you still want to continue with the Reset Demo Data?')) {
+          Notification.show('Cancelled', 'Reset Demo Data was cancelled. Your backup is safe.', 'error');
+          return;
+        }
+      } catch (e) {
+        if (!confirm('Could not create automatic backup. Do you want to continue anyway?')) return;
+      }
+
+      await Store.resetDemoDataKeepAdmins();
       await inventory.loadEquipments();
       this.refreshAll();
-      Notification.show('Data Reset', 'All demo data has been restored to factory defaults.');
+
+      // Reset the input
+      if (resetDemoInput) resetDemoInput.value = '';
+      checkResetDemoConfirm();
+
+      Store.logActivity('Demo Data Reset', {
+        admin: auth.getUserName(),
+        message: 'Demo transaction data was reset (kept admin accounts & settings)'
+      });
+      Notification.show('Reset Complete', 'Demo data has been reset successfully. Admin accounts and settings preserved.');
     });
+
+    // ===== FACTORY RESET (with typing confirmation + auto backup) =====
+    const factoryInput = document.getElementById('factoryResetConfirmInput');
+    const btnFactory = document.getElementById('btnFactoryReset');
+
+    const checkFactoryConfirm = () => {
+      const isValid = factoryInput?.value === 'FACTORY RESET';
+      if (btnFactory) btnFactory.disabled = !isValid;
+      if (factoryInput) factoryInput.classList.toggle('valid', isValid);
+    };
+
+    factoryInput?.addEventListener('input', checkFactoryConfirm);
+    factoryInput?.addEventListener('focus', () => {
+      if (factoryInput.value) checkFactoryConfirm();
+    });
+
+    btnFactory?.addEventListener('click', async () => {
+      if (factoryInput?.value !== 'FACTORY RESET') return;
+
+      // Auto backup before factory reset
+      try {
+        this._downloadBackup('COMLAB_Backup_BeforeFactoryReset');
+        if (!confirm('⚠️ Your backup has been downloaded.\n\nThis is your LAST CHANCE to cancel.\n\nFactory Reset will DELETE EVERYTHING and restore the application to its original state.\n\nDo you still want to continue?')) {
+          Notification.show('Cancelled', 'Factory Reset was cancelled. Your backup is safe.', 'error');
+          return;
+        }
+      } catch (e) {
+        if (!confirm('Could not create automatic backup. Do you want to continue with Factory Reset anyway?')) return;
+      }
+
+      await Store.factoryReset();
+      await inventory.loadEquipments();
+      this.refreshAll();
+
+      // Reset the input
+      if (factoryInput) factoryInput.value = '';
+      checkFactoryConfirm();
+
+      Store.logActivity('Factory Reset', {
+        admin: auth.getUserName(),
+        message: 'System was completely reset to factory defaults'
+      });
+      Notification.show('Factory Reset Complete', 'The system has been restored to its original installation state.');
+
+      // Reload settings UI
+      this.loadSettings();
+    });
+
+    // ===== ABOUT SECTION STATS =====
+    this._updateAboutSection();
+  }
+
+  _updateAboutSection() {
+    const equipCount = document.getElementById('aboutEquipCount');
+    const studentCount = document.getElementById('aboutStudentCount');
+    const borrowCount = document.getElementById('aboutBorrowCount');
+    if (equipCount) equipCount.textContent = Store.getEquipments().filter(e => !e.archived).length;
+    if (studentCount) studentCount.textContent = Store.getAllStudents().length;
+    if (borrowCount) borrowCount.textContent = Store.getBorrowHistory().length;
   }
 
   applySettingsToUI(settings) {
