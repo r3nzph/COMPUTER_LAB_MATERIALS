@@ -377,6 +377,16 @@ class AuthSystem {
       document.body.style.overflow = 'hidden';
     });
 
+    // Switch to Login link inside register modal
+    const switchToLogin = document.getElementById('switchToLogin');
+    if (switchToLogin) {
+      switchToLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (registerModal) registerModal.classList.remove('active');
+        if (loginModal) loginModal.classList.add('active');
+      });
+    }
+
     const closeReg = () => {
       registerModal.classList.remove('active');
       document.body.style.overflow = '';
@@ -535,6 +545,30 @@ class AuthSystem {
         this.showLoginError(result.message);
       }
     });
+
+    // Forgot Password link (inside student login tab)
+    const forgotPwLink = loginModal.querySelector('.form-options a');
+    if (forgotPwLink) {
+      forgotPwLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const studentId = prompt('Enter your TUPT Student ID to recover your password:');
+        if (!studentId || !studentId.trim()) return;
+        const allStudents = this.getAllStudents();
+        const student = allStudents.find(s => s.id === studentId.trim().toUpperCase());
+        if (!student) {
+          Notification.show('Not Found', 'No account found with that Student ID.', 'error');
+          return;
+        }
+        const effectivePassword = this.getEffectivePassword(student.id, student.password);
+        this.showModal(
+          'Password Recovery',
+          `Your password for <strong>${student.name}</strong> is:<br><br>` +
+          `<div style="font-size:1.5rem;font-weight:800;font-family:monospace;letter-spacing:2px;padding:0.8rem;background:rgba(var(--primary-rgb),0.06);border-radius:8px;text-align:center;">${effectivePassword}</div>` +
+          `<br><small style="color:var(--text-light);">Keep this password secure. Do not share it with others.</small>`,
+          'success'
+        );
+      });
+    }
   }
 
   showLoginError(message) {
